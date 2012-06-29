@@ -45,11 +45,16 @@ without fiddling with the database settings. Now to initialize the database:
 
 Make sure to replace the URI with the full redirect URI of the management 
 client. If you do not provide a URI the default redirect URI 
-`http://localhost/html-manage-oauth/index.html` is used. A reference management 
-client can be found [here](https://github.com/fkooman/html-manage-oauth/).
+`http://localhost/html-manage-oauth/index.html` is used. 
 
-On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
+*NOTE*: On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
 in `/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
+
+# Management Client
+A reference management client can be found 
+[here](https://github.com/fkooman/html-manage-oauth/). This client is written
+in HTML, CSS and JavaScript only and can be hosted on any (static) web server.
+See the accompanying README file for more information.
 
 # SELinux
 The install script already takes care of setting the file permissions of the
