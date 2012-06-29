@@ -26,9 +26,8 @@ name!
     $ cd /var/www/html
     $ su -c 'mkdir php-oauth'
     $ su -c 'chown fkooman.fkooman php-oauth'
-    $ git clone git://github.com/fkooman/phpvoot.git php-oauth
+    $ git clone git://github.com/fkooman/php-oauth.git
     $ cd php-oauth
-    $ git checkout php-oauth
     $ docs/install_dependencies.sh
 
 Now you can create the default configuration files, the paths will be 
