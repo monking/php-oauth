@@ -6,7 +6,8 @@ This project is a stand-alone OAuth 2 Authorization Server.
 * PDO storage backend for OAuth tokens
 * OAuth 2 (authorization code and implicit grant) support
 * SAML authentication support ([simpleSAMLphp](http://www.simplesamlphp.org)) 
-* [BrowserID](http://browserid.org) authentication support
+* [BrowserID](http://browserid.org) authentication support using 
+([php-browserid](https://github.com/fkooman/php-browserid/))
 
 # Requirements
 The installation requirements on Fedora/CentOS can be installed like this:
@@ -36,20 +37,19 @@ be generated and shown on the screen (see later for Apache configuration).
 
     $ docs/configure.sh
 
-Next make sure to configure the database settings, and possibly other settings. 
-If you want to keep using SQlite you are good to go without fiddling with the
-database settings. Now to initialize the database:
+Next make sure to configure the database settings in `config/oauth.ini`, and 
+possibly other settings. If you want to keep using SQlite you are good to go 
+without fiddling with the database settings. Now to initialize the database:
 
-    $ php docs/initOAuthDatabase.php https://www.example.org
+    $ php docs/initOAuthDatabase.php https://www.example.org/html-manage-oauth/index.html
 
-Make sure to replace the URI with the base URI to the management client. So if 
-the `html-manage-oauth` client is installed at 
-`https://www.example.org/app/html-manage-oauth/index.html` use 
-`https://www.example.org/app` here. See below for more details on the 
-management client.
+Make sure to replace the URI with the full redirect URI of the management 
+client. If you do not provide a URI the default redirect URI 
+`http://localhost/html-manage-oauth/index.html` is used. A reference management 
+client can be found [here](https://github.com/fkooman/html-manage-oauth/).
 
-On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not in
-`/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
+On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
+in `/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
 
 # SELinux
 The install script already takes care of setting the file permissions of the

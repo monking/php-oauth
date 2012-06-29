@@ -8,14 +8,14 @@ $storage = new PdoOAuthStorage($config);
 $storage->initDatabase();
 $storage->updateDatabase();
 
-$appRoot = ($argc !== 2) ? "http://localhost" : $argv[1];
+$redirectUri = ($argc !== 2) ? "http://localhost/html-manage-oauth/index.html" : $argv[1];
 
 if(FALSE === $storage->getClient("manage")) {
     $data = array("id" => "manage",
                   "name" => "Management Client",
                   "description" => "Web application to manage Approvals and OAuth client registrations.",
                   "secret" => NULL,
-                  "redirect_uri" => $appRoot . "/html-manage-oauth/index.html",
+                  "redirect_uri" => $redirectUri,
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
