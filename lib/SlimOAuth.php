@@ -360,18 +360,14 @@ class SlimOAuth {
 
             case "TokenException":
                 $response = $this->_app->response();
-                // we need to inform the client interacting with the token endpoint
-                list($error, $description) = explode(":", $e->getMessage());
-                $code = 400;
-                if("invalid_client" === $error) {
-                    $code = 401;
+                if($e->getResponseCode() === 401) {
                     $response['WWW-Authenticate'] = 'Basic realm="OAuth Server"';
                 }
-                $response->status($code);
+                $response->status($e->getResponseCode());
                 $response['Content-Type'] = 'application/json';
                 $response['Cache-Control'] = 'no-store';
                 $response['Pragma'] = 'no-cache';
-                $response->body(json_encode(array("error" => $error, "error_description" => $description)));
+                $response->body(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
                 break;
 
             case "ErrorException":

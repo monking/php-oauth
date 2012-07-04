@@ -3,56 +3,14 @@
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "VerifyException.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "TokenException.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "ClientException.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "ResourceOwnerException.php";
 
 interface IResourceOwner {
     public function setHint                    ($resourceOwnerIdHint = NULL);
     public function getResourceOwnerId         ();
     public function getResourceOwnerDisplayName();
-}
-
-/**
- * Thrown when the resource owner needs to be  informed of an error
- */
-class ResourceOwnerException extends Exception {
-
-}
-
-/**
- * Thrown when interaction with the token endpoint fails
- * https://tools.ietf.org/html/draft-ietf-oauth-v2-26#section-5.2
- */
-class TokenException extends Exception {
-
-}
-
-/**
- * Thrown when the client needs to be informed of an error
- */
-class ClientException extends Exception {
-
-    private $_description;
-    private $_client;
-    private $_state;
-
-    public function __construct($message, $description, $client, $state, $code = 0, Exception $previous = null) {
-        $this->_description = $description;
-        $this->_client = $client;
-        $this->_state = $state;
-        parent::__construct($message, $code, $previous);
-    }
-
-    public function getDescription() {
-        return $this->_description;
-    }
-
-    public function getClient() {
-        return $this->_client;
-    }
-
-    public function getState() {
-        return $this->_state;
-    }
-
 }
 
 class AuthorizationServer {
