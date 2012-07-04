@@ -2,6 +2,7 @@
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "VerifyException.php";
 
 interface IResourceOwner {
     public function setHint                    ($resourceOwnerIdHint = NULL);
@@ -13,13 +14,6 @@ interface IResourceOwner {
  * Thrown when the resource owner needs to be  informed of an error
  */
 class ResourceOwnerException extends Exception {
-
-}
-
-/**
- * Thrown when the verification of the access token fails
- */
-class VerifyException extends Exception {
 
 }
 

@@ -2,7 +2,7 @@
 
 require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "Config.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "AuthorizationServer.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "VerifyException.php";
 
 class ResourceServer {
 
@@ -20,24 +20,17 @@ class ResourceServer {
         $b64TokenRegExp = '(?:[[:alpha:][:digit:]-._~+/]+=*)';
         $result = preg_match('|^Bearer (?P<value>' . $b64TokenRegExp . ')$|', $authorizationHeader, $matches);
         if($result === FALSE || $result === 0) {
-            throw new VerifyException("invalid_token: the access token is malformed");
+            throw new VerifyException("invalid_token", "the access token is malformed");
         }
         $accessToken = $matches['value'];
         $token = $this->_storage->getAccessToken($accessToken);
         if($token === FALSE) {
-            throw new VerifyException("invalid_token: the access token is invalid");
+            throw new VerifyException("invalid_token", "the access token is invalid");
         }
         if(time() > $token->issue_time + $token->expires_in) {
-            throw new VerifyException("invalid_token: the access token expired");
+            throw new VerifyException("invalid_token", "the access token expired");
         }
         return $token;
-    }
-
-    // verify at the AS
-    public function verifyAtAS($authorizationHeader) {
-        // pass the token endpoint of the AS and user/pass to authenticate 
-        // somehow...
-
     }
 
 }
