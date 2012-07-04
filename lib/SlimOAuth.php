@@ -339,11 +339,8 @@ class SlimOAuth {
             case "VerifyException":
                 $response = $this->_app->response();
                 // the request for the resource was not valid, tell client
-                $error = $e->getMessage();
-                $description = $e->getDescription();
-                $code = $e->getResponseCode();
-                $response['WWW-Authenticate'] = sprintf('Bearer realm="OAuth Server",error="%s",error_description="%s"', $error, $description);
-                $response->status($code);
+                $response['WWW-Authenticate'] = sprintf('Bearer realm="OAuth Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription());
+                $response->status($e->getResponseCode());
                 break;
         
             case "ClientException": 
