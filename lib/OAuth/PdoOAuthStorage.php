@@ -1,8 +1,8 @@
 <?php
 
-require_once "lib/OAuth/IOAuthStorage.php";
-require_once "lib/OAuth/StorageException.php";
-require_once "lib/Config.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "Config.php";
 
 /**
  * Class to implement storage for the OAuth Authorization Server using PDO.

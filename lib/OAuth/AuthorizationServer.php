@@ -1,7 +1,7 @@
 <?php 
 
-require_once "lib/OAuth/IOAuthStorage.php";
-require_once "lib/OAuth/StorageException.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
 
 interface IResourceOwner {
     public function setHint                    ($resourceOwnerIdHint = NULL);
@@ -235,44 +235,43 @@ class AuthorizationServer {
             throw new TokenException("invalid_request: the grant_type parameter is missing");
         }
 
-        if(!in_array($grantType, array("authorization_code", "refresh_token", "urn:pingidentity.com:oauth2:grant_type:validate_bearer"))) {
-            throw new TokenException("unsupported_grant_type: the requested grant type is not supported");
-        }
+        switch($grantType) {
+            case "urn:pingidentity.com:oauth2:grant_type:validate_bearer":
+                if(NULL === $token) {
+                    throw new TokenException("invalid_request: the token parameter is missing");
+                }
+                $accessToken = $this->_storage->getAccessToken($token);
+                if(FALSE === $accessToken) {
+                    throw new TokenException("invalid_grant: the token was not found");
+                }
+                $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
+                return $accessToken;
+            
+            case "authorization_code":
+                if(NULL === $code) {
+                    throw new TokenException("invalid_request: the code parameter is missing");
+                }
+                $result = $this->_storage->getAuthorizationCode($code, $redirectUri);
+                if(FALSE === $result) {
+                    throw new TokenException("invalid_grant: the authorization code was not found");
+                }
+                if(time() > $result->issue_time + 600) {
+                    throw new TokenException("invalid_grant: the authorization code expired");
+                }
+                break;
 
-        // FIXME: fix the if/then/else flow
-        if("urn:pingidentity.com:oauth2:grant_type:validate_bearer" === $grantType) {
-            if(NULL === $token) {
-                throw new TokenException("invalid_request: the token parameter is missing");
-            }
-            $accessToken = $this->_storage->getAccessToken($token);
-            if(FALSE === $accessToken) {
-                throw new TokenException("invalid_grant: the token was not found");
-            }
-            $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
-            return $accessToken;
-        }
+            case "refresh_token":
+                if(NULL === $refreshToken) {
+                    throw new TokenException("invalid_request: the refresh_token parameter is missing");
+                }
+                $result = $this->_storage->getRefreshToken($refreshToken);        
+                if(FALSE === $result) {
+                    throw new TokenException("invalid_grant: the refresh_token was not found");
+                }
+                break;
 
-        if("authorization_code" === $grantType) {
-            // authorization_code
-            if(NULL === $code) {
-                throw new TokenException("invalid_request: the code parameter is missing");
-            }
-            $result = $this->_storage->getAuthorizationCode($code, $redirectUri);
-            if(FALSE === $result) {
-                throw new TokenException("invalid_grant: the authorization code was not found");
-            }
-            if(time() > $result->issue_time + 600) {
-                throw new TokenException("invalid_grant: the authorization code expired");
-            }
-        } else {
-            // refresh_token
-            if(NULL === $refreshToken) {
-                throw new TokenException("invalid_request: the refresh_token parameter is missing");
-            }
-            $result = $this->_storage->getRefreshToken($refreshToken);        
-            if(FALSE === $result) {
-                throw new TokenException("invalid_grant: the refresh_token was not found");
-            }
+            default:
+                throw new TokenException("unsupported_grant_type: the requested grant type is not supported");
         }
 
         $client = $this->_storage->getClient($result->client_id);
