@@ -34,11 +34,6 @@ class AuthorizationServer {
             throw new ResourceOwnerException('client_id missing');
         }
 
-        $clientIdLength = strlen($clientId);
-        if(NULL === $clientIdLength || $clientIdLength < 1 || $clientIdLength > 64) {
-            throw new ResourceOwnerException('client_id length exceeded');
-        }
-
         if(NULL === $responseType) {
             throw new ResourceOwnerException('response_type missing');
         }

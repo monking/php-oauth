@@ -20,8 +20,6 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
             throw new Exception("unable to generate temporary file for database");
         }
         $dsn = "sqlite:" . $this->_tmpDb;
-        // load DB scheme
-        // NOT EASY, aargh!
 
         // load default config
         $c = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
