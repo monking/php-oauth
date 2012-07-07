@@ -22,7 +22,11 @@ class SspResourceOwner implements IResourceOwner {
     public function getResourceOwnerId() {
         $this->_ssp->requireAuth(array("saml:NameIDPolicy" => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"));
         if($this->_c->getSectionValue('SspResourceOwner', 'useNameID')) {
-            return $this->_ssp->getAuthData("saml:sp:NameID");
+            $nameId = $this->_ssp->getAuthData("saml:sp:NameID");
+            if("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" !== $nameId['Format']) {
+                throw new ResourceOwnerException("NameID format not equal urn:oasis:names:tc:SAML:2.0:nameid-format:persistent");
+            }
+            return $nameId['Value'];
         } else {
             $attributes = $this->_ssp->getAttributes();
             if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName'), $attributes)) {
