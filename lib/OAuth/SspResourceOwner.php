@@ -20,16 +20,20 @@ class SspResourceOwner implements IResourceOwner {
     }
 
     public function getResourceOwnerId() {
-        $this->_ssp->requireAuth();
-        $attributes = $this->_ssp->getAttributes();
-        if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName'), $attributes)) {
-            throw new ResourceOwnerException("resourceOwnerIdAttributeName is not available in SAML attributes");
+        $this->_ssp->requireAuth(array("saml:NameIDPolicy" => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"));
+        if(TRUE === $this->_c->getSectionValue('SspResourceOwner', 'useNameID')) {
+            return $this->_ssp->getAuthData("saml:sp:NameID");
+        } else {
+            $attributes = $this->_ssp->getAttributes();
+            if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName'), $attributes)) {
+                throw new ResourceOwnerException("resourceOwnerIdAttributeName is not available in SAML attributes");
+            }
+            return $attributes[$this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName')][0];
         }
-        return $attributes[$this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName')][0];
     }
 
     public function getResourceOwnerDisplayName() {
-        $this->_ssp->requireAuth();
+        $this->_ssp->requireAuth(array("saml:NameIDPolicy" => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"));
         $attributes = $this->_ssp->getAttributes();
         if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerDisplayNameAttributeName'), $attributes)) {
             throw new ResourceOwnerException("resourceOwnerDisplayNameAttributeName is not available in SAML attributes");

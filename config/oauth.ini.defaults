@@ -72,8 +72,16 @@ verifierAddress = "https://browserid.org/verify"
 sspPath = "/var/simplesamlphp/lib"
 authSource = "default-sp"
 
-resourceOwnerIdAttributeName = "uid"
-resourceOwnerDisplayNameAttributeName = "cn"
+; by default we use the (persistent) NameID value received from the SAML 
+; assertion as the user identifier (RECOMMENDED)
+useNameID = TRUE
+
+; if you want to use an attribute for the uid set the above to FALSE and specify
+; the attribute here
+;resourceOwnerIdAttributeName = "uid"
 ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
+
+; displayName
+resourceOwnerDisplayNameAttributeName = "cn"
 ;resourceOwnerDisplayNameAttributeName = "urn:mace:dir:attribute-def:displayName"
 
