@@ -34,7 +34,7 @@ class ClientException extends Exception {
                'Client     : ' . $this->getClient() . PHP_EOL .
                'State      : ' . $this->getState() . PHP_EOL;
         if($includeTrace) {
-            $msg .= 'Trace      : ' . $this->getTraceAsString() . PHP_EOL;
+            $msg .= 'Trace      : ' . PHP_EOL . $this->getTraceAsString() . PHP_EOL;
         }
         return $msg;
     }

@@ -3,9 +3,11 @@
 class Logger {
 
     private $_logFile;
+    private $_sendMail;
 
-    public function __construct($logFile) {
+    public function __construct($logFile, $sendMail = NULL) {
         $this->_logFile = $logFile;
+        $this->_sendMail = $sendMail;
     }
 
     public function logMessage($level, $message) {
@@ -23,6 +25,17 @@ class Logger {
         $logMessage = date("c") . " " . $logLevel . " " . $message . PHP_EOL;
         if(FALSE === file_put_contents($this->_logFile, $logMessage, FILE_APPEND | LOCK_EX)) {
             throw new Exception("unable to write to log file");
+        }
+
+        if(NULL !== $this->_sendMail) {
+            $mailHeaders  = 'From: no-reply@tuxed.net' . "\r\n";
+            $mailHeaders .= 'Reply-To: no-reply@tuxed.net' . "\r\n";
+            $mailHeaders .= 'X-Mailer: PHP/' . phpversion();
+            $mailSubject = $logLevel . " " . substr(strtok($message, PHP_EOL), 0, 20);
+            $mailBody = $message;
+            if(FALSE === mail($this->_sendMail, $mailSubject, $mailBody, $mailHeaders)) {
+                throw new Exception("unable to mail log entry");
+            }
         }
     }
 

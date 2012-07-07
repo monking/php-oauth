@@ -33,7 +33,7 @@ class VerifyException extends Exception {
         $msg = 'Message    : ' . $this->getMessage() . PHP_EOL .
                'Description: ' . $this->getDescription() . PHP_EOL;
         if($includeTrace) {
-            $msg .= 'Trace      : ' . $this->getTraceAsString() . PHP_EOL;
+            $msg .= 'Trace      : ' . PHP_EOL . $this->getTraceAsString() . PHP_EOL;
         }
         return $msg;
     }
