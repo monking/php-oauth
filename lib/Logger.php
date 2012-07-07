@@ -28,12 +28,9 @@ class Logger {
         }
 
         if(NULL !== $this->_sendMail) {
-            $mailHeaders  = 'From: no-reply@tuxed.net' . "\r\n";
-            $mailHeaders .= 'Reply-To: no-reply@tuxed.net' . "\r\n";
-            $mailHeaders .= 'X-Mailer: PHP/' . phpversion();
             $mailSubject = $logLevel . " " . substr(strtok($message, PHP_EOL), 0, 20);
             $mailBody = $message;
-            if(FALSE === mail($this->_sendMail, $mailSubject, $mailBody, $mailHeaders)) {
+            if(FALSE === mail($this->_sendMail, $mailSubject, $mailBody) {
                 throw new Exception("unable to mail log entry");
             }
         }
