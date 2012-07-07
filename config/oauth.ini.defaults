@@ -69,7 +69,7 @@ verifierAddress = "https://browserid.org/verify"
 
 ; simpleSAMLphp configuration
 [SspResourceOwner]
-sspPath = "/var/simplesamlphp/lib"
+sspPath = "/var/simplesamlphp"
 authSource = "default-sp"
 
 ; by default we use the (persistent) NameID value received from the SAML 

@@ -21,7 +21,7 @@ class SspResourceOwner implements IResourceOwner {
 
     public function getResourceOwnerId() {
         $this->_ssp->requireAuth(array("saml:NameIDPolicy" => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"));
-        if(TRUE === $this->_c->getSectionValue('SspResourceOwner', 'useNameID')) {
+        if($this->_c->getSectionValue('SspResourceOwner', 'useNameID')) {
             return $this->_ssp->getAuthData("saml:sp:NameID");
         } else {
             $attributes = $this->_ssp->getAttributes();
