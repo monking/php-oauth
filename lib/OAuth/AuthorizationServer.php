@@ -179,72 +179,72 @@ class AuthorizationServer {
         $token        = self::getParameter($post, 'token');
 
         if(NULL === $grantType) {
-            throw new TokenException("invalid_request: the grant_type parameter is missing");
+            throw new TokenException("invalid_request", "the grant_type parameter is missing");
         }
 
         switch($grantType) {
             case "urn:pingidentity.com:oauth2:grant_type:validate_bearer":
                 if(NULL === $token) {
-                    throw new TokenException("invalid_request: the token parameter is missing");
+                    throw new TokenException("invalid_request", "the token parameter is missing");
                 }
                 $accessToken = $this->_storage->getAccessToken($token);
                 if(FALSE === $accessToken) {
-                    throw new TokenException("invalid_grant: the token was not found");
+                    throw new TokenException("invalid_grant", "the token was not found");
                 }
                 $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
                 return $accessToken;
             
             case "authorization_code":
                 if(NULL === $code) {
-                    throw new TokenException("invalid_request: the code parameter is missing");
+                    throw new TokenException("invalid_request", "the code parameter is missing");
                 }
                 $result = $this->_storage->getAuthorizationCode($code, $redirectUri);
                 if(FALSE === $result) {
-                    throw new TokenException("invalid_grant: the authorization code was not found");
+                    throw new TokenException("invalid_grant", "the authorization code was not found");
                 }
                 if(time() > $result->issue_time + 600) {
-                    throw new TokenException("invalid_grant: the authorization code expired");
+                    throw new TokenException("invalid_grant", "the authorization code expired");
                 }
                 break;
 
             case "refresh_token":
                 if(NULL === $refreshToken) {
-                    throw new TokenException("invalid_request: the refresh_token parameter is missing");
+                    throw new TokenException("invalid_request", "the refresh_token parameter is missing");
                 }
                 $result = $this->_storage->getRefreshToken($refreshToken);        
                 if(FALSE === $result) {
-                    throw new TokenException("invalid_grant: the refresh_token was not found");
+                    throw new TokenException("invalid_grant", "the refresh_token was not found");
                 }
                 break;
 
             default:
-                throw new TokenException("unsupported_grant_type: the requested grant type is not supported");
+                throw new TokenException("unsupported_grant_type", "the requested grant type is not supported");
         }
 
         $client = $this->_storage->getClient($result->client_id);
         if("user_agent_based_application" === $client->type) {
-            throw new TokenException("unauthorized_client: this client type is not allowed to use the token endpoint");
+            throw new TokenException("unauthorized_client", "this client type is not allowed to use the token endpoint");
         }
         if("web_application" === $client->type) {
             // REQUIRE basic auth
             if(NULL === $authorizationHeader || empty($authorizationHeader)) {
-                throw new TokenException("invalid_client: this client requires authentication");
+                throw new TokenException("invalid_client", "this client requires authentication");
             }
             if(FALSE === self::_verifyBasicAuth($authorizationHeader, $client->id, $client->secret)) {
-                throw new TokenException("invalid_client: client authentication failed");
+                throw new TokenException("invalid_client", "client authentication failed");
             }
         }
         if("native_application" === $client->type) {
             // MAY use basic auth, so only check when Authorization header is provided
             if(NULL !== $authorizationHeader && !empty($authorizationHeader)) {
                 if(FALSE === self::_verifyBasicAuth($authorizationHeader, $client->id, $client->secret)) {
-                    throw new TokenException("invalid_client: client authentication failed");
+                    throw new TokenException("invalid_client", "client authentication failed");
                 }
             }
         }
 
         if($client->id !== $result->client_id) {
-            throw new TokenException("invalid_grant: grant was not issued to this client");
+            throw new TokenException("invalid_grant", "grant was not issued to this client");
         }
 
         // create a new access token
@@ -255,7 +255,7 @@ class AuthorizationServer {
         if("authorization_code" === $grantType) {
             // we need to be able to delete, otherwise someone else was first!
             if(FALSE === $this->_storage->deleteAuthorizationCode($code, $redirectUri)) {
-                throw new TokenException("invalid_grant: this grant was already used");
+                throw new TokenException("invalid_grant", "this grant was already used");
             }
             // create a refresh token as well
             $token->refresh_token = self::randomHex(16);
