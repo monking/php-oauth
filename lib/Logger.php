@@ -30,7 +30,7 @@ class Logger {
         if(NULL !== $this->_sendMail) {
             $mailSubject = $logLevel . " " . substr(strtok($message, PHP_EOL), 0, 20);
             $mailBody = $message;
-            if(FALSE === mail($this->_sendMail, $mailSubject, $mailBody) {
+            if(FALSE === mail($this->_sendMail, $mailSubject, $mailBody)) {
                 throw new Exception("unable to mail log entry");
             }
         }
