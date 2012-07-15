@@ -1,10 +1,13 @@
 # PHP OAuth Authorization Server
 
-This project is a stand-alone OAuth 2 Authorization Server. 
+This project aims at providing a stand-alone OAuth v2 Authorization Server that
+is easy to integrate with your existing REST services, writting in any language, 
+without requiring extensive changes.
 
 # Features
-* PDO storage backend for OAuth tokens
-* OAuth 2 (authorization code and implicit grant) support
+* PDO (database abstraction layer for various databases) storage backend for
+  OAuth tokens
+* OAuth v2 (authorization code and implicit grant) support
 * SAML authentication support ([simpleSAMLphp](http://www.simplesamlphp.org)) 
 * [BrowserID](http://browserid.org) authentication support using 
 ([php-browserid](https://github.com/fkooman/php-browserid/))
@@ -33,7 +36,8 @@ name!
 
 Now you can create the default configuration files, the paths will be 
 automatically set, permissions set and a sample Apache configuration file will 
-be generated and shown on the screen (see later for Apache configuration).
+be generated and shown on the screen (see below for more information on
+Apache configuration).
 
     $ docs/configure.sh
 
@@ -86,10 +90,19 @@ To configure the SAML integration, make sure the following settings are correct:
 
     ; simpleSAMLphp configuration
     [SspResourceOwner]
-    sspPath = "/var/simplesamlphp/lib"
+    sspPath = "/var/simplesamlphp"
     authSource = "default-sp"
 
-    resourceOwnerIdAttributeName = "uid"
-    resourceOwnerDisplayNameAttributeName = "cn"
+    ; by default we use the (persistent) NameID value received from the SAML 
+    ; assertion as the user identifier (RECOMMENDED)
+    useNameID = TRUE
+
+    ; if you want to use an attribute for the uid set the above to FALSE and specify
+    ; the attribute here
+    ;resourceOwnerIdAttributeName = "uid"
     ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
+
+    ; displayName
+    resourceOwnerDisplayNameAttributeName = "cn"
     ;resourceOwnerDisplayNameAttributeName = "urn:mace:dir:attribute-def:displayName"
+
