@@ -3,11 +3,11 @@
 <html lang="en">
 <head>
   <title>Authorization</title>
-  <script src="../templates/askAuthorization.js" type=
+  <script src="js/askAuthorization.js" type=
   "text/javascript">
 </script>
   <link rel="stylesheet" type="text/css" href=
-  "../templates/default.css">
+  "css/default.css">
 </head>
 
 <body>
