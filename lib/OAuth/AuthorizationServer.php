@@ -10,7 +10,6 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . "ResourceOwnerException.php";
 interface IResourceOwner {
     public function setHint                    ($resourceOwnerIdHint = NULL);
     public function getResourceOwnerId         ();
-    public function getResourceOwnerDisplayName();
 }
 
 class AuthorizationServer {
@@ -90,13 +89,6 @@ class AuthorizationServer {
             if(FALSE === self::isSubsetScope($requestedScope, $this->_c->getValue('supportedScopes'))) {
                 // scope not supported
                 throw new ClientException("invalid_scope", "scope not supported", $client, $state);
-            }
-        }
-
-        if(in_array('oauth_admin', self::getScopeArray($requestedScope))) {
-            // administrator scope requested, need to be in admin list
-            if(!in_array($resourceOwner->getResourceOwnerId(), $this->_c->getValue('adminResourceOwnerId'))) {
-                throw new ClientException("invalid_scope", "scope not supported: resource owner is not an administrator", $client, $state);
             }
         }
    

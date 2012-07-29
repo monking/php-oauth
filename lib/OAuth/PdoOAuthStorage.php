@@ -15,7 +15,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     private $_c;
     private $_pdo;
 
-    public $requiredVersion = 2012060601;
+    public $requiredVersion = 2012072901;
 
     public function __construct(Config $c) {
         $this->_c = $c;
@@ -40,43 +40,6 @@ class PdoOAuthStorage implements IOAuthStorage {
             throw new StorageException("unable to retrieve clients");
         }
         return $stmt->fetchAll(PDO::FETCH_ASSOC); 
-    }
-
-    public function getResourceOwner($resourceOwnerId) {
-        $stmt = $this->_pdo->prepare("SELECT * FROM ResourceOwner WHERE id = :resource_owner_id");
-        $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
-        $result = $stmt->execute();
-        if (FALSE === $result) {
-            throw new StorageException("unable to retrieve resource owner");
-        }
-        return $stmt->fetch(PDO::FETCH_OBJ);
-    }
-
-    public function storeResourceOwner($resourceOwnerId, $resourceOwnerDisplayName) {
-        $result = $this->getResourceOwner($resourceOwnerId);
-        if(FALSE === $result || empty($result)) {
-            // resource_owner_id does not exist yet, insert new record
-            $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, display_name) VALUES(:id, :display_name)");
-            $stmt->bindValue(":id", $resourceOwnerId, PDO::PARAM_STR);
-            $stmt->bindValue(":display_name", $resourceOwnerDisplayName, PDO::PARAM_STR);
-            if(FALSE === $stmt->execute()) {
-                throw new StorageException("unable to store resource owner");
-            }
-            return 1 === $stmt->rowCount();
-        } else {
-            // resource_owner_id already exists, update if display_name changed
-            if($resourceOwnerDisplayName !== $result->display_name) {
-                $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET display_name = :display_name WHERE id = :id");
-                $stmt->bindValue(":id", $resourceOwnerId, PDO::PARAM_STR);
-                $stmt->bindValue(":display_name", $resourceOwnerDisplayName, PDO::PARAM_STR);
-                if(FALSE === $stmt->execute()) {
-                    throw new StorageException("unable to update resource owner");
-                }
-                return 1 === $stmt->rowCount();
-            }
-            // already exists, no change in display_name, do nothing
-        }
-        return TRUE;
     }
 
     public function getClient($clientId) {
@@ -309,7 +272,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
 
         $this->_pdo->exec("
             INSERT INTO Version
-            VALUES(2012060601)
+            VALUES(2012072901)
         ");
 
         $this->_pdo->exec("
@@ -324,13 +287,6 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         ");
 
         $this->_pdo->exec("
-            CREATE TABLE IF NOT EXISTS `ResourceOwner` (
-            `id` varchar(64) NOT NULL,
-            `display_name` text NOT NULL,
-            PRIMARY KEY (`id`))
-        ");
-
-        $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `AccessToken` (
             `access_token` varchar(64) NOT NULL,
             `client_id` varchar(64) NOT NULL,
@@ -339,8 +295,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `expires_in` int(11) DEFAULT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`access_token`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
-            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
         ");
 
         $this->_pdo->exec("
@@ -350,8 +305,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`refresh_token`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
-            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
         ");
 
         $this->_pdo->exec("
@@ -359,8 +313,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text NOT NULL,
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
-            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
         ");
 
         $this->_pdo->exec("
@@ -372,8 +325,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `issue_time` int(11) DEFAULT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`authorization_code`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
-            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
         ");
     }
 
@@ -399,7 +351,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     public function updateDatabase() {
         $version = $this->getDatabaseVersion();
         switch($version) {
-            case 2012060601:
+            case 2012072901:
                 // intial version, do nothing here...
 
         /*

@@ -1,16 +1,12 @@
 ; This is the OAuth Authorization Server configuration
 
 ; name of service
-serviceName = "Group Provider"
+serviceName = "OAuth Authorization Server"
 ; type of resources you get access too
-serviceResources = "group membership details"
+serviceResources = "Protected Resource"
 
 ; the storage backend, currently only PDO is supported
 storageBackend = "PdoOAuthStorage"
-
-; these resourceOwnerIds can manage client registrations
-adminResourceOwnerId[] = "fkooman"
-;adminResourceOwnerId[] = "francois"
 
 authenticationMechanism = "DummyResourceOwner"
 ;authenticationMechanism = "BrowserIDResourceOwner"
@@ -60,7 +56,6 @@ persistentConnection = FALSE
 ; Dummy Configuration
 [DummyResourceOwner]
 resourceOwnerId = "fkooman"
-resourceOwnerDisplayName = "François Kooman"
 
 ; BrowserID configuration
 [BrowserIDResourceOwner]
@@ -80,8 +75,3 @@ useNameID = TRUE
 ; the attribute here
 ;resourceOwnerIdAttributeName = "uid"
 ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
-
-; displayName
-resourceOwnerDisplayNameAttributeName = "cn"
-;resourceOwnerDisplayNameAttributeName = "urn:mace:dir:attribute-def:displayName"
-

@@ -10,9 +10,6 @@ interface IOAuthStorage {
     public function getRefreshToken        ($refreshToken);
     public function storeRefreshToken      ($refreshToken, $clientId, $resourceOwnerId, $scope);
 
-    public function getResourceOwner       ($resourceOwnerId);
-    public function storeResourceOwner     ($resourceOwnerId, $resourceOwnerDisplayName);
-
     public function getClients             ();
     public function getClient              ($clientId);
 

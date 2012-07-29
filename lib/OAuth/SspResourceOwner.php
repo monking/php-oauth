@@ -36,15 +36,6 @@ class SspResourceOwner implements IResourceOwner {
         }
     }
 
-    public function getResourceOwnerDisplayName() {
-        $this->_ssp->requireAuth(array("saml:NameIDPolicy" => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"));
-        $attributes = $this->_ssp->getAttributes();
-        if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerDisplayNameAttributeName'), $attributes)) {
-            throw new ResourceOwnerException("resourceOwnerDisplayNameAttributeName is not available in SAML attributes");
-        }
-        return $attributes[$this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerDisplayNameAttributeName')][0];
-    }
-
 }
 
 ?>
