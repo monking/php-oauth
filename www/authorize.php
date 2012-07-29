@@ -20,13 +20,12 @@ try {
     require_once "../lib/OAuth/$oauthStorageBackend.php";
     $storage = new $oauthStorageBackend($config);
 
-    $storage->storeResourceOwner($resourceOwner->getResourceOwnerId(), $resourceOwner->getResourceOwnerDisplayName());
-    $resourceOwner->setHint(AuthorizationServer::getParameter($_GET, 'user_address'));
-
-    $authorizationServer = new AuthorizationServer($storage, $config);
-
     $incomingRequest = new IncomingHttpRequest();
     $request = $incomingRequest->getRequest();
+
+    $resourceOwner->setHint($request->getQueryParameter("user_address"));
+
+    $authorizationServer = new AuthorizationServer($storage, $config);
 
     switch($request->getRequestMethod()) {
         case "GET":

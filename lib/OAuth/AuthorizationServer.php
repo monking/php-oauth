@@ -270,7 +270,7 @@ class AuthorizationServer {
         return $token;
     }
 
-    public static function getParameter(array $parameters, $key) {
+    private static function getParameter(array $parameters, $key) {
         return (array_key_exists($key, $parameters) && !empty($parameters[$key])) ? $parameters[$key] : NULL;
     }
 

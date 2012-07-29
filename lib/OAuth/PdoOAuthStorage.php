@@ -295,7 +295,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `expires_in` int(11) DEFAULT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`access_token`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
 
         $this->_pdo->exec("
@@ -305,7 +305,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`refresh_token`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
 
         $this->_pdo->exec("
@@ -313,7 +313,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text NOT NULL,
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
 
         $this->_pdo->exec("
@@ -325,7 +325,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `issue_time` int(11) DEFAULT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`authorization_code`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`)
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
     }
 
