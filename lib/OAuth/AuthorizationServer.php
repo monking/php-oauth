@@ -170,7 +170,7 @@ class AuthorizationServer {
         }
     }
 
-    public function token(array $post, $authorizationHeader) {
+    public function token(array $post, $user = NULL, $pass = NULL) {
         // exchange authorization code for access token
         $grantType    = self::getParameter($post, 'grant_type');
         $code         = self::getParameter($post, 'code');
@@ -227,17 +227,18 @@ class AuthorizationServer {
         }
         if("web_application" === $client->type) {
             // REQUIRE basic auth
-            if(NULL === $authorizationHeader || empty($authorizationHeader)) {
+            if(NULL === $user || empty($user) || NULL === $pass || empty($pass)) {
                 throw new TokenException("invalid_client", "this client requires authentication");
             }
-            if(FALSE === self::_verifyBasicAuth($authorizationHeader, $client->id, $client->secret)) {
+        
+            if($user !== $client->id || $pass !== $client->secret) {
                 throw new TokenException("invalid_client", "client authentication failed");
             }
         }
         if("native_application" === $client->type) {
             // MAY use basic auth, so only check when Authorization header is provided
-            if(NULL !== $authorizationHeader && !empty($authorizationHeader)) {
-                if(FALSE === self::_verifyBasicAuth($authorizationHeader, $client->id, $client->secret)) {
+            if(NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
+                if($user !== $client->id || $pass !== $client->secret) {
                     throw new TokenException("invalid_client", "client authentication failed");
                 }
             }
@@ -275,25 +276,6 @@ class AuthorizationServer {
             }
         }
         return $token;
-    }
-
-    private static function _verifyBasicAuth($authorizationHeader, $requiredUser, $requiredPass) {
-        // b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
-        // FIXME: basic is more restrictive than Bearer?
-        $b64TokenRegExp = '(?:[[:alpha:][:digit:]-._~+/]+=*)';
-        $result = preg_match('|^Basic (?P<value>' . $b64TokenRegExp . ')$|', $authorizationHeader, $matches);
-        if($result === FALSE || $result === 0) {
-            return FALSE;
-        }
-        $basicAuth = $matches['value'];
-        $decodedBasicAuth = base64_decode($basicAuth, TRUE);
-        $colonPosition = strpos($decodedBasicAuth, ":");
-        if ($colonPosition === FALSE || $colonPosition === 0 || $colonPosition + 1 === strlen($decodedBasicAuth)) {
-            return FALSE;
-        }
-        $u = substr($decodedBasicAuth, 0, $colonPosition);
-        $p = substr($decodedBasicAuth, $colonPosition + 1);
-        return ($u === $requiredUser && $p === $requiredPass);
     }
 
     public static function getParameter(array $parameters, $key) {
