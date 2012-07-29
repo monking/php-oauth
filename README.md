@@ -1,7 +1,7 @@
 # PHP OAuth Authorization Server
 
 This project aims at providing a stand-alone OAuth v2 Authorization Server that
-is easy to integrate with your existing REST services, writting in any language, 
+is easy to integrate with your existing REST services, written in any language, 
 without requiring extensive changes.
 
 # Features
@@ -32,7 +32,6 @@ name!
     $ su -c 'chown fkooman.fkooman php-oauth'
     $ git clone git://github.com/fkooman/php-oauth.git
     $ cd php-oauth
-    $ docs/install_dependencies.sh
 
 Now you can create the default configuration files, the paths will be 
 automatically set, permissions set and a sample Apache configuration file will 
