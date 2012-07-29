@@ -16,17 +16,6 @@ authenticationMechanism = "DummyResourceOwner"
 supportedScopes[] = "read"
 supportedScopes[] = "write"
 
-; *ONLY* users in the list adminResourceOwnerId can request the admin scope
-supportedScopes[] = "oauth_admin"
-
-; When this permission is given the client can request information about the
-; authenticated user
-supportedScopes[] = "oauth_userinfo"
-
-; When this permission is given the client can request information about the
-; approved application and register approvals or delete them
-supportedScopes[] = "oauth_approval"
-
 ; makes it possible for resource owners to deselect some of the 
 ; scope fields requested by the client
 allowResourceOwnerScopeFiltering = FALSE
