@@ -5,14 +5,14 @@
   <meta charset="utf-8">
   <title>Error</title>
   <link rel="stylesheet" type="text/css" href=
-  "../templates/default.css">
+  "css/default.css">
 </head>
 
 <body>
   <div id="container">
     <h3>Error</h3>
 
-    <p><?php echo $description; ?></p>
+    <p>A fatal error occurred!</p>
 
     <div class="errorBox">
       <?php echo $error; ?>
