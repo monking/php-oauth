@@ -1,4 +1,6 @@
 #!/bin/sh
+APP_NAME="php-oauth"
+
 INSTALL_DIR=`pwd`
 
 # create directories
@@ -32,6 +34,6 @@ echo "***********************"
 echo "* HTTPD Configuration *"
 echo "***********************"
 echo "---- cut ----"
-cat docs/apache.conf | sed "s|/PATH/TO/APP|${INSTALL_DIR}|g"
+cat docs/apache.conf | sed "s|/PATH/TO/APP|${INSTALL_DIR}|g" | sed "s|APPNAME|${APP_NAME}|g"
 echo "---- cut ----"
 
