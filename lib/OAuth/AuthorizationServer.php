@@ -1,16 +1,12 @@
 <?php 
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "IResourceOwner.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "VerifyException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "TokenException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "ClientException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "ResourceOwnerException.php";
-
-interface IResourceOwner {
-    public function setHint                    ($resourceOwnerIdHint = NULL);
-    public function getResourceOwnerId         ();
-}
 
 class AuthorizationServer {
 
@@ -52,6 +48,7 @@ class AuthorizationServer {
                 throw new ResourceOwnerException("redirect_uri is malformed");
             }
             // redirectUri MUST NOT contain fragment
+            // but this is impossible anyway and PHP will never see the fragment...
             $fragment = parse_url($redirectUri, PHP_URL_FRAGMENT);
             if($fragment !== NULL) {
                 throw new ResourceOwnerException("redirect_uri must not contain fragment");
