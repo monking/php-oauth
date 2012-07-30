@@ -61,7 +61,19 @@ class IncomingHttpRequest {
     }
 
     public function getRequestHeaders() {
-        return $_SERVER;
+	// The $_SERVER environment does not contain the Authorization
+        // header by default. On Apache this header can be extracted with
+	// apache_request_headers(), but this does not work on other
+	// web servers...
+        $requestHeaders = $_SERVER;
+        if(function_exists(apache_request_headers)) {
+                $apacheHeaders = apache_request_headers();
+                if(array_key_exists("Authorization", $apacheHeaders)) {
+                        // add the HTTP_AUTHORIZATION header
+                        $requestHeaders['HTTP_AUTHORIZATION'] = $apacheHeaders['Authorization'];
+                }
+        }
+        return $requestHeaders;
     }
 
 }
