@@ -7,14 +7,21 @@ authorizations.
 
 # API
 
-This section describes the API to add and remove authorizations.
+This section describes the API to add and remove authorizations. However, the 
+application managing this should also be authorized to do this. A scope of 
+"oauth_authorizations" can be requested by the client. 
+
+Not all clients should be allowed to do this, only particular clients after the 
+resource owner was authenticated and authorized the client. All authorization
+registrations through the API are bound to the authenticated resource owner.
 
 ## Adding Authorizations
 
 The call:
 
     POST /php-oauth/api.php/authorizations/
-    
+    Authorization: Bearer xyz
+
     { 'client_id': 'democlient', 'scope': 'read write' }
 
 The response:
@@ -26,6 +33,7 @@ The response:
 The call:
 
     GET /php-oauth/api.php/authorizations/democlient
+    Authorization: Bearer xyz
 
 The response:
 
@@ -39,6 +47,7 @@ The response:
 The call:
 
     GET /php-oauth/api.php/authorizations/
+    Authorization: Bearer xyz
 
 The response:
 
@@ -54,6 +63,7 @@ The response:
 The call:
 
     DELETE /php-oauth/api.php/authorizations/democlient
+    Authorization: Bearer xyz
 
 The response:
 
