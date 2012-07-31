@@ -28,6 +28,7 @@ try {
     if($restInfo->match("POST", "authorizations", FALSE)) {
         $data = json_decode($request->getContent(), TRUE);
         $storage->addApproval($data['client_id'], $token->resource_owner_id, $data['scope']);
+        $response->setStatusCode(201);
     } else if($restInfo->match("GET", "authorizations", TRUE)) {
         $data = $storage->getApproval($restInfo->getResource(), $token->resource_owner_id);
         $response->setContent(json_encode($data));      

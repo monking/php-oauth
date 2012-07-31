@@ -28,6 +28,13 @@ The response:
 
     HTTP/1.1 201 Created
 
+Example using cURL:
+
+    curl -X POST -d '{"client_id":"example", "scope": "read write"}' 
+    -H "Content-Type: application/json" 
+    -H "Authorization: Bearer 8d93c2365812c64094e6c0946501e472" 
+    -v http://localhost/php-oauth/api.php/authorizations/
+
 ## Getting an Authorization
 
 The call:
