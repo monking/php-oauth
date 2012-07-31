@@ -17,10 +17,14 @@ registrations through the API are bound to the authenticated resource owner.
 
 ## Adding Authorizations
 
+This adds an authorization for a specific `client_id` with some `scope` for
+the authenticated resource owner.
+
 The call:
 
-    POST /php-oauth/api.php/authorizations/
+    POST /php-oauth/api.php/authorizations/ HTTP/1.1
     Authorization: Bearer xyz
+    Content-Type: application/json
 
     { 'client_id': 'democlient', 'scope': 'read write' }
 
@@ -39,7 +43,7 @@ Example using cURL:
 
 The call:
 
-    GET /php-oauth/api.php/authorizations/democlient
+    GET /php-oauth/api.php/authorizations/democlient HTTP/1.1
     Authorization: Bearer xyz
 
 The response:
@@ -53,7 +57,7 @@ The response:
 
 The call:
 
-    GET /php-oauth/api.php/authorizations/
+    GET /php-oauth/api.php/authorizations/ HTTP/1.1
     Authorization: Bearer xyz
 
 The response:
@@ -69,11 +73,21 @@ The response:
 
 The call:
 
-    DELETE /php-oauth/api.php/authorizations/democlient
+    DELETE /php-oauth/api.php/authorizations/democlient HTTP/1.1
     Authorization: Bearer xyz
 
 The response:
 
     HTTP/1.1 200 OK
 
+# Error Handling
+
+If a resource does not exist (in `GET` and `DELETE` requests) within a 
+collection the `HTTP/1.1 404 Not Found` error code MUST be returned.
+
+If the authorization fails, "OAuth 2.0 Authorization Framework: Bearer Token
+Usage" error handling (Section 3.1) should be followed.
+
+If something goes wrong at the server side an `HTTP/1.1 500 Internal Server Error`
+should be returned.
 
