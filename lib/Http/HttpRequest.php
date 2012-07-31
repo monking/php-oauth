@@ -10,12 +10,14 @@ class HttpRequest {
     private $_method;
     private $_headers;
     private $_content;
+    private $_pathInfo;
 
     public function __construct($requestUri, $requestMethod = "GET") {
         $this->setRequestUri(new Uri($requestUri));
         $this->setRequestMethod($requestMethod);
         $this->_headers = array();
         $this->_content = NULL;
+        $this->_pathInfo = NULL;
     }
 
     public function setRequestUri(Uri $u) {
@@ -129,12 +131,88 @@ class HttpRequest {
         return $this->_content;
     }
 
+    public function setPathInfo($pathInfo) {
+        $this->_pathInfo = $pathInfo;
+    }
+
+    public function getPathInfo() {
+        return $this->_pathInfo;
+    }
+
+    public function getRestInfo() {
+        return new RestInfo($this->getPathInfo(), $this->getRequestMethod());
+    }
+
     public function getBasicAuthUser() {
         return $this->headerExists("PHP_AUTH_USER") ? $this->getHeader("PHP_AUTH_USER") : NULL;
     }
 
     public function getBasicAuthPass() {
         return $this->headerExists("PHP_AUTH_PW") ? $this->getHeader("PHP_AUTH_PW") : NULL;
+    }
+
+}
+
+class RestInfo {
+
+    private $_pathInfo;
+    private $_requestMethod;
+    private $_explodedPath;
+
+    public function __construct($pathInfo, $requestMethod) {
+        $this->_pathInfo = $pathInfo;
+        $this->_requestMethod = $requestMethod;
+        $this->_explodedPath = NULL;
+
+        if(NULL !== $this->_pathInfo) {
+            if(1 < strlen($this->_pathInfo)) {
+                $this->_explodedPath = explode("/", substr($this->_pathInfo, 1));
+            }
+        }
+    }
+
+    private function _getRequestMethod() {
+        return $this->_requestMethod;
+    }
+
+    public function getCollection() {
+        if(is_array($this->_explodedPath) && 0 < count($this->_explodedPath)) {
+            return $this->_explodedPath[0];
+        }
+        return NULL;
+    }
+
+    public function getResource() {
+        if(is_array($this->_explodedPath) && 1 < count($this->_explodedPath)) {
+            return $this->_explodedPath[1];
+        }
+        return NULL;
+    }
+
+    private function _hasTrailingSlash() {
+        return empty($this->_explodedPath[count($this->_explodedPath)-1]);
+    }
+
+    public function match($requestMethod, $collectionName, $requireResource) {
+        if($requestMethod !== $this->_getRequestMethod()) {
+            return FALSE;
+        }
+        if($collectionName !== $this->getCollection()) {
+            return FALSE;
+        }
+        if($requireResource) {
+            if(NULL === $this->getResource()) {
+                return FALSE;
+            }
+            if($this->_hasTrailingSlash()) {
+                return FALSE;
+            }
+        } else {
+            if(!$this->_hasTrailingSlash()) {
+                return FALSE;
+            }
+        }
+        return TRUE;
     }
 
 }

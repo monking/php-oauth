@@ -16,7 +16,12 @@ class IncomingHttpRequest {
         $request = new HttpRequest($this->getRequestUri(), $_SERVER['REQUEST_METHOD']);
         $request->setContent($this->getContent());
         $request->setHeaders($this->getRequestHeaders());
+        $request->setPathInfo($this->getPathInfo());
         return $request;
+    }
+
+    private function getPathInfo() {
+        return array_key_exists('PATH_INFO', $_SERVER) ? $_SERVER['PATH_INFO'] : NULL;
     }
 
     private function getRequestUri() {
@@ -66,7 +71,7 @@ class IncomingHttpRequest {
 	// apache_request_headers(), but this does not work on other
 	// web servers...
         $requestHeaders = $_SERVER;
-        if(function_exists(apache_request_headers)) {
+        if(function_exists("apache_request_headers")) {
                 $apacheHeaders = apache_request_headers();
                 if(array_key_exists("Authorization", $apacheHeaders)) {
                         // add the HTTP_AUTHORIZATION header
