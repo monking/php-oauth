@@ -15,6 +15,7 @@ authenticationMechanism = "DummyResourceOwner"
 ; example scopes supported by the resource server
 supportedScopes[] = "read"
 supportedScopes[] = "write"
+supportedScopes[] = "authorizations"
 
 ; makes it possible for resource owners to deselect some of the 
 ; scope fields requested by the client
