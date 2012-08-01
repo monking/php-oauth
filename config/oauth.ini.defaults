@@ -16,6 +16,7 @@ authenticationMechanism = "DummyResourceOwner"
 supportedScopes[] = "read"
 supportedScopes[] = "write"
 supportedScopes[] = "authorizations"
+supportedScopes[] = "applications"
 
 ; makes it possible for resource owners to deselect some of the 
 ; scope fields requested by the client

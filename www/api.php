@@ -55,6 +55,9 @@ try {
         } else if($restInfo->match("GET", "authorizations", FALSE)) {
             $data = $storage->getApprovals($token->resource_owner_id);
             $response->setContent(json_encode($data));      
+        } else if($restInfo->match("GET", "applications", FALSE)) {
+            $data = $storage->getClients();
+            $response->setContent(json_encode($data)); 
         } else {
             throw new ApiException("invalid_request", "unsupported collection or resource request");
         }
