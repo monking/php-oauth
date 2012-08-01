@@ -62,6 +62,45 @@ try {
             if(FALSE === $storage->deleteClient($restInfo->getResource())) {
                 throw new ApiException("not_found", "the resource you are trying to delete does not exist");
             }
+        } else if($restInfo->match("GET", "applications", TRUE)) {
+            $data = $storage->getClient($restInfo->getResource());
+            if(FALSE === $data) {
+                throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
+            }
+            $response->setContent(json_encode($data));
+        } else if($restInfo->match("POST", "applications", FALSE)) {
+            $data = json_decode($request->getContent(), TRUE);
+            if(NULL === $data || !is_array($data) || 
+                    !array_key_exists("id", $data) || 
+                    !array_key_exists("name", $data) ||
+                    !array_key_exists("description", $data) ||
+                    !array_key_exists("secret", $data) ||
+                    !array_key_exists("type", $data) ||
+                    !array_key_exists("redirect_uri", $data)) {
+                throw new ApiException("invalid_request", "missing required parameters");
+            }
+            // check to see if an application with this id already exists
+            if(FALSE === $storage->getClient($data['id'])) {
+                if(FALSE === $storage->addClient($data)) {
+                    throw new ApiException("invalid_request", "unable to add application");
+                }
+            } else {
+                throw new ApiException("invalid_request", "application already exists");
+            }
+            $response->setStatusCode(201);
+        } else if($restInfo->match("PUT", "applications", TRUE)) {
+            $data = json_decode($request->getContent(), TRUE);
+            if(NULL === $data || !is_array($data) || 
+                    !array_key_exists("name", $data) ||
+                    !array_key_exists("description", $data) ||
+                    !array_key_exists("secret", $data) ||
+                    !array_key_exists("type", $data) ||
+                    !array_key_exists("redirect_uri", $data)) {
+                throw new ApiException("invalid_request", "missing required parameters");
+            }
+            if(FALSE === $storage->updateClient($restInfo->getResource(), $data)) {
+                throw new ApiException("invalid_request", "unable to update application");
+            }
         } else {
             throw new ApiException("invalid_request", "unsupported collection or resource request");
         }
