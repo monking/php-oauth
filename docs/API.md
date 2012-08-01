@@ -18,35 +18,40 @@ registrations through the API are bound to the authenticated resource owner.
 ## Adding Authorizations
 
 This adds an authorization for a specific `client_id` with some `scope` for
-the authenticated resource owner.
+the authenticated resource owner. The `client_id` needs to be registered, and
+no existing authorization can exist for the `client_id` and resource owner.
 
-The call:
+The parameters `client_id` and `scope` are required. The resource owner is 
+determined through the OAuth access token for which the resource owner gave
+consent.
+
+### Request
 
     POST /php-oauth/api.php/authorizations/ HTTP/1.1
     Authorization: Bearer xyz
     Content-Type: application/json
 
-    { 'client_id': 'democlient', 'scope': 'read write' }
+    {"client_id":"democlient","scope":"read write"}
 
-The response:
+### Response
 
     HTTP/1.1 201 Created
 
-Example using cURL:
+### cURL Example
 
-    curl -X POST -d '{"client_id":"example", "scope": "read write"}' 
-    -H "Content-Type: application/json" 
-    -H "Authorization: Bearer 8d93c2365812c64094e6c0946501e472" 
-    -v http://localhost/php-oauth/api.php/authorizations/
+    $ curl -v -X POST -d '{"client_id":"democlient","scope":"read write"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer 8d93c2365812c64094e6c0946501e472" \
+    http://localhost/php-oauth/api.php/authorizations/
 
 ## Getting an Authorization
 
-The call:
+### Request
 
     GET /php-oauth/api.php/authorizations/democlient HTTP/1.1
     Authorization: Bearer xyz
 
-The response:
+### Response
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -55,28 +60,26 @@ The response:
 
 ## Listing Authorizations
 
-The call:
+### Request
 
     GET /php-oauth/api.php/authorizations/ HTTP/1.1
     Authorization: Bearer xyz
 
-The response:
+### Response
 
     HTTP/1.1 200 OK
     Content-Type: application/json
 
-    [ { 'client_id': 'democlient', 'scope': 'read write' }, 
-      { 'client_id': 'otherclient', 'scope': 'admin' } 
-    ]
+    [{"client_id":"authorization_manager","scope":"authorizations"},{"client_id":"democlient","scope":"read write"}]
 
 ## Deleting Authorizations
 
-The call:
+### Request
 
     DELETE /php-oauth/api.php/authorizations/democlient HTTP/1.1
     Authorization: Bearer xyz
 
-The response:
+### Response
 
     HTTP/1.1 200 OK
 
@@ -88,6 +91,15 @@ collection the `HTTP/1.1 404 Not Found` error code MUST be returned.
 If the authorization fails, "OAuth 2.0 Authorization Framework: Bearer Token
 Usage" error handling (Section 3.1) should be followed.
 
-If something goes wrong at the server side an `HTTP/1.1 500 Internal Server Error`
-should be returned.
+If something goes wrong at the server side an 
+`HTTP/1.1 500 Internal Server Error` should be returned.
+
+The error should be indicated through the HTTP status code as well as through
+JSON in the body of the response. For example:
+
+    HTTP/1.1 400 Bad Request
+    Content-Type: application/json
+
+    {"error":"invalid_request","error_description":"authorization already exists for this client and resource owner"}
+
 
