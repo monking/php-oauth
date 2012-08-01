@@ -33,8 +33,13 @@ try {
             if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
             }
-            if(FALSE === $storage->addApproval($data['client_id'], $token->resource_owner_id, $data['scope'])) {
-                throw new ApiException("invalid_request", "authorization not added");
+            // check to see if an authorization for this client/resource_owner already exists
+            if(FALSE === $storage->getApproval($data['client_id'], $token->resource_owner_id)) {
+                if(FALSE === $storage->addApproval($data['client_id'], $token->resource_owner_id, $data['scope'])) {
+                    throw new ApiException("invalid_request", "unable to add authorization");
+                }
+            } else {
+                throw new ApiException("invalid_request", "authorization already exists for this client and resource owner");
             }
             $response->setStatusCode(201);
         } else if($restInfo->match("GET", "authorizations", TRUE)) {
@@ -52,11 +57,6 @@ try {
             $response->setContent(json_encode($data));      
         } else {
             throw new ApiException("invalid_request", "unsupported collection or resource request");
-
-            // unsupported call
-            //$response->setStatusCode(405);
-            //$response->setHeader("Allow", "GET,POST,DELETE");
-            //$response->setContent(json_encode(array("error" => "Method Not Allowed")));
         }
     } else {
         $response->setStatusCode(401);

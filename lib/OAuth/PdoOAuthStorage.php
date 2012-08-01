@@ -313,7 +313,8 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text NOT NULL,
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
+            UNIQUE(`client_id`, `resource_owner_id`))
         ");
 
         $this->_pdo->exec("
