@@ -58,6 +58,10 @@ try {
         } else if($restInfo->match("GET", "applications", FALSE)) {
             $data = $storage->getClients();
             $response->setContent(json_encode($data)); 
+        } else if($restInfo->match("DELETE", "applications", TRUE)) {
+            if(FALSE === $storage->deleteClient($restInfo->getResource())) {
+                throw new ApiException("not_found", "the resource you are trying to delete does not exist");
+            }
         } else {
             throw new ApiException("invalid_request", "unsupported collection or resource request");
         }
