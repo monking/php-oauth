@@ -10,12 +10,24 @@ $storage->updateDatabase();
 
 $redirectUri = ($argc !== 2) ? "http://localhost/html-manage-oauth/index.html" : $argv[1];
 
-if(FALSE === $storage->getClient("manage")) {
-    $data = array("id" => "manage",
-                  "name" => "Management Client",
-                  "description" => "Web application to manage Approvals and OAuth client registrations.",
-                  "secret" => NULL,
-                  "redirect_uri" => $redirectUri,
+if(FALSE === $storage->getClient("authorization_manager")) {
+    $data = array("id" => "authorization_manager",
+                  "name" => "Manage Authorizations",
+                  "description" => "This application can be used by end users to view and revoke application permissions.",
+                          "secret" => NULL,
+                  "redirect_uri" => "http://localhost/html-manage-authorizations/index.html",
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
+
+if(FALSE === $storage->getClient("application_manager")) {
+    $data = array("id" => "application_manager",
+                  "name" => "Manage Applications",
+                  "description" => "This application can be used by administrators to manage applications.",
+                  "secret" => NULL,
+                  "redirect_uri" => "http://localhost/html-manage-applications/index.html",
+                  "type" => "user_agent_based_application");
+    $storage->addClient($data);
+}
+
+?>
