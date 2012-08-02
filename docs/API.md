@@ -5,11 +5,11 @@ adding and deleting authorized applications. This is helpful for applications
 that are designed to manage the OAuth server in which users are able to revoke
 authorizations.
 
-# API
+# Authorizations API
 
 This section describes the API to add and remove authorizations. However, the 
 application managing this should also be authorized to do this. A scope of 
-"oauth_authorizations" can be requested by the client. 
+"authorizations" can be requested by the client. 
 
 Not all clients should be allowed to do this, only particular clients after the 
 resource owner was authenticated and authorized the client. All authorization
@@ -103,3 +103,26 @@ JSON in the body of the response. For example:
     {"error":"invalid_request","error_description":"authorization already exists for this client and resource owner"}
 
 
+# Applications API
+
+The API also provides functionality to manage applications, i.e.: client 
+registrations. The following functionality is exposed:
+
+* Add a new application (`POST /php-oauth/api.php/applications/`)
+* Update an application (`PUT /php-oauth/api.php/applications/democlient`)
+* Delete an application (`DELETE /php-oauth/api.php/applications/democlient`)
+* List applications (`GET /php-oauth/api.php/applications/`)
+* Get an application (`GET /php-oauth/api.php/applications/democlient`)
+
+The API works the same as for the authorizations. For adding a new application
+the following JSON parameters are required in the POST body:
+
+* `id`
+* `name`
+* `description`
+* `secret (only for `web_application` type)
+* `type` (`web_application`, `user_agent_based_application` or `native_application`)
+* `redirect_uri`
+
+For updating an application the same parameters are required, except `id` as 
+that is specified in the URL.
