@@ -30,4 +30,14 @@ if(FALSE === $storage->getClient("application_manager")) {
     $storage->addClient($data);
 }
 
+
+if(FALSE === $storage->getClient("democlient")) {
+    $data = array("id" => "democlient",
+                  "name" => "Web Application Profile Demo Client",
+                  "description" => "This application can be used to test REST APIs protected by OAuth.",
+                  "secret" => 's3cr3t',
+                  "redirect_uri" => "http://localhost/php-oauth-demo-client/index.php",
+                  "type" => "web_application");
+    $storage->addClient($data);
+}
 ?>

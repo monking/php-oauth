@@ -3,7 +3,6 @@
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IResourceOwner.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "VerifyException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "TokenException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "ClientException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "ResourceOwnerException.php";
