@@ -23,8 +23,7 @@ do
     INI_FILE=`basename ${DEFAULTS_FILE} .defaults`
     if [ ! -f ${INI_FILE} ]
     then
-        cp ${DEFAULTS_FILE} ${INI_FILE}
-        sed -i "s|/PATH/TO/APP|${INSTALL_DIR}|g" ${INI_FILE}
+        cat ${DEFAULTS_FILE} | sed "s|/PATH/TO/APP|${INSTALL_DIR}|g" > ${INI_FILE}
     fi
 done
 )
