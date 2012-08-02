@@ -44,20 +44,19 @@ Next make sure to configure the database settings in `config/oauth.ini`, and
 possibly other settings. If you want to keep using SQlite you are good to go 
 without fiddling with the database settings. Now to initialize the database:
 
-    $ php docs/initOAuthDatabase.php https://www.example.org/html-manage-oauth/index.html
-
-Make sure to replace the URI with the full redirect URI of the management 
-client. If you do not provide a URI the default redirect URI 
-`http://localhost/html-manage-oauth/index.html` is used. 
+    $ php docs/initOAuthDatabase.php
 
 *NOTE*: On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
 in `/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
 
 # Management Client
-A reference management client can be found 
-[here](https://github.com/fkooman/html-manage-oauth/). This client is written
-in HTML, CSS and JavaScript only and can be hosted on any (static) web server.
-See the accompanying README file for more information.
+There are two reference management clients available:
+
+* [Manage Applications](https://github.com/fkooman/html-manage-applications/). 
+* [Manage Authorizations](https://github.com/fkooman/html-manage-authorizations/). 
+
+These clients are written in HTML, CSS and JavaScript only and can be hosted on 
+any (static) web server. See the accompanying READMEs for more information.
 
 # SELinux
 The install script already takes care of setting the file permissions of the
@@ -81,7 +80,7 @@ environment and do not forget to restart Apache.
 The install script from the previous section outputs a config for your system
 which replaces the `/PATH/TO/APP` with the actual directory.
 
-# Configuration
+# SAML Configuration
 In the configuration file `config/oauth.ini` various aspects can be configured. 
 To configure the SAML integration, make sure the following settings are correct:
 
