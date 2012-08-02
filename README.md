@@ -22,10 +22,7 @@ On Debian/Ubuntu:
     $ sudo apt-get install git sqlite3 php5 php5-sqlite wget unzip
 
 # Installation
-The project includes install scripts that downloads the required dependencies
-and sets the permissions for the directories to write to and fixes SELinux 
-permissions. *NOTE*: in the `chown` line you need to use your own user account 
-name!
+*NOTE*: in the `chown` line you need to use your own user account name!
 
     $ cd /var/www/html
     $ su -c 'mkdir php-oauth'
