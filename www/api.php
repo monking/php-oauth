@@ -20,17 +20,15 @@ try {
 
     $incomingRequest = new IncomingHttpRequest();
     $request = $incomingRequest->getRequest();
-
-    $restInfo = $request->getRestInfo();
     
     $rs = new ResourceServer($storage, $config);
     if($request->headerExists("HTTP_AUTHORIZATION")) { 
             
         $token = $rs->verify($request->getHeader("HTTP_AUTHORIZATION"));
 
-        if($restInfo->match("GET", "userinfo", FALSE)) {
-            $response->setContent = json_encode(array("resource_owner_id" => $token['resource_owner_id']));
-        } else if($restInfo->match("POST", "authorizations", FALSE)) {
+        if($request->matchRest("GET", "resource_owner", "id")) {
+            $response->setContent(json_encode(array("id" => $token->resource_owner_id)));
+        } else if($request->matchRest("POST", "authorizations", FALSE)) {
             $data = json_decode($request->getContent(), TRUE);
             if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
@@ -44,33 +42,33 @@ try {
                 throw new ApiException("invalid_request", "authorization already exists for this client and resource owner");
             }
             $response->setStatusCode(201);
-        } else if($restInfo->match("GET", "authorizations", TRUE)) {
-            $data = $storage->getApproval($restInfo->getResource(), $token->resource_owner_id);
+        } else if($request->matchRest("GET", "authorizations", TRUE)) {
+            $data = $storage->getApproval($request->getResource(), $token->resource_owner_id);
             if(FALSE === $data) {
                 throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
             }
             $response->setContent(json_encode($data));      
-        } else if($restInfo->match("DELETE", "authorizations", TRUE)) {
-            if(FALSE === $storage->deleteApproval($restInfo->getResource(), $token->resource_owner_id)) {
+        } else if($request->matchRest("DELETE", "authorizations", TRUE)) {
+            if(FALSE === $storage->deleteApproval($request->getResource(), $token->resource_owner_id)) {
                 throw new ApiException("not_found", "the resource you are trying to delete does not exist");
             }
-        } else if($restInfo->match("GET", "authorizations", FALSE)) {
+        } else if($request->matchRest("GET", "authorizations", FALSE)) {
             $data = $storage->getApprovals($token->resource_owner_id);
             $response->setContent(json_encode($data));      
-        } else if($restInfo->match("GET", "applications", FALSE)) {
+        } else if($request->matchRest("GET", "applications", FALSE)) {
             $data = $storage->getClients();
             $response->setContent(json_encode($data)); 
-        } else if($restInfo->match("DELETE", "applications", TRUE)) {
-            if(FALSE === $storage->deleteClient($restInfo->getResource())) {
+        } else if($request->matchRest("DELETE", "applications", TRUE)) {
+            if(FALSE === $storage->deleteClient($request->getResource())) {
                 throw new ApiException("not_found", "the resource you are trying to delete does not exist");
             }
-        } else if($restInfo->match("GET", "applications", TRUE)) {
-            $data = $storage->getClient($restInfo->getResource());
+        } else if($request->matchRest("GET", "applications", TRUE)) {
+            $data = $storage->getClient($request->getResource());
             if(FALSE === $data) {
                 throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
             }
             $response->setContent(json_encode($data));
-        } else if($restInfo->match("POST", "applications", FALSE)) {
+        } else if($request->matchRest("POST", "applications", FALSE)) {
             $data = json_decode($request->getContent(), TRUE);
             if(NULL === $data || !is_array($data) || 
                     !array_key_exists("id", $data) || 
@@ -90,7 +88,7 @@ try {
                 throw new ApiException("invalid_request", "application already exists");
             }
             $response->setStatusCode(201);
-        } else if($restInfo->match("PUT", "applications", TRUE)) {
+        } else if($request->matchRest("PUT", "applications", TRUE)) {
             $data = json_decode($request->getContent(), TRUE);
             if(NULL === $data || !is_array($data) || 
                     !array_key_exists("name", $data) ||
@@ -100,7 +98,7 @@ try {
                     !array_key_exists("redirect_uri", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
             }
-            if(FALSE === $storage->updateClient($restInfo->getResource(), $data)) {
+            if(FALSE === $storage->updateClient($request->getResource(), $data)) {
                 throw new ApiException("invalid_request", "unable to update application");
             }
         } else {

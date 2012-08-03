@@ -12,7 +12,7 @@ that authorized the application.
 
 ### Request
 
-    GET /php-oauth/api.php/userinfo
+    GET /php-oauth/api.php/resource_owner/id
     Authorization: Bearer xyz
 
 ### Response
@@ -20,7 +20,7 @@ that authorized the application.
     HTTP/1.1 200 OK
     Content-Type: application/json
 
-    {'resource_owner_id': 'fkooman'}
+    {'id': 'fkooman'}
 
 # Authorizations API
 
