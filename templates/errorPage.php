@@ -4,8 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>Error</title>
-  <link rel="stylesheet" type="text/css" href=
-  "css/default.css">
+  <link rel="stylesheet" type="text/css" href="css/default.css">
 </head>
 
 <body>

@@ -5,6 +5,23 @@ adding and deleting authorized applications. This is helpful for applications
 that are designed to manage the OAuth server in which users are able to revoke
 authorizations.
 
+# User Info API
+
+This API call is used to retrieve the user identifier of the resource owner
+that authorized the application.
+
+### Request
+
+    GET /php-oauth/api.php/userinfo
+    Authorization: Bearer xyz
+
+### Response
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {'resource_owner_id': 'fkooman'}
+
 # Authorizations API
 
 This section describes the API to add and remove authorizations. However, the 
@@ -101,7 +118,6 @@ JSON in the body of the response. For example:
     Content-Type: application/json
 
     {"error":"invalid_request","error_description":"authorization already exists for this client and resource owner"}
-
 
 # Applications API
 

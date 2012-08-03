@@ -11,7 +11,7 @@
 <body>
   <div id="container">
     <form method="post" action="">
-      <h3><?php echo $serviceName; ?></h3>
+      <h1><?php echo $serviceName; ?></h1>
 
       <p><strong><?php echo $clientName; ?></strong> wants to
       access your

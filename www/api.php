@@ -28,7 +28,9 @@ try {
             
         $token = $rs->verify($request->getHeader("HTTP_AUTHORIZATION"));
 
-        if($restInfo->match("POST", "authorizations", FALSE)) {
+        if($restInfo->match("GET", "userinfo", FALSE)) {
+            $response->setContent = json_encode(array("resource_owner_id" => $token['resource_owner_id']));
+        } else if($restInfo->match("POST", "authorizations", FALSE)) {
             $data = json_decode($request->getContent(), TRUE);
             if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
