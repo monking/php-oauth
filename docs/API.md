@@ -28,6 +28,14 @@ This section describes the API to add and remove authorizations. However, the
 application managing this should also be authorized to do this. A scope of 
 "authorizations" can be requested by the client. 
 
+An "authorization" in this sense is an indicator that a resource owner allows
+a client to act on its behalf. Typically whenever a registered clients starts
+the OAuth dance it will trigger a confirmation dialog for the resource owner
+to either allow or deny this request. Using this API a privileged client can
+register these authorizations out-of-band. This will optimize the flow when
+a client wants to access the protected resources: the resource owner is no 
+longer prompted for consent.
+
 Not all clients should be allowed to do this, only particular clients after the 
 resource owner was authenticated and authorized the client. All authorization
 registrations through the API are bound to the authenticated resource owner.
@@ -73,7 +81,7 @@ consent.
     HTTP/1.1 200 OK
     Content-Type: application/json
 
-    { 'client_id': 'democlient', 'scope': 'read write' }
+    {"client_id":"democlient","scope":"read write"}
 
 ## Listing Authorizations
 
@@ -141,4 +149,4 @@ the following JSON parameters are required in the POST body:
 * `redirect_uri`
 
 For updating an application the same parameters are required, except `id` as 
-that is specified in the URL.
+that is specified in the URL directly.
