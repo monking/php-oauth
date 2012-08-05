@@ -14,8 +14,9 @@ if(FALSE === $storage->getClient("authorization_manager")) {
     $data = array("id" => "authorization_manager",
                   "name" => "Manage Authorizations",
                   "description" => "This application can be used by end users to view and revoke application permissions.",
-                          "secret" => NULL,
+                  "secret" => NULL,
                   "redirect_uri" => "http://localhost/html-manage-authorizations/index.html",
+                  "icon" => NULL,
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
@@ -26,10 +27,21 @@ if(FALSE === $storage->getClient("application_manager")) {
                   "description" => "This application can be used by administrators to manage applications.",
                   "secret" => NULL,
                   "redirect_uri" => "http://localhost/html-manage-applications/index.html",
+                  "icon" => NULL,
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
 
+if(FALSE === $storage->getClient("remotestorage_portal")) {
+    $data = array("id" => "remotestorage_portal",
+                  "name" => "remoteStorage Portal",
+                  "description" => "This application can be used to install and launch 'Unhosted' applications.",
+                  "secret" => NULL,
+                  "redirect_uri" => "http://localhost/html-remoteStorage-portal/index.html",
+                  "icon" => NULL,
+                  "type" => "user_agent_based_application");
+    $storage->addClient($data);
+}
 
 if(FALSE === $storage->getClient("democlient")) {
     $data = array("id" => "democlient",
@@ -37,6 +49,7 @@ if(FALSE === $storage->getClient("democlient")) {
                   "description" => "This application can be used to test REST APIs protected by OAuth.",
                   "secret" => 's3cr3t',
                   "redirect_uri" => "http://localhost/php-oauth-demo-client/index.php",
+                  "icon" => NULL,
                   "type" => "web_application");
     $storage->addClient($data);
 }

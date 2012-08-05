@@ -15,7 +15,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     private $_c;
     private $_pdo;
 
-    public $requiredVersion = 2012072901;
+    public $requiredVersion = 2012080501;
 
     public function __construct(Config $c) {
         $this->_c = $c;
@@ -53,12 +53,13 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function updateClient($clientId, $data) {
-        $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type WHERE id = :client_id");
+        $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type, icon = :icon WHERE id = :client_id");
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
         $stmt->bindValue(":secret", $data['secret'], PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $data['redirect_uri'], PDO::PARAM_STR);
         $stmt->bindValue(":type", $data['type'], PDO::PARAM_STR);
+        $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to update client");
@@ -67,13 +68,14 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function addClient($data) {
-        $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type)");
+        $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type, icon) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type, :icon)");
         $stmt->bindValue(":client_id", $data['id'], PDO::PARAM_STR);
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
         $stmt->bindValue(":secret", $data['secret'], PDO::PARAM_STR | PDO::PARAM_NULL);
         $stmt->bindValue(":redirect_uri", $data['redirect_uri'], PDO::PARAM_STR);
         $stmt->bindValue(":type", $data['type'], PDO::PARAM_STR);
+        $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to add client");
         }
@@ -208,7 +210,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     }
 
     public function getApprovals($resourceOwnerId) {
-        $stmt = $this->_pdo->prepare("SELECT c.id, a.scope, c.name, c.description, c.redirect_uri FROM Approval a, Client c WHERE resource_owner_id = :resource_owner_id AND a.client_id = c.id");
+        $stmt = $this->_pdo->prepare("SELECT c.id, a.scope, c.name, c.description, c.icon, c.redirect_uri FROM Approval a, Client c WHERE resource_owner_id = :resource_owner_id AND a.client_id = c.id");
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
@@ -272,7 +274,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
 
         $this->_pdo->exec("
             INSERT INTO Version
-            VALUES(2012072901)
+            VALUES(2012080501)
         ");
 
         $this->_pdo->exec("
@@ -283,6 +285,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `secret` text DEFAULT NULL,
             `redirect_uri` text NOT NULL,
             `type` text NOT NULL,
+            `icon` text DEFAULT NULL,
             PRIMARY KEY (`id`))
         ");
 
@@ -323,7 +326,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
             `redirect_uri` text DEFAULT NULL,
-            `issue_time` int(11) DEFAULT NULL,
+            `issue_time` int(11) NOT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`authorization_code`),
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
@@ -352,7 +355,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     public function updateDatabase() {
         $version = $this->getDatabaseVersion();
         switch($version) {
-            case 2012072901:
+            case 2012080501:
                 // intial version, do nothing here...
 
         /*
