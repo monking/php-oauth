@@ -17,6 +17,7 @@ if(FALSE === $storage->getClient("authorization_manager")) {
                   "secret" => NULL,
                   "redirect_uri" => "http://localhost/html-manage-authorizations/index.html",
                   "icon" => NULL,
+                  "allowed_scope" => "authorizations",
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
@@ -28,6 +29,7 @@ if(FALSE === $storage->getClient("application_manager")) {
                   "secret" => NULL,
                   "redirect_uri" => "http://localhost/html-manage-applications/index.html",
                   "icon" => NULL,
+                  "allowed_scope" => "applications",
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
@@ -39,6 +41,7 @@ if(FALSE === $storage->getClient("remotestorage_portal")) {
                   "secret" => NULL,
                   "redirect_uri" => "http://localhost/html-remoteStorage-portal/index.html",
                   "icon" => NULL,
+                  "allowed_scope" => "applications authorizations",
                   "type" => "user_agent_based_application");
     $storage->addClient($data);
 }
@@ -50,6 +53,7 @@ if(FALSE === $storage->getClient("democlient")) {
                   "secret" => 's3cr3t',
                   "redirect_uri" => "http://localhost/php-oauth-demo-client/index.php",
                   "icon" => NULL,
+                  "allowed_scope" => "read",
                   "type" => "web_application");
     $storage->addClient($data);
 }

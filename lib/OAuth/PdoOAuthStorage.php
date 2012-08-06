@@ -15,7 +15,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     private $_c;
     private $_pdo;
 
-    public $requiredVersion = 2012080501;
+    public $requiredVersion = 2012080601;
 
     public function __construct(Config $c) {
         $this->_c = $c;
@@ -53,13 +53,14 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function updateClient($clientId, $data) {
-        $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type, icon = :icon WHERE id = :client_id");
+        $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type, icon = :icon, allowed_scope = :allowed_scope WHERE id = :client_id");
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
         $stmt->bindValue(":secret", $data['secret'], PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $data['redirect_uri'], PDO::PARAM_STR);
         $stmt->bindValue(":type", $data['type'], PDO::PARAM_STR);
         $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
+        $stmt->bindValue(":allowed_scope", $data['allowed_scope'], PDO::PARAM_STR);
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to update client");
@@ -68,7 +69,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function addClient($data) {
-        $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type, icon) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type, :icon)");
+        $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type, icon, allowed_scope) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type, :icon, :allowed_scope)");
         $stmt->bindValue(":client_id", $data['id'], PDO::PARAM_STR);
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
@@ -76,6 +77,7 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":redirect_uri", $data['redirect_uri'], PDO::PARAM_STR);
         $stmt->bindValue(":type", $data['type'], PDO::PARAM_STR);
         $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
+        $stmt->bindValue(":allowed_scope", $data['allowed_scope'], PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to add client");
         }
@@ -274,7 +276,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
 
         $this->_pdo->exec("
             INSERT INTO Version
-            VALUES(2012080501)
+            VALUES(2012080601)
         ");
 
         $this->_pdo->exec("
@@ -286,6 +288,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `redirect_uri` text NOT NULL,
             `type` text NOT NULL,
             `icon` text DEFAULT NULL,
+            `allowed_scope` text DEFAULT NULL,
             PRIMARY KEY (`id`))
         ");
 
@@ -355,7 +358,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     public function updateDatabase() {
         $version = $this->getDatabaseVersion();
         switch($version) {
-            case 2012080501:
+            case 2012080601:
                 // intial version, do nothing here...
 
         /*

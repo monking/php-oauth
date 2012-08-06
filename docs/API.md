@@ -148,6 +148,7 @@ the following JSON parameters are required in the POST body:
 * `type` (`web_application`, `user_agent_based_application` or `native_application`)
 * `redirect_uri`
 * `icon` (full absolute URL to icon)
+* `allowed_scope` (scopes the client is able to request, space separated)
 
 For updating an application the same parameters are required, except `id` as 
 that is specified in the URL directly.

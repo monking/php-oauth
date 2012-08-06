@@ -77,6 +77,7 @@ try {
                     !array_key_exists("secret", $data) ||
                     !array_key_exists("type", $data) ||
                     !array_key_exists("icon", $data) ||
+                    !array_key_exists("allowed_scope", $data) ||
                     !array_key_exists("redirect_uri", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
             }
@@ -97,6 +98,7 @@ try {
                     !array_key_exists("secret", $data) ||
                     !array_key_exists("type", $data) ||
                     !array_key_exists("icon", $data) ||
+                    !array_key_exists("allowed_scope", $data) ||
                     !array_key_exists("redirect_uri", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
             }
