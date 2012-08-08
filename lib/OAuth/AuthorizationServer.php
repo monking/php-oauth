@@ -53,11 +53,18 @@ class AuthorizationServer {
         }
 
         $requestedScope = self::normalizeScope($scope);
-
         if(FALSE === $requestedScope) {
             throw new ClientException("invalid_scope", "malformed scope", $client, $state);
         }
-   
+        
+        // check that requested scope by client is actually allowed, if no allowed
+        // scope is specified all scopes are allowed
+        if(NULL !== $client->allowed_scope && !empty($client->allowed_scope)) {
+            if(!$this->isSubsetScope($requestedScope, $client->allowed_scope)) {
+                throw new ClientException("invalid_scope", "not authorized to request this scope", $client, $state);
+            }
+        }
+
         $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $requestedScope);
         if(FALSE === $approvedScope || FALSE === self::isSubsetScope($requestedScope, $approvedScope->scope)) {
             return array ("action" => "ask_approval", "client" => $client);
