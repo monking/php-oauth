@@ -22,7 +22,7 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         $dsn = "sqlite:" . $this->_tmpDb;
 
         // load default config
-        $c = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
+        $c = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
 
         // override DB config in memory only
         $c->setValue("storageBackend", "PdoOAuthStorage");
@@ -39,6 +39,8 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
                   "name" => "Simple Test Client",
                   "description" => "Client for unit testing",
                   "secret" => NULL,
+                  "icon" => NULL,
+                  "allowed_scope" => "read",
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "user_agent_based_application");
 
@@ -46,6 +48,8 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
                   "name" => "Simple Test Client for Authorization Code Profile",
                   "description" => "Client for unit testing",
                   "secret" => "abcdef",
+                  "icon" => NULL,
+                  "allowed_scope" => "read",
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "web_application");
         $this->_storage->addClient($uaba);
@@ -111,10 +115,9 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         
         // exchange code for token
         
-        $ah = "Basic " . base64_encode("testcodeclient:abcdef");
         $post = array ("grant_type" => "authorization_code",
                        "code" => $matches[1]);
-        $response = $this->_as->token($post, $ah);
+        $response = $this->_as->token($post, "testcodeclient", "abcdef");
 
         $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->access_token);
         $this->assertEquals(3600, $response->expires_in);

@@ -22,7 +22,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
         $dsn = "sqlite:" . $this->_tmpDb;
 
         // load default config
-        $c = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
+        $c = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
 
         // override DB config in memory only
         $c->setValue("storageBackend", "PdoOAuthStorage");
@@ -39,6 +39,8 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
                   "name" => "Simple Test Client",
                   "description" => "Client for unit testing",
                   "secret" => NULL,
+                  "allowed_scope" => "read",
+                  "icon" => NULL,
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "user_agent_based_application");
 
@@ -46,6 +48,8 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
                   "name" => "Simple Test Client for Authorization Code Profile",
                   "description" => "Client for unit testing",
                   "secret" => "abcdef",
+                  "icon" => NULL,
+                  "allowed_scope" => "read",
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "web_application");
         $this->_storage->addClient($uaba);
