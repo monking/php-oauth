@@ -34,30 +34,7 @@ class AuthorizationServer {
 
         $client = $this->_storage->getClient($clientId);
         if(FALSE === $client) {
-            if(!$this->_c->getValue('allowUnregisteredClients')) {
-                throw new ResourceOwnerException('client not registered');
-            }
-            // we need a redirectUri for unregistered clients
-            if(NULL === $redirectUri) {
-                throw new ResourceOwnerException('redirect_uri required for unregistered clients');
-            }
-            // validate the redirectUri
-            $u = filter_var($redirectUri, FILTER_VALIDATE_URL);
-            if(FALSE === $u) {
-                throw new ResourceOwnerException("redirect_uri is malformed");
-            }
-            // redirectUri MUST NOT contain fragment
-            // but this is impossible anyway and PHP will never see the fragment...
-            $fragment = parse_url($redirectUri, PHP_URL_FRAGMENT);
-            if($fragment !== NULL) {
-                throw new ResourceOwnerException("redirect_uri must not contain fragment");
-            }
-            // clientId MUST be hostname of redirect_uri
-            $host = parse_url($redirectUri, PHP_URL_HOST);
-            if($host !== $clientId) {
-                throw new ResourceOwnerException("client_id should match with hostname of redirect_uri");
-            }
-            $client = (object) array ("id" => $host, "name" => $host, "description" => "UNREGISTERED APPLICATION", "type" => "user_agent_based_application", "redirect_uri" => $redirectUri);
+            throw new ResourceOwnerException('client not registered');
         }
 
         if(NULL !== $redirectUri) {

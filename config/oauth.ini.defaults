@@ -19,10 +19,6 @@ allowResourceOwnerScopeFiltering = FALSE
 ; the access token expiry time (in seconds)
 accessTokenExpiry = 3600
 
-; whether to allow unregistered clients
-; NOT RECOMMENDED
-allowUnregisteredClients = FALSE
-
 [PdoOAuthStorage]
 dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite";
 ;dsn = "mysql:host=localhost;dbname=oauth"
