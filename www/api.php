@@ -25,6 +25,17 @@ try {
             
         $token = $rs->verify($request->getHeader("HTTP_AUTHORIZATION"));
 
+        // verify the scope permissions
+        if(in_array($request->getCollection(), array ("applications", "authorizations"))) {
+            $grantedScope = explode(" ", $token->scope);
+            if(!in_array($request->getCollection(), $grantedScope)) {
+                throw new VerifyException("insufficient_scope", "no permission for this call with current scope");
+            }
+        }
+
+        // applications scope is very sensitive, should be bound to a few "admin" uids.
+        // FIXME: implement check!
+
         if($request->matchRest("GET", "resource_owner", "id")) {
             $response->setContent(json_encode(array("id" => $token->resource_owner_id)));
         } else if($request->matchRest("POST", "authorizations", FALSE)) {
