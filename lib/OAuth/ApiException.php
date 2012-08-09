@@ -19,6 +19,8 @@ class ApiException extends Exception {
                 return 404;
             case "invalid_request":
                 return 400;
+            case "forbidden":
+                return 403;
             default:
                 return 400;
         }

@@ -14,6 +14,10 @@ $response->setHeader("Content-Type", "application/json");
 try { 
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
 
+    if(!$config->getSectionValue("Api", "enableApi")) {
+        throw new ApiException("forbidden","api disabled");
+    }
+
     $oauthStorageBackend = $config->getValue('storageBackend');
     require_once "../lib/OAuth/$oauthStorageBackend.php";
     $storage = new $oauthStorageBackend($config);
@@ -31,10 +35,14 @@ try {
             if(!in_array($request->getCollection(), $grantedScope)) {
                 throw new VerifyException("insufficient_scope", "no permission for this call with current scope");
             }
-        }
 
-        // applications scope is very sensitive, should be bound to a few "admin" uids.
-        // FIXME: implement check!
+            // FIXME: do not check if there is no such configuration thingy, 
+            // i.e. by default authorizations is allowed for everyone
+            $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
+            if(!in_array($request->getCollection(), $grantedEntitlement)) {
+                throw new ApiException("forbidden", "not entitled to use this api call");
+            }
+        }
 
         if($request->matchRest("GET", "resource_owner", "id")) {
             $response->setContent(json_encode(array("id" => $token->resource_owner_id)));

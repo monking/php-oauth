@@ -19,6 +19,21 @@ allowResourceOwnerScopeFiltering = FALSE
 ; the access token expiry time (in seconds)
 accessTokenExpiry = 3600
 
+; Options for the HTTP REST based API for managing the OAuth AS
+[Api]
+enableApi = FALSE
+
+; what "entitlement" is required to use the specific API functionality. 
+; if disabled, any authenticated resource owner is allowed to use this 
+; particular part of the API.
+
+; entitlement for client management (add, modify, delete)
+apiEntitlement["applications"] = "applications"
+
+; entitlement for manage client authorizations; i.e. use the API to give 
+; consent to a particular client and scope
+;apiEntitlement["authorizations"] = "authorizations"
+
 [PdoOAuthStorage]
 dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite";
 ;dsn = "mysql:host=localhost;dbname=oauth"
@@ -33,10 +48,16 @@ persistentConnection = FALSE
 [DummyResourceOwner]
 resourceOwnerId = "fkooman"
 
+resourceOwnerEntitlement["applications"] = "fkooman"
+;resourceOwnerEntitlement["authorizations"] = "fkooman"
+
 ; BrowserID configuration
 [BrowserIDResourceOwner]
 browserIDPath = "/var/www/html/php-browserid"
 verifierAddress = "https://browserid.org/verify"
+
+resourceOwnerEntitlement["applications"] = "fkooman@example.org"
+;resourceOwnerEntitlement["authorizations"] = "fkooman@example.org"
 
 ; simpleSAMLphp configuration
 [SspResourceOwner]
@@ -51,3 +72,9 @@ useNameID = TRUE
 ; the attribute here
 ;resourceOwnerIdAttributeName = "uid"
 ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
+
+;entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
+
+entitlementFromAttributeValue["applications"] = "urn:vnd:oauth2:applications"
+;entitlementFromAttributeValue["authorizations"] = "urn:vnd:oauth2:authorizations"
+

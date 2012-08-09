@@ -6,9 +6,6 @@ $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTO
 
 $storage = new PdoOAuthStorage($config);
 $storage->initDatabase();
-$storage->updateDatabase();
-
-$redirectUri = ($argc !== 2) ? "http://localhost/html-manage-oauth/index.html" : $argv[1];
 
 if(FALSE === $storage->getClient("authorization_manager")) {
     $data = array("id" => "authorization_manager",

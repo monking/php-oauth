@@ -15,6 +15,15 @@ class DummyResourceOwner implements IResourceOwner {
         return $this->_c->getSectionValue('DummyResourceOwner', 'resourceOwnerId');
     }
 
+    public function getEntitlements() {
+        $entitlements = array();
+        foreach($this->_c->getSectionValue("DummyResourceOwner", "resourceOwnerEntitlement") as $k => $v) {
+            if($v === $this->getResourceOwnerId()) {
+                array_push($entitlements, $k);
+            }
+        }
+        return $entitlements;
+    }
 }
 
 ?>

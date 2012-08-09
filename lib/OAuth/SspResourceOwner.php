@@ -19,8 +19,12 @@ class SspResourceOwner implements IResourceOwner {
     public function setHint($resourceOwnerIdHint = NULL) {
     }
 
-    public function getResourceOwnerId() {
+    private function _authenticateUser() {
         $this->_ssp->requireAuth(array("saml:NameIDPolicy" => "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"));
+    }
+
+    public function getResourceOwnerId() {
+        $this->_authenticateUser();
         if($this->_c->getSectionValue('SspResourceOwner', 'useNameID')) {
             $nameId = $this->_ssp->getAuthData("saml:sp:NameID");
             if("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" !== $nameId['Format']) {
@@ -34,6 +38,12 @@ class SspResourceOwner implements IResourceOwner {
             }
             return $attributes[$this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName')][0];
         }
+    }
+
+    public function getEntitlements() {
+        // $this->_authenticateUser();
+        // $attributes = $this->_ssp->getAttributes();
+        return array();
     }
 
 }
