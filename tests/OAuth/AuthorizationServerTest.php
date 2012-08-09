@@ -32,7 +32,6 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         $this->_storage = new PdoOAuthStorage($c);
         
         $this->_storage->initDatabase();
-        $this->_storage->updateDatabase();
 
         // add a client
         $uaba = array("id" => "testclient",
