@@ -18,9 +18,7 @@ try {
 
     $authorizationServer = new AuthorizationServer($storage, $config);
 
-    $incomingRequest = new IncomingHttpRequest();
-    $request = $incomingRequest->getRequest();
-
+    $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
 
     switch($request->getRequestMethod()) {
 

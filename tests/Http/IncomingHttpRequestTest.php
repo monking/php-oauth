@@ -20,8 +20,9 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
                 ->method('getRequestHeaders')
                 ->will($this->returnValue(array("A" => "B")));
         // $this->assertInstanceOf("HttpRequest", $stub->getRequest());
-        $this->assertEquals($request_uri, $stub->getRequest()->getRequestUri()->getUri());
-        $this->assertEquals("GET", $stub->getRequest()->getRequestMethod());
+        $request = HttpRequest::fromIncomingHttpRequest($stub);
+        $this->assertEquals($request_uri, $request->getRequestUri()->getUri());
+        $this->assertEquals("GET", $request->getRequestMethod());
     }
 
     function getDataProvider() {
@@ -59,9 +60,11 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
                 ->will($this->returnValue($content));
 
         //$this->assertInstanceOf('HttpRequest', $stub->getRequest());
-        $this->assertEquals($request_uri, $stub->getRequest()->getRequestUri()->getUri());
-        $this->assertEquals("POST", $stub->getRequest()->getRequestMethod());
-        $this->assertEquals($content, $stub->getRequest()->getContent());
+        
+        $request = HttpRequest::fromIncomingHttpRequest($stub);
+        $this->assertEquals($request_uri, $request->getRequestUri()->getUri());
+        $this->assertEquals("POST", $request->getRequestMethod());
+        $this->assertEquals($content, $request->getContent());
     }
 
     function postDataProvider() {

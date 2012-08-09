@@ -20,8 +20,7 @@ try {
     require_once "../lib/OAuth/$oauthStorageBackend.php";
     $storage = new $oauthStorageBackend($config);
 
-    $incomingRequest = new IncomingHttpRequest();
-    $request = $incomingRequest->getRequest();
+    $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
 
     $resourceOwner->setHint($request->getQueryParameter("user_address"));
 
