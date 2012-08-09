@@ -6,7 +6,6 @@ $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTO
 
 $storage = new PdoOAuthStorage($config);
 $storage->initDatabase();
-$storage->updateDatabase();
 
 if($argc !== 2) {
         echo "ERROR: specify manifest file or URL to parse" . PHP_EOL;
