@@ -38,10 +38,10 @@ try {
 
             // FIXME: do not check if there is no such configuration thingy, 
             // i.e. by default authorizations is allowed for everyone
-            $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
-            if(!in_array($request->getCollection(), $grantedEntitlement)) {
-                throw new ApiException("forbidden", "not entitled to use this api call");
-            }
+            //$grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
+            //if(!in_array($request->getCollection(), $grantedEntitlement)) {
+            //    throw new ApiException("forbidden", "not entitled to use this api call");
+            //}
         }
 
         if($request->matchRest("GET", "resource_owner", "id")) {
