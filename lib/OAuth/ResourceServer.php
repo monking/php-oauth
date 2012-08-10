@@ -30,6 +30,8 @@ class ResourceServer {
         if(time() > $token->issue_time + $token->expires_in) {
             throw new VerifyException("invalid_token", "the access token expired");
         }
+        $entitlement = $this->_storage->getEntitlement($token->resource_owner_id);
+        $token->resource_owner_entitlement = $entitlement->entitlement;
         return $token;
     }
 

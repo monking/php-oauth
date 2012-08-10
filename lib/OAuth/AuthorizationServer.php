@@ -65,6 +65,8 @@ class AuthorizationServer {
             }
         }
 
+        $this->_storage->updateEntitlement($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement());
+
         $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $requestedScope);
         if(FALSE === $approvedScope || FALSE === self::isSubsetScope($requestedScope, $approvedScope->scope)) {
             return array ("action" => "ask_approval", "client" => $client);
@@ -157,6 +159,7 @@ class AuthorizationServer {
                     throw new TokenException("invalid_grant", "the token was not found");
                 }
                 $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
+                $accessToken->resource_owner_entitlement = $this->_storage->getEntitlement($accessToken->resource_owner_id);
                 return $accessToken;
             
             case "authorization_code":

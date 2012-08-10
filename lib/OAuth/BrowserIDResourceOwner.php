@@ -26,14 +26,14 @@ class BrowserIDResourceOwner implements IResourceOwner {
         return $this->_verifier->authenticate($this->_resourceOwnerIdHint);
     }
 
-    public function getEntitlements() {
+    public function getEntitlement() {
         $entitlements = array();
         foreach($this->_c->getSectionValue("BrowserIDResourceOwner", "resourceOwnerEntitlement") as $k => $v) {
             if($v === $this->getResourceOwnerId()) {
                 array_push($entitlements, $k);
             }
         }
-        return $entitlements;
+        return implode(" ", $entitlements);
     }
 
 }

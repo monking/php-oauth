@@ -256,7 +256,50 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
        return 1 === $stmt->rowCount();
     }
 
+    public function updateEntitlement($resourceOwnerId, $entitlement) {
+        $result = $this->getEntitlement($resourceOwnerId);
+        if(FALSE === $result) {
+            $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, entitlement) VALUES(:resource_owner_id, :entitlement)");
+            $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
+            $stmt->bindValue(":entitlement", $entitlement, PDO::PARAM_STR);
+            if(FALSE === $stmt->execute()) {
+                throw new StorageException("unable to store entitlement");
+            }
+           return 1 === $stmt->rowCount();
+        } else {
+            if($result !== $entitlement) {
+                $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET entitlement = :entitlement WHERE id = :resource_owner_id");
+                $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
+                $stmt->bindValue(":entitlement", $entitlement, PDO::PARAM_STR);
+                if(FALSE === $stmt->execute()) {
+                    throw new StorageException("unable to update entitlement");
+                }
+                return 1 === $stmt->rowCount();
+            } else {
+                return TRUE;
+            }
+        }
+    }
+
+    public function getEntitlement($resourceOwnerId) {
+        $stmt = $this->_pdo->prepare("SELECT * FROM ResourceOwner WHERE id = :resource_owner_id");
+        $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
+        $result = $stmt->execute();
+        if (FALSE === $result) {
+            throw new StorageException("unable to get entitlement");
+        }
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+
     public function initDatabase() {
+        $this->_pdo->exec("
+            CREATE TABLE IF NOT EXISTS `ResourceOwner` (
+            `id` varchar(64) NOT NULL,
+            `entitlement` text DEFAULT NULL,
+            PRIMARY KEY (`id`))
+        ");
+
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `Client` (
             `id` varchar(64) NOT NULL,

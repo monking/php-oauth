@@ -40,10 +40,14 @@ class SspResourceOwner implements IResourceOwner {
         }
     }
 
-    public function getEntitlements() {
-        // $this->_authenticateUser();
-        // $attributes = $this->_ssp->getAttributes();
-        return array();
+    public function getEntitlement() {
+        $this->_authenticateUser();
+        $attributes = $this->_ssp->getAttributes();
+
+        if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'entitlementAttributeName'), $attributes)) {
+            throw new ResourceOwnerException("entitlementAttributeName is not available in SAML attributes");
+        }
+        return implode(" ", $attributes[$this->_c->getSectionValue('SspResourceOwner', 'entitlementAttributeName')]);
     }
 
 }

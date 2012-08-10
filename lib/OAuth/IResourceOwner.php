@@ -3,7 +3,7 @@
 interface IResourceOwner {
     public function setHint                    ($resourceOwnerIdHint = NULL);
     public function getResourceOwnerId         ();
-    public function getEntitlements            ();
+    public function getEntitlement             ();
 }
 
 ?>

@@ -57,6 +57,7 @@ browserIDPath = "/var/www/html/php-browserid"
 verifierAddress = "https://browserid.org/verify"
 
 resourceOwnerEntitlement["applications"] = "fkooman@example.org"
+;resourceOwnerEntitlement["applications"] = "john.doe@example.org"
 ;resourceOwnerEntitlement["authorizations"] = "fkooman@example.org"
 
 ; simpleSAMLphp configuration
@@ -68,13 +69,22 @@ authSource = "default-sp"
 ; assertion as the user identifier (RECOMMENDED)
 useNameID = TRUE
 
-; if you want to use an attribute for the uid set the above to FALSE and specify
-; the attribute here
+; by default we recommend to use an entitlement SAML attribute to indicate
+; who is allowed to access certain restricted API calls
+;entitlementAttributeName = "eduPersonEntitlement"
+;entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
+;entitlementFromAttributeValue["applications"] = "urn:vnd:oauth2:applications"
+;entitlementFromAttributeValue["authorizations"] = "urn:vnd:oauth2:authorizations"
+
+; you can also use an attribute to determine the UID, but this is not 
+; recommended and should only be used for testing purposes!
 ;resourceOwnerIdAttributeName = "uid"
 ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
 
-;entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
-
-entitlementFromAttributeValue["applications"] = "urn:vnd:oauth2:applications"
-;entitlementFromAttributeValue["authorizations"] = "urn:vnd:oauth2:authorizations"
-
+; but you can also "cheat" and determine entitlement based on the "uid" 
+; attribute, or any other attribute 
+;entitlementAttributeName = "uid"
+;entitlementFromAttributeValue["applications"] = "fkooman"
+;entitlementFromAttributeValue["applications"] = "john.doe"
+;entitlementFromAttributeValue["authorizations"] = "fkooman"
+;entitlementFromAttributeValue["authorizations"] = "john.doe"
