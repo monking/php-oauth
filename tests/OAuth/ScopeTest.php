@@ -39,6 +39,14 @@ class ScopeTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("delete merge read write", $s->getScope());
     }
 
+    function testClone() {
+        $s = new Scope("read write delete merge");
+        $t = new Scope("write delete");
+        $c = clone $s;
+        $c->mergeWith($t);
+        $this->assertEquals("delete merge read write", $c->getScope());
+    }
+
 }
 
 ?>
