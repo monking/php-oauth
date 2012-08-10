@@ -33,20 +33,21 @@ try {
         if(in_array($request->getCollection(), array ("applications", "authorizations"))) {
             $grantedScope = explode(" ", $token->scope);
             if(!in_array($request->getCollection(), $grantedScope)) {
-                throw new VerifyException("insufficient_scope", "no permission for this call with current scope");
+                throw new VerifyException("insufficient_scope", "no permission for this call with granted scope");
             }
+        }
 
-            $requiredEntitlements = $config->getSectionValue("Api", "apiEntitlement", FALSE);
-            if(NULL !== $requiredEntitlements) {
-                $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
-                foreach($requiredEntitlements as $k => $v) {
-                    if($request->getCollection() === $k) {
-                        // need the $v entitlement
-                        if(!in_array($v, $grantedEntitlement)) {
-                            throw new ApiException("forbidden", "not entitled to use this api call");
-                        }
-                    }
-                }
+        // verify the entitlement
+        $requireEntitlement = $config->getSectionValue("Api", "requireEntitlement");
+        if(!array_key_exists($request->getCollection(), $requireEntitlement)) {
+            // if the collection entitlement was not explicitely mentioned in the 
+            // configuration file, deny access
+            throw new ApiException("forbidden", "entitlement configuration missing for this api call");
+        }
+        if($requireEntitlement[$request->getCollection()]) {
+            $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
+            if(!in_array($request->getCollection(), $grantedEntitlement)) {
+                throw new ApiException("forbidden", "not entitled to use this api call");
             }
         }
 

@@ -23,16 +23,15 @@ accessTokenExpiry = 3600
 [Api]
 enableApi = FALSE
 
-; what "entitlement" is required to use the specific API functionality. 
-; if disabled, any authenticated resource owner is allowed to use this 
-; particular part of the API.
+; determine whether an entitlement is needed to access the various aspects of 
+; the API
 
-; entitlement for client management (add, modify, delete)
-apiEntitlement["applications"] = "applications"
-
-; entitlement for manage client authorizations; i.e. use the API to give 
-; consent to a particular client and scope
-;apiEntitlement["authorizations"] = "authorizations"
+; manage OAuth clients (global)
+requireEntitlement["applications"] = TRUE
+; manage OAuth consent/authorization/approval (per resource owner)
+requireEntitlement["authorizations"] = FALSE
+; retrieve resource owner information (per resource owner)
+requireEntitlement["resource_owner"] = FALSE
 
 [PdoOAuthStorage]
 dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite";
