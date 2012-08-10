@@ -86,10 +86,10 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
      * @expectedException ClientException
      * @expectedExceptionMessage invalid_scope
      */
-    public function testMissingScope() {
+    /*public function testMissingScope() {
         $get = array("client_id" => "testclient", "response_type" => "token");
         $this->_as->authorize($this->_ro, $get);
-    }
+    }*/
 
     /**
      * @expectedException ResourceOwnerException

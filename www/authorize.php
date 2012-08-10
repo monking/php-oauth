@@ -43,7 +43,7 @@ try {
                         'clientName' => $client->name,
                         'clientDescription' => $client->description,
                         'clientRedirectUri' => $client->redirect_uri,
-                        'scope' => AuthorizationServer::normalizeScope($request->getQueryParameter("scope"), TRUE), 
+                        'scope' => explode(" ", $request->getQueryParameter("scope")), 
                         'serviceName' => $config->getValue('serviceName'),
                         'serviceResources' => $config->getValue('serviceResources'),
                         'allowFilter' => $config->getValue('allowResourceOwnerScopeFiltering')

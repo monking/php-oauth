@@ -330,7 +330,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `refresh_token` varchar(64) NOT NULL,
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
-            `scope` text NOT NULL,
+            `scope` text DEFAULT NULL,
             PRIMARY KEY (`refresh_token`),
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
@@ -339,7 +339,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             CREATE TABLE IF NOT EXISTS `Approval` (
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
-            `scope` text NOT NULL,
+            `scope` text DEFAULT NULL,
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
             UNIQUE(`client_id`, `resource_owner_id`))
         ");
@@ -351,7 +351,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `resource_owner_id` varchar(64) NOT NULL,
             `redirect_uri` text DEFAULT NULL,
             `issue_time` int(11) NOT NULL,
-            `scope` text NOT NULL,
+            `scope` text DEFAULT NULL,
             PRIMARY KEY (`authorization_code`),
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");

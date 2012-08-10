@@ -3,6 +3,7 @@
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "IResourceOwner.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "Scope.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "TokenException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "ClientException.php";
 require_once __DIR__ . DIRECTORY_SEPARATOR . "ResourceOwnerException.php";
@@ -18,122 +19,122 @@ class AuthorizationServer {
     }
  
     public function authorize(IResourceOwner $resourceOwner, array $get) {
-        $clientId     = self::getParameter($get, 'client_id');
-        $responseType = self::getParameter($get, 'response_type');
-        $redirectUri  = self::getParameter($get, 'redirect_uri');
-        $scope        = self::normalizeScope(self::getParameter($get, 'scope'));
-        $state        = self::getParameter($get, 'state');
+        try { 
+            $clientId     = self::getParameter($get, 'client_id');
+            $responseType = self::getParameter($get, 'response_type');
+            $redirectUri  = self::getParameter($get, 'redirect_uri');
+            $scope        = new Scope(self::getParameter($get, 'scope'));
+            $state        = self::getParameter($get, 'state');
 
-        if(NULL === $clientId) {
-            throw new ResourceOwnerException('client_id missing');
-        }
-
-        if(NULL === $responseType) {
-            throw new ResourceOwnerException('response_type missing');
-        }
-
-        $client = $this->_storage->getClient($clientId);
-        if(FALSE === $client) {
-            throw new ResourceOwnerException('client not registered');
-        }
-
-        if(NULL !== $redirectUri) {
-            if($client->redirect_uri !== $redirectUri) {
-                throw new ResourceOwnerException('specified redirect_uri not the same as registered redirect_uri');
+            if(NULL === $clientId) {
+                throw new ResourceOwnerException('client_id missing');
             }
-        }
 
-        // we need to make sure the client can only request the grant types belonging to its profile
-        $allowedClientProfiles = array ( "web_application" => array ("code"),
-                                         "native_application" => array ("token", "code"),
-                                         "user_agent_based_application" => array ("token"));
+            if(NULL === $responseType) {
+                throw new ResourceOwnerException('response_type missing');
+            }
 
-        if(!in_array($responseType, $allowedClientProfiles[$client->type])) {
-            throw new ClientException("unsupported_response_type", "response_type not supported by client profile", $client, $state);
-        }
+            $client = $this->_storage->getClient($clientId);
+            if(FALSE === $client) {
+                throw new ResourceOwnerException('client not registered');
+            }
 
-        $requestedScope = self::normalizeScope($scope);
-        if(FALSE === $requestedScope) {
-            throw new ClientException("invalid_scope", "malformed scope", $client, $state);
-        }
-        
-        // check that requested scope by client is actually allowed, if no allowed
-        // scope is specified all scopes are allowed
-        if(NULL !== $client->allowed_scope && !empty($client->allowed_scope)) {
-            if(!$this->isSubsetScope($requestedScope, $client->allowed_scope)) {
+            if(NULL !== $redirectUri) {
+                if($client->redirect_uri !== $redirectUri) {
+                    throw new ResourceOwnerException('specified redirect_uri not the same as registered redirect_uri');
+                }
+            }
+
+            // we need to make sure the client can only request the grant types belonging to its profile
+            $allowedClientProfiles = array ( "web_application" => array ("code"),
+                                             "native_application" => array ("token", "code"),
+                                             "user_agent_based_application" => array ("token"));
+
+            if(!in_array($responseType, $allowedClientProfiles[$client->type])) {
+                throw new ClientException("unsupported_response_type", "response_type not supported by client profile", $client, $state);
+            }
+
+            if(!$scope->isSubsetOf(new Scope($client->allowed_scope))) {
                 throw new ClientException("invalid_scope", "not authorized to request this scope", $client, $state);
             }
-        }
 
-        $this->_storage->updateEntitlement($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement());
+            $this->_storage->updateEntitlement($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement());
 
-        $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $requestedScope);
-        if(FALSE === $approvedScope || FALSE === self::isSubsetScope($requestedScope, $approvedScope->scope)) {
-            return array ("action" => "ask_approval", "client" => $client);
-        } else {
-            if("token" === $responseType) {
-                // implicit grant
-                $accessToken = self::randomHex(16);
-                $this->_storage->storeAccessToken($accessToken, time(), $clientId, $resourceOwner->getResourceOwnerId(), $requestedScope, $this->_c->getValue('accessTokenExpiry'));
-                $token = array("access_token" => $accessToken, 
-                               "expires_in" => $this->_c->getValue('accessTokenExpiry'), 
-                               "token_type" => "bearer", 
-                               "scope" => $requestedScope);
-                if(NULL !== $state) {
-                    $token += array ("state" => $state);
-                }
-                return array("action" => "redirect", "url" => $client->redirect_uri . "#" . http_build_query($token));
+            $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
+            if(FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
+                return array ("action" => "ask_approval", "client" => $client);
             } else {
-                // authorization code grant
-                $authorizationCode = self::randomHex(16);
-                $this->_storage->storeAuthorizationCode($authorizationCode, $resourceOwner->getResourceOwnerId(), time(), $clientId, $redirectUri, $requestedScope);
-                $token = array("code" => $authorizationCode);
-                if(NULL !== $state) {
-                    $token += array ("state" => $state);
+                if("token" === $responseType) {
+                    // implicit grant
+                    $accessToken = self::randomHex(16);
+                    $this->_storage->storeAccessToken($accessToken, time(), $clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope(), $this->_c->getValue('accessTokenExpiry'));
+                    $token = array("access_token" => $accessToken, 
+                                   "expires_in" => $this->_c->getValue('accessTokenExpiry'), 
+                                   "token_type" => "bearer", 
+                                   "scope" => $scope->getScope());
+                    if(NULL !== $state) {
+                        $token += array ("state" => $state);
+                    }
+                    return array("action" => "redirect", "url" => $client->redirect_uri . "#" . http_build_query($token));
+                } else {
+                    // authorization code grant
+                    $authorizationCode = self::randomHex(16);
+                    $this->_storage->storeAuthorizationCode($authorizationCode, $resourceOwner->getResourceOwnerId(), time(), $clientId, $redirectUri, $scope->getScope());
+                    $token = array("code" => $authorizationCode);
+                    if(NULL !== $state) {
+                        $token += array ("state" => $state);
+                    }
+                    return array("action" => "redirect", "url" => $client->redirect_uri . "?" . http_build_query($token));
                 }
-                return array("action" => "redirect", "url" => $client->redirect_uri . "?" . http_build_query($token));
             }
+        } catch (ScopeException $e) {
+            throw new ClientException("invalid_scope", "malformed scope", $client, $state);
         }
     }
 
     public function approve(IResourceOwner $resourceOwner, array $get, array $post) {
-        $clientId     = self::getParameter($get, 'client_id');
-        $responseType = self::getParameter($get, 'response_type');
-        $redirectUri  = self::getParameter($get, 'redirect_uri');
-        $scope        = self::normalizeScope(self::getParameter($get, 'scope'));
-        $state        = self::getParameter($get, 'state');
+        try { 
+            $clientId     = self::getParameter($get, 'client_id');
+            $responseType = self::getParameter($get, 'response_type');
+            $redirectUri  = self::getParameter($get, 'redirect_uri');
+            $scope        = new Scope(self::getParameter($get, 'scope'));
+            $state        = self::getParameter($get, 'state');
 
-        $result = $this->authorize($resourceOwner, $get);
-        $postScope = self::normalizeScope(self::getParameter($post, 'scope'));
-        $approval = self::getParameter($post, 'approval');
+            $result = $this->authorize($resourceOwner, $get);
+            $postScope = new Scope(implode(" ", self::getParameter($post, 'scope')));
+            $approval = self::getParameter($post, 'approval');
 
-        if($result['action'] !== "ask_approval") {
-            return $result;
-        }
-
-        if("Approve" === $approval) {
-            if(FALSE === self::isSubsetScope($postScope, $scope)) {
-                // FIXME: should this actually be an authorize exception? this is a user error!
-                throw new ClientException("invalid_scope", "approved scope is not a subset of requested scope", $client, $state);
+            if($result['action'] !== "ask_approval") {
+                return $result;
             }
 
-            $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId());
-            if(FALSE === $approvedScope) {
-                // no approved scope stored yet, new entry
-                $this->_storage->addApproval($clientId, $resourceOwner->getResourceOwnerId(), $postScope);
-            } else if(!self::isSubsetScope($postScope, $approvedScope->scope)) {
-                // not a subset, merge and store the new one
-                $mergedScopes = self::mergeScopes($postScope, $approvedScope->scope);
-                $this->_storage->updateApproval($clientId, $resourceOwner->getResourceOwnerId(), $mergedScopes);
+            if("Approve" === $approval) {
+                if(!$postScope->isSubsetOf($scope)) {
+                    // FIXME: should this actually be an authorize exception? this is a user error!
+                    throw new ClientException("invalid_scope", "approved scope is not a subset of requested scope", $client, $state);
+                }
+
+                $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId());
+                if(FALSE === $approvedScope) {
+                    // no approved scope stored yet, new entry
+                    $this->_storage->addApproval($clientId, $resourceOwner->getResourceOwnerId(), $postScope->getScope());
+                } else if(!$postScope->isSubsetOf(new Scope($approvedScope->scope))) {
+                    // not a subset, merge and store the new one
+                    $mergedScopes = clone $postScope;
+                    $mergedScopes->mergeWith(new Scope($approvedScope->scope));
+                    $this->_storage->updateApproval($clientId, $resourceOwner->getResourceOwnerId(), $mergedScopes->getScope());
+                } else {
+                    // subset, approval for superset of scope already exists, do nothing
+                }
+                $get['scope'] = $postScope->getScope();
+                return $this->authorize($resourceOwner, $get);
+
             } else {
-                // subset, approval for superset of scope already exists, do nothing
+                $client = $this->_storage->getClient($clientId);
+                throw new ClientException("access_denied", "not authorized by resource owner", $client, $state);
             }
-            $get['scope'] = $postScope;
-            return $this->authorize($resourceOwner, $get);
-
-        } else {
-            $client = $this->_storage->getClient($clientId);
-            throw new ClientException("access_denied", "not authorized by resource owner", $client, $state);
+        } catch (ScopeException $e) {
+            throw new ClientException("invalid_scope", "malformed scope", $client, $state);
         }
     }
 
@@ -250,55 +251,7 @@ class AuthorizationServer {
         return (array_key_exists($key, $parameters) && !empty($parameters[$key])) ? $parameters[$key] : NULL;
     }
 
-    private static function _isValidScopeToken($scopeToTest) {
-        // scope       = scope-token *( SP scope-token )
-        // scope-token = 1*( %x21 / %x23-5B / %x5D-7E )
-        $scopeToken = '(?:\x21|[\x23-\x5B]|[\x5D-\x7E])+';
-        $scope = '/^' . $scopeToken . '(?:\x20' . $scopeToken . ')*$/';
-        $result = preg_match($scope, $scopeToTest);
-		return $result === 1;
-    }
-
-    public static function getScopeArray($scopeToConvert) {
-        return is_array($scopeToConvert) ? $scopeToConvert : explode(" ", $scopeToConvert);
-    }
-
-    public static function getScopeString($scopeToConvert) {
-        return is_array($scopeToConvert) ? implode(" ", $scopeToConvert) : $scopeToConvert;
-    }
-
-    public static function normalizeScope($scopeToNormalize, $toArray = FALSE) {
-        $scopeToNormalize = self::getScopeString($scopeToNormalize);
-        if(self::_isValidScopeToken($scopeToNormalize)) {
-            $a = self::getScopeArray($scopeToNormalize);
-            sort($a, SORT_STRING);
-            $a = array_unique($a, SORT_STRING);
-            return $toArray ? $a : self::getScopeString($a);
-        }
-        return FALSE;
-    }
-
-    /**
-     * Compares two scopes and returns true if $s is a subset of $t
-     */
-    public static function isSubsetScope($s, $t) {
-        $u = self::normalizeScope($s, TRUE);
-        $v = self::normalizeScope($t, TRUE);
-        foreach($u as $i) {
-            if(!in_array($i, $v)) {
-                return FALSE;
-            }
-        }
-        return TRUE;
-    }
-
-    public static function mergeScopes($s, $t) {
-        $u = self::normalizeScope($s, TRUE);
-        $v = self::normalizeScope($t, TRUE);
-        return self::normalizeScope(array_merge($u, $v));
-    }
-
-   public static function randomHex($len = 16) {
+    public static function randomHex($len = 16) {
         $randomString = bin2hex(openssl_random_pseudo_bytes($len, $strong));
         // @codeCoverageIgnoreStart
         if (FALSE === $strong) {
