@@ -95,23 +95,20 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $h = new HttpRequest("http://www.example.com/request", "FOO");
     }
 
-    /**
-     * @expectedException HttpRequestException
-     */
     function testNonExistingHeader() {
         $h = new HttpRequest("http://www.example.com/request");
-        $h->getHeader("Authorization");
+        $this->assertNull($h->getHeader("Authorization"));
     }
 
     function testForHeaderDoesNotExist() {
         $h = new HttpRequest("http://www.example.com/request");
-        $this->assertFalse($h->headerExists("Authorization"));
+        $this->assertNull($h->getHeader("Authorization"));
     }
 
     function testForHeaderDoesExist() {
         $h = new HttpRequest("http://www.example.com/request");
         $h->setHeader("Authorization", "Bla");
-        $this->assertTrue($h->headerExists("Authorization"));
+        $this->assertNotNull($h->getHeader("Authorization"));
     }
 
 }

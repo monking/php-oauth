@@ -95,10 +95,7 @@ class HttpRequest {
 
     public function getHeader($headerKey) {
         $headerKey = $this->_getHeaderKey($headerKey);
-        if ($headerKey === NULL) {
-            throw new HttpRequestException("no such header");
-        }
-        return $this->_headers[$headerKey];
+        return $headerKey !== NULL ? $this->_headers[$headerKey] : NULL;
     }
 
     /**
@@ -114,10 +111,6 @@ class HttpRequest {
         $headerKeys = array_keys($this->_headers);
         $keyPositionInArray = array_search(strtolower($headerKey), array_map('strtolower', $headerKeys));
         return ($keyPositionInArray === FALSE) ? NULL : $headerKeys[$keyPositionInArray];
-    }
-
-    public function headerExists($headerKey) {
-        return $this->_getHeaderKey($headerKey) !== NULL;
     }
 
     public function getHeaders($formatted = FALSE) {
@@ -148,11 +141,11 @@ class HttpRequest {
     }
 
     public function getBasicAuthUser() {
-        return $this->headerExists("PHP_AUTH_USER") ? $this->getHeader("PHP_AUTH_USER") : NULL;
+        return $this->getHeader("PHP_AUTH_USER");
     }
 
     public function getBasicAuthPass() {
-        return $this->headerExists("PHP_AUTH_PW") ? $this->getHeader("PHP_AUTH_PW") : NULL;
+        return $this->getHeader("PHP_AUTH_PW");
     }
 
     public function getCollection($asArray = FALSE) {
