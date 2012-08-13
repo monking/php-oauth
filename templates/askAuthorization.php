@@ -33,6 +33,9 @@
         <tr>
           <th>Requested Permission(s)</th>
 
+          <?php if(empty($scope)) { ?>
+          <td><em>None</em></td>
+          <?php } else { ?>
           <td>
             <?php if($allowFilter) { ?><?php foreach($scope as $s) { ?><label><input type="checkbox"
             checked="checked" name="scope[]" value=
@@ -54,6 +57,8 @@
               <?php } ?></li>
             </ul><?php } ?>
           </td>
+          <?php } ?>
+
         </tr>
 
         <tr>

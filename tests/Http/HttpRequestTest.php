@@ -111,6 +111,14 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($h->getHeader("Authorization"));
     }
 
+    function testForNoQueryValue() {
+        $h = new HttpRequest("http://www.example.com/request?foo=&bar=&foobar=xyz");
+        $this->assertNull($h->getQueryParameter("foo"));
+        $this->assertNull($h->getQueryParameter("bar"));
+        $this->assertEquals("xyz", $h->getQueryParameter("foobar"));
+    }
+
+
 }
 
 ?>

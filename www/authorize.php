@@ -43,7 +43,7 @@ try {
                         'clientName' => $client->name,
                         'clientDescription' => $client->description,
                         'clientRedirectUri' => $client->redirect_uri,
-                        'scope' => explode(" ", $request->getQueryParameter("scope")), 
+                        'scope' => (NULL !== $request->getQueryParameter("scope")) ? explode(" ", $request->getQueryParameter("scope")) : NULL, 
                         'serviceName' => $config->getValue('serviceName'),
                         'serviceResources' => $config->getValue('serviceResources'),
                         'allowFilter' => $config->getValue('allowResourceOwnerScopeFiltering')

@@ -50,7 +50,7 @@ if(FALSE === $storage->getClient("democlient")) {
                   "secret" => 's3cr3t',
                   "redirect_uri" => "http://localhost/php-oauth-demo-client/index.php",
                   "icon" => NULL,
-                  "allowed_scope" => "read",
+                  "allowed_scope" => "read write",
                   "type" => "web_application");
     $storage->addClient($data);
 }
