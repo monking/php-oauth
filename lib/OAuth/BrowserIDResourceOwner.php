@@ -27,8 +27,13 @@ class BrowserIDResourceOwner implements IResourceOwner {
     }
 
     public function getEntitlement() {
+        $resourceOwnerEntitlement = $this->_c->getSectionValue("BrowserIDResourceOwner", "resourceOwnerEntitlement", FALSE);
+        if(!is_array($resourceOwnerEntitlement)) {
+            return NULL;
+        }
+
         $entitlements = array();
-        foreach($this->_c->getSectionValue("BrowserIDResourceOwner", "resourceOwnerEntitlement") as $k => $v) {
+        foreach($resourceOwnerEntitlement as $k => $v) {
             if($v === $this->getResourceOwnerId()) {
                 array_push($entitlements, $k);
             }

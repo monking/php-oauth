@@ -40,14 +40,9 @@ try {
         }
     }
 
-    // verify the entitlement
-    $requireEntitlement = $config->getSectionValue("Api", "requireEntitlement");
-    if(!array_key_exists($request->getCollection(), $requireEntitlement)) {
-        // if the collection entitlement was not explicitely mentioned in the 
-        // configuration file, deny access
-        throw new ApiException("forbidden", "entitlement configuration missing for this api call");
-    }
-    if($requireEntitlement[$request->getCollection()]) {
+    // verify the entitlement, to manage clients one needs to have the 
+    // "applications" entitlement
+    if(in_array($request->getCollection(), array ("applications"))) {
         $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
         if(!in_array($request->getCollection(), $grantedEntitlement)) {
             throw new ApiException("forbidden", "not entitled to use this api call");

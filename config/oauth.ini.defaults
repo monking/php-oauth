@@ -23,16 +23,6 @@ accessTokenExpiry = 3600
 [Api]
 enableApi = FALSE
 
-; determine whether an entitlement is needed to access the various aspects of 
-; the API
-
-; manage OAuth clients (global)
-requireEntitlement["applications"] = TRUE
-; manage OAuth consent/authorization/approval (per resource owner)
-requireEntitlement["authorizations"] = FALSE
-; retrieve resource owner information (per resource owner)
-requireEntitlement["resource_owner"] = FALSE
-
 [PdoOAuthStorage]
 dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite";
 ;dsn = "mysql:host=localhost;dbname=oauth"
@@ -46,9 +36,7 @@ persistentConnection = FALSE
 ; Dummy Configuration
 [DummyResourceOwner]
 resourceOwnerId = "fkooman"
-
 resourceOwnerEntitlement["applications"] = "fkooman"
-;resourceOwnerEntitlement["authorizations"] = "fkooman"
 
 ; BrowserID configuration
 [BrowserIDResourceOwner]
@@ -57,7 +45,6 @@ verifierAddress = "https://browserid.org/verify"
 
 resourceOwnerEntitlement["applications"] = "fkooman@example.org"
 ;resourceOwnerEntitlement["applications"] = "john.doe@example.org"
-;resourceOwnerEntitlement["authorizations"] = "fkooman@example.org"
 
 ; simpleSAMLphp configuration
 [SspResourceOwner]
@@ -69,26 +56,19 @@ authSource = "default-sp"
 useNameID = TRUE
 
 ; you can also use an attribute as a unique identifier for a user instead 
-; of the NameID, but first set 'useNameID' to FALSE then!
+; of the NameID, but set 'useNameID' to FALSE then!
 ;resourceOwnerIdAttributeName = "uid"
 ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
-
-; whether or not to use entitlements. If you want to manage applications using 
-; the php-oauth API you need to enable this!
-useEntitlement = FALSE
 
 ; by default we recommend to use an entitlement SAML attribute to indicate
 ; who is allowed to access certain restricted API calls
 ;entitlementAttributeName = "eduPersonEntitlement"
 ;entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
-;entitlementFromAttributeValue["applications"] = "urn:vnd:oauth2:applications"
-;entitlementFromAttributeValue["authorizations"] = "urn:vnd:oauth2:authorizations"
+;entitlementValueMapping["applications"] = "urn:vnd:oauth2:applications"
 
 ; but you can also "cheat" and determine entitlement based on the "uid" 
-; attribute, or any other attribute 
+; attribute, or any other attribute that matches a certain value...
 ;entitlementAttributeName = "uid"
 ;entitlementAttributeName = "urn:mace:dir:attribute-def:uid"
-;entitlementFromAttributeValue["applications"] = "fkooman"
-;entitlementFromAttributeValue["applications"] = "john.doe"
-;entitlementFromAttributeValue["authorizations"] = "fkooman"
-;entitlementFromAttributeValue["authorizations"] = "john.doe"
+;entitlementValueMapping["applications"] = "fkooman"
+;entitlementValueMapping["applications"] = "john.doe"

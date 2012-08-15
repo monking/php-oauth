@@ -44,20 +44,18 @@ class SspResourceOwner implements IResourceOwner {
         $this->_authenticateUser();
         $attributes = $this->_ssp->getAttributes();
 
-        $useEntitlement = $this->_c->getSectionValue('SspResourceOwner', 'useEntitlement');
-        if(!$useEntitlement) {
+        $entitlementAttributeName = $this->_c->getSectionValue('SspResourceOwner', 'entitlementAttributeName', FALSE);
+        $entitlementValueMapping = $this->_c->getSectionValue("SspResourceOwner", "entitlementValueMapping", FALSE);
+        if(NULL === $entitlementAttributeName || !is_array($entitlementValueMapping)) {
             return NULL;
         }
-
-        $entitlementAttributeName = $this->_c->getSectionValue('SspResourceOwner', 'entitlementAttributeName');
-        $entitlementFromAttributeValue = $this->_c->getSectionValue("SspResourceOwner", "entitlementFromAttributeValue");
 
         if(!array_key_exists($entitlementAttributeName, $attributes)) {
             throw new ResourceOwnerException("entitlementAttributeName is not available in SAML attributes");
         }
 
         $entitlements = array();
-        foreach($entitlementFromAttributeValue as $k => $v) {
+        foreach($entitlementValueMapping as $k => $v) {
             if(in_array($v, $attributes[$entitlementAttributeName])) {
                 array_push($entitlements, $k);
             }
