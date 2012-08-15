@@ -42,10 +42,12 @@ try {
 
     // verify the entitlement, to manage clients one needs to have the 
     // "applications" entitlement
-    if(in_array($request->getCollection(), array ("applications"))) {
-        $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
-        if(!in_array($request->getCollection(), $grantedEntitlement)) {
-            throw new ApiException("forbidden", "not entitled to use this api call");
+    if(!$config->getSectionValue("Api", "disableEntitlementEnforcement")) {
+        if(in_array($request->getCollection(), array ("applications"))) {
+            $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
+            if(!in_array($request->getCollection(), $grantedEntitlement)) {
+                throw new ApiException("forbidden", "not entitled to use this api call");
+            }
         }
     }
 

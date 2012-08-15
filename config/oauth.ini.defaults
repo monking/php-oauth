@@ -23,6 +23,12 @@ accessTokenExpiry = 3600
 [Api]
 enableApi = FALSE
 
+; make it possible to disable API entitlement enforcement, allowing any 
+; authenticated user to manage OAuth client registrations
+; NOT RECOMMENDED, ONLY FOR TESTING PURPOSES, THIS CONFIGURATION OPTION WILL BE 
+; REMOVED IN THE FUTURE! THIS IS INSECURE! YOU HAVE BEEN WARNED.
+disableEntitlementEnforcement = FALSE
+
 [PdoOAuthStorage]
 dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite";
 ;dsn = "mysql:host=localhost;dbname=oauth"
