@@ -68,6 +68,15 @@ authSource = "default-sp"
 ; assertion as the user identifier (RECOMMENDED)
 useNameID = TRUE
 
+; you can also use an attribute as a unique identifier for a user instead 
+; of the NameID, but first set 'useNameID' to FALSE then!
+;resourceOwnerIdAttributeName = "uid"
+;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
+
+; whether or not to use entitlements. If you want to manage applications using 
+; the php-oauth API you need to enable this!
+useEntitlement = FALSE
+
 ; by default we recommend to use an entitlement SAML attribute to indicate
 ; who is allowed to access certain restricted API calls
 ;entitlementAttributeName = "eduPersonEntitlement"
@@ -75,14 +84,10 @@ useNameID = TRUE
 ;entitlementFromAttributeValue["applications"] = "urn:vnd:oauth2:applications"
 ;entitlementFromAttributeValue["authorizations"] = "urn:vnd:oauth2:authorizations"
 
-; you can also use an attribute to determine the UID, but this is not 
-; recommended and should only be used for testing purposes!
-;resourceOwnerIdAttributeName = "uid"
-;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
-
 ; but you can also "cheat" and determine entitlement based on the "uid" 
 ; attribute, or any other attribute 
 ;entitlementAttributeName = "uid"
+;entitlementAttributeName = "urn:mace:dir:attribute-def:uid"
 ;entitlementFromAttributeValue["applications"] = "fkooman"
 ;entitlementFromAttributeValue["applications"] = "john.doe"
 ;entitlementFromAttributeValue["authorizations"] = "fkooman"

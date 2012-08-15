@@ -33,7 +33,7 @@ class BrowserIDResourceOwner implements IResourceOwner {
                 array_push($entitlements, $k);
             }
         }
-        return implode(" ", $entitlements);
+        	return empty($entitlements) ? NULL : implode(" ", $entitlements);
     }
 
 }
