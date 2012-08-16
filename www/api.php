@@ -106,6 +106,9 @@ try {
                 !array_key_exists("redirect_uri", $data)) {
             throw new ApiException("invalid_request", "missing required parameters");
         }
+	if(!in_array($data['type'], array ("user_agent_based_application", "web_application", "native_application"))) {
+		throw new ApiException("invalid_request", "unsupported client type");
+	}
         // check to see if an application with this id already exists
         if(FALSE === $storage->getClient($data['id'])) {
             if(FALSE === $storage->addClient($data)) {
@@ -126,6 +129,9 @@ try {
                 !array_key_exists("allowed_scope", $data) ||
                 !array_key_exists("redirect_uri", $data)) {
             throw new ApiException("invalid_request", "missing required parameters");
+        }
+        if(!in_array($data['type'], array ("user_agent_based_application", "web_application", "native_application"))) {
+                throw new ApiException("invalid_request", "unsupported client type");
         }
         if(FALSE === $storage->updateClient($request->getResource(), $data)) {
             throw new ApiException("invalid_request", "unable to update application");
