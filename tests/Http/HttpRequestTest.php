@@ -48,6 +48,100 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("text/html", $h->getHeader("CONTENT-TYPE"));
     }
 
+    function testCollection() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar");
+        $this->assertEquals("foo", $h->getCollection());
+    }
+
+    function testOtherCollection() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar/foobar");
+        $this->assertEquals("foo/bar", $h->getCollection());
+    }
+
+    function testResource() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar");
+        $this->assertEquals("bar", $h->getResource());
+    }
+    
+    function testMissingResource() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/");
+        $this->assertFalse($h->getResource());
+    }
+
+    function testMissingCollection() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/");
+        $this->assertFalse($h->getCollection());
+    }
+
+    function testMissingResourceRoot() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/");
+        $this->assertFalse($h->getResource());
+    }
+
+    function testMissingCollectionPathInfo() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $this->assertFalse($h->getCollection());
+    }
+
+    function testMissingResourcePathInfo() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $this->assertFalse($h->getResource());
+    }
+
+    function testWeirdPathInfoCollection() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("foo");
+        $this->assertFalse($h->getCollection());
+    }
+
+    function testWeirdPathInfoResource() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("foo");
+        $this->assertFalse($h->getResource());
+    }
+
+    function testMatchRest() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar");
+        $this->assertTrue($h->matchRest("POST", "foo", TRUE));
+    }
+
+    function testMatchRestSpecificResource() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar");
+        $this->assertTrue($h->matchRest("POST", "foo", "bar"));
+    }
+
+    function testMatchRestNoResource() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/");
+        $this->assertTrue($h->matchRest("POST", "foo", FALSE));
+    }
+
+    function testMatchRestNonMatchingCollection() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar");
+        $this->assertFalse($h->matchRest("POST", "bar", TRUE));
+    }
+
+    function testNonMatchingResource() {
+        $h = new HttpRequest("http://www.example.com/request", "POST");
+        $h->setPathInfo("/foo/bar");
+        $this->assertFalse($h->matchRest("POST", "foo", "foo"));
+    }
+
+    function testMatchRestNonMatchingRequestMethod() {
+        $h = new HttpRequest("http://www.example.com/request", "GET");
+        $h->setPathInfo("/foo/bar");
+        $this->assertFalse($h->matchRest("POST", "foo", TRUE));
+    }
+
     /**
      * @expectedException HttpRequestException
      */
@@ -117,7 +211,6 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertNull($h->getQueryParameter("bar"));
         $this->assertEquals("xyz", $h->getQueryParameter("foobar"));
     }
-
 
 }
 

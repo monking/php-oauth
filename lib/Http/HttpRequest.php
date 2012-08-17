@@ -162,7 +162,7 @@ class HttpRequest {
         unset($e[sizeof($e)-1]);
         unset($e[0]);
         if(empty($e)) {
-            return FALSE;
+            return FALSE;   // <-- FIXME: this can never be reached?
         }
         return $asArray ? array_values($e) : implode("/", $e);
     }

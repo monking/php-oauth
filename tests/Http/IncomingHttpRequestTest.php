@@ -13,7 +13,10 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
         $_SERVER['SERVER_NAME'] = $name;
         $_SERVER['REQUEST_URI'] = $request;
         $_SERVER['REQUEST_METHOD'] = "GET";
+        $_SERVER['PATH_INFO'] = "/foo/bar";
         $_SERVER['HTTPS'] = $https;
+        $_SERVER['PHP_AUTH_USER'] = "user";
+        $_SERVER['PHP_AUTH_PW'] = "pass";
 
         $stub = $this->getMock('IncomingHttpRequest', array('getRequestHeaders'));
         $stub->expects($this->any())
@@ -23,6 +26,9 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
         $request = HttpRequest::fromIncomingHttpRequest($stub);
         $this->assertEquals($request_uri, $request->getRequestUri()->getUri());
         $this->assertEquals("GET", $request->getRequestMethod());
+        $this->assertEquals("/foo/bar", $request->getPathInfo());
+        //$this->assertEquals("user", $request->getBasicAuthUser());
+        //$this->assertEquals("pass", $request->getBasicAuthPass());
     }
 
     function getDataProvider() {
