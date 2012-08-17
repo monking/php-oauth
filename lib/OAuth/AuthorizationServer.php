@@ -66,6 +66,7 @@ class AuthorizationServer {
             } else {
                 if("token" === $responseType) {
                     // implicit grant
+                    // FIXME: return existing access token if it exists for this exact client, resource owner and scope?
                     $accessToken = self::randomHex(16);
                     $this->_storage->storeAccessToken($accessToken, time(), $clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope(), $this->_c->getValue('accessTokenExpiry'));
                     $token = array("access_token" => $accessToken, 
@@ -218,6 +219,7 @@ class AuthorizationServer {
         }
 
         // create a new access token
+        // FIXME: return existing access token if it exists for this exact client, resource owner and scope?
         $accessToken = self::randomHex(16);
         $this->_storage->storeAccessToken($accessToken, time(), $result->client_id, $result->resource_owner_id, $result->scope, $this->_c->getValue('accessTokenExpiry'));
         $token = $this->_storage->getAccessToken($accessToken);
@@ -228,6 +230,7 @@ class AuthorizationServer {
                 throw new TokenException("invalid_grant", "this grant was already used");
             }
             // create a refresh token as well
+            // FIXME: return existing refresh token if it exists for this exact client, resource owner and scope!
             $token->refresh_token = self::randomHex(16);
             $this->_storage->storeRefreshToken($token->refresh_token, $token->client_id, $token->resource_owner_id, $token->scope);
         } else {
