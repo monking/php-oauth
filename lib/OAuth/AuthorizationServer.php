@@ -160,6 +160,12 @@ class AuthorizationServer {
                 if(FALSE === $accessToken) {
                     throw new TokenException("invalid_grant", "the token was not found");
                 }
+
+                // FIXME: should this be handled here?
+                if(time() > $acessToken->issue_time + $accessToken->expires_in) {
+                    throw new VerifyException("invalid_grant", "the access token expired");
+                }
+
                 $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
                 // FIXME: update the expires_in field to show the actual amount of seconds it is still valid?
                 $accessToken->resource_owner_entitlement = $this->_storage->getEntitlement($accessToken->resource_owner_id);
