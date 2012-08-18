@@ -24,6 +24,8 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         // load default config
         $c = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
 
+        $c->setValue("accessTokenExpiry", 5);
+
         // override DB config in memory only
         $c->setValue("storageBackend", "PdoOAuthStorage");
         $c->setSectionValue("PdoOAuthStorage", "dsn", $dsn);
@@ -85,7 +87,7 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals("redirect", $action);
         // regexp match to deal with random access token
-        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=3600&token_type=bearer&scope=read$|', $url);
+        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read$|', $url);
     }
 
     public function testAuthorizationCode() {
@@ -113,28 +115,38 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         preg_match('|^http://localhost/php-oauth/unit/test.html\?code=([a-zA-Z0-9]+)$|', $url, $matches);
         
         // exchange code for token
-        
         $post = array ("grant_type" => "authorization_code",
                        "code" => $matches[1]);
         $response = $this->_as->token($post, "testcodeclient", "abcdef");
 
         $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->access_token);
-        $this->assertEquals(3600, $response->expires_in);
+        $this->assertEquals(5, $response->expires_in);
         $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->refresh_token);
         $this->assertEquals("read", $response->scope);
         // .. redirect_uri
+
+        // verify token
+        $t = $this->_rs->verify("Bearer " . $response->access_token);
+        $this->assertEquals("fkooman", $t->resource_owner_id);
+
+        sleep(6);
+        try { 
+            $t = $this->_rs->verify("Bearer " . $response->access_token);
+            $this->assertEquals("fkooman", $t->resource_owner_id);
+        } catch(VerifyException $e) {
+            $this->assertEquals("invalid_token", $e->getMessage());
+            $this->assertEquals("the access token expired", $e->getDescription());
+        }
 
         // validate access_token at token endpoint
         $post = array ("grant_type" => "urn:pingidentity.com:oauth2:grant_type:validate_bearer", "token" => $response->access_token);
         $response = $this->_as->token($post, NULL);
 
         $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->access_token);
-        $this->assertEquals(3600, $response->expires_in);
+        $this->assertEquals(5, $response->expires_in);
         $this->assertEquals("read", $response->scope);
         $this->assertEquals("urn:pingidentity.com:oauth2:validated_token", $response->token_type);
-
-        // validate both the old and new access token
-
+        
     }
 
 }
