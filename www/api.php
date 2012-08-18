@@ -6,6 +6,7 @@ require_once "../lib/Http/Uri.php";
 require_once "../lib/Http/HttpRequest.php";
 require_once "../lib/Http/HttpResponse.php";
 require_once "../lib/Http/IncomingHttpRequest.php";
+require_once "../lib/OAuth/Scope.php";
 require_once "../lib/OAuth/ResourceServer.php";
 
 $response = new HttpResponse();
@@ -94,21 +95,7 @@ try {
         }
         $response->setContent(json_encode($data));
     } else if($request->matchRest("POST", "applications", FALSE)) {
-        $data = json_decode($request->getContent(), TRUE);
-        if(NULL === $data || !is_array($data) || 
-                !array_key_exists("id", $data) || 
-                !array_key_exists("name", $data) ||
-                !array_key_exists("description", $data) ||
-                !array_key_exists("secret", $data) ||
-                !array_key_exists("type", $data) ||
-                !array_key_exists("icon", $data) ||
-                !array_key_exists("allowed_scope", $data) ||
-                !array_key_exists("redirect_uri", $data)) {
-            throw new ApiException("invalid_request", "missing required parameters");
-        }
-	if(!in_array($data['type'], array ("user_agent_based_application", "web_application", "native_application"))) {
-		throw new ApiException("invalid_request", "unsupported client type");
-	}
+        $data = validateClientData($request->getContent());
         // check to see if an application with this id already exists
         if(FALSE === $storage->getClient($data['id'])) {
             if(FALSE === $storage->addClient($data)) {
@@ -119,19 +106,9 @@ try {
         }
         $response->setStatusCode(201);
     } else if($request->matchRest("PUT", "applications", TRUE)) {
-        $data = json_decode($request->getContent(), TRUE);
-        if(NULL === $data || !is_array($data) || 
-                !array_key_exists("name", $data) ||
-                !array_key_exists("description", $data) ||
-                !array_key_exists("secret", $data) ||
-                !array_key_exists("type", $data) ||
-                !array_key_exists("icon", $data) ||
-                !array_key_exists("allowed_scope", $data) ||
-                !array_key_exists("redirect_uri", $data)) {
-            throw new ApiException("invalid_request", "missing required parameters");
-        }
-        if(!in_array($data['type'], array ("user_agent_based_application", "web_application", "native_application"))) {
-                throw new ApiException("invalid_request", "unsupported client type");
+        $data = validateClientData($request->getContent());
+        if($data['id'] !== $request->getResource()) {
+            throw new ApiException("invalid_request", "resource does not match client id value");
         }
         if(FALSE === $storage->updateClient($request->getResource(), $data)) {
             throw new ApiException("invalid_request", "unable to update application");
@@ -162,5 +139,64 @@ try {
 }
 
 $response->sendResponse();
+
+// FIXME: deal with PUT and POST both
+function validateClientData($d) { 
+    $data = json_decode($d, TRUE);
+    if(NULL === $data || !is_array($data) || 
+            !array_key_exists("id", $data) || 
+            !array_key_exists("name", $data) ||
+            !array_key_exists("description", $data) ||
+            !array_key_exists("secret", $data) ||
+            !array_key_exists("type", $data) ||
+            !array_key_exists("icon", $data) ||
+            !array_key_exists("allowed_scope", $data) ||
+            !array_key_exists("redirect_uri", $data)) {
+        throw new ApiException("invalid_request", "missing required parameters");
+    }
+
+    if(empty($data['id'])) {
+		    throw new ApiException("invalid_request", "id cannot be empty");
+    }
+
+    if(empty($data['name'])) {
+		    throw new ApiException("invalid_request", "name cannot be empty");
+    }
+
+    // client type should be any of below types
+    if(!in_array($data['type'], array ("user_agent_based_application", "web_application", "native_application"))) {
+	    throw new ApiException("invalid_request", "unsupported client type");
+    }
+
+    // secret cannot be empty when type is "web_application"
+    if("web_application" === $data['type'] && empty($data['secret'])) {
+        throw new ApiException("invalid_request", "secret should be set for web_application type");
+    }
+
+    // icon should be empty, or URL with path
+    if(!empty($data['icon'])) { 
+        if(FALSE === filter_var($data['icon'], FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
+            throw new ApiException("invalid_request", "icon should be valid URL with path");
+        }
+    }
+
+    // redirect_uri should be URL
+    if(FALSE === filter_var($data['redirect_uri'], FILTER_VALIDATE_URL)) {
+        throw new ApiException("invalid_request", "redirect_uri should be valid URL");
+    }
+    // and it is not allowed to have a fragment (#) in it
+    if(NULL !== parse_url($data['redirect_uri'], PHP_URL_FRAGMENT)) {
+        throw new ApiException("invalid_request", "redirect_uri cannot contain a fragment");
+    }
+
+    // scope should be valid
+    try {
+        $s = new Scope($data['allowed_scope']);
+    } catch (ScopeException $e) {
+        throw new ApiException("invalid_request", "scope is invalid");
+    }
+    return $data;
+}
+
 
 ?>
