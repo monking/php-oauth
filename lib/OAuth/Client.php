@@ -52,11 +52,14 @@ class Client {
     }
 
     public function setId($i) {
+        if(empty($i)) {
+	        throw new ClientException("id cannot be empty");
+        }
         $result = preg_match($this->regExpVSCHAR, $i);
 	    if(1 !== $result) {
             throw new ClientException("id contains invalid character");
         }
-        $this->_client['id'] = empty($i) ? NULL : $i;
+        $this->_client['id'] = $i;
     }
 
     public function getId() {
@@ -65,7 +68,7 @@ class Client {
 
     public function setName($n) {
         if(empty($n)) {
-		        throw new ClientException("name cannot be empty");
+	        throw new ClientException("name cannot be empty");
         }
         $this->_client['name'] = $n;
     }
@@ -101,7 +104,6 @@ class Client {
         return $this->_client['redirect_uri'];
     }
 
-
     public function setType($t) {
         if(!in_array($t, array ("user_agent_based_application", "web_application", "native_application"))) {
 	        throw new ClientException("type not supported");
@@ -124,7 +126,6 @@ class Client {
     }
 
     public function setAllowedScope($a) {
-        // FIXME: verify that empty scope is also allowed
         try {
             $s = new Scope($a);
         } catch (ScopeException $e) {

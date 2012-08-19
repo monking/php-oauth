@@ -40,7 +40,7 @@ class Scope {
     }
 
     /**
-     * Returns true if the specified scope(s) are contained within the 
+     * This object scope needs to contain all the scopes from the provided
      * scope object.
      */
     public function hasScope(Scope $scope) {
@@ -54,9 +54,7 @@ class Scope {
     }
 
     /**
-     * Returns true ONLY IFF the specified scope(s) are contained within the
-     * scope object, i.e.: the scopes in this object are a subset of the scopes
-     * provided.
+     * This object scope needs to be a subset of the provided scope object.
      */
     public function isSubsetOf(Scope $scope) {
         $s = $scope->getScope(TRUE);

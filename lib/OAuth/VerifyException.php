@@ -23,6 +23,7 @@ class VerifyException extends Exception {
             case "invalid_token":
                 return 401;
             case "insufficient_scope":
+            case "insufficient_entitlement":
                 return 403;
             default:
                 return 400;

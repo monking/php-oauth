@@ -32,37 +32,31 @@ try {
     if(NULL === $authorizationHeader) {
         throw new VerifyException("invalid_token", "no token provided");
     }
-    $token = $rs->verify($authorizationHeader);
+    $rs->verifyBearerToken($authorizationHeader);
 
     // verify the scope permissions
     if(in_array($request->getCollection(), array ("applications", "authorizations"))) {
-        $grantedScope = explode(" ", $token->scope);
-        if(!in_array($request->getCollection(), $grantedScope)) {
-            throw new VerifyException("insufficient_scope", "no permission for this call with granted scope");
-        }
+        $rs->requireScope($request->getCollection());
     }
 
     // verify the entitlement, to manage clients one needs to have the 
     // "applications" entitlement
     if(!$config->getSectionValue("Api", "disableEntitlementEnforcement")) {
         if(in_array($request->getCollection(), array ("applications"))) {
-            $grantedEntitlement = explode(" ", $token->resource_owner_entitlement);
-            if(!in_array($request->getCollection(), $grantedEntitlement)) {
-                throw new ApiException("forbidden", "not entitled to use this api call");
-            }
+            $rs->requireEntitlement($request->getCollection());
         }
     }
 
     if($request->matchRest("GET", "resource_owner", "id")) {
-        $response->setContent(json_encode(array("id" => $token->resource_owner_id)));
+        $response->setContent(json_encode(array("id" => $rs->getResourceOwnerId())));
     } else if($request->matchRest("POST", "authorizations", FALSE)) {
         $data = json_decode($request->getContent(), TRUE);
         if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
             throw new ApiException("invalid_request", "missing required parameters");
         }
         // check to see if an authorization for this client/resource_owner already exists
-        if(FALSE === $storage->getApproval($data['client_id'], $token->resource_owner_id)) {
-            if(FALSE === $storage->addApproval($data['client_id'], $token->resource_owner_id, $data['scope'])) {
+        if(FALSE === $storage->getApproval($data['client_id'], $rs->getResourceOwnerId())) {
+            if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope'])) {
                 throw new ApiException("invalid_request", "unable to add authorization");
             }
         } else {
@@ -70,17 +64,17 @@ try {
         }
         $response->setStatusCode(201);
     } else if($request->matchRest("GET", "authorizations", TRUE)) {
-        $data = $storage->getApproval($request->getResource(), $token->resource_owner_id);
+        $data = $storage->getApproval($request->getResource(), $rs->getResourceOwnerId());
         if(FALSE === $data) {
             throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
         }
         $response->setContent(json_encode($data));      
     } else if($request->matchRest("DELETE", "authorizations", TRUE)) {
-        if(FALSE === $storage->deleteApproval($request->getResource(), $token->resource_owner_id)) {
+        if(FALSE === $storage->deleteApproval($request->getResource(), $rs->getResourceOwnerId())) {
             throw new ApiException("not_found", "the resource you are trying to delete does not exist");
         }
     } else if($request->matchRest("GET", "authorizations", FALSE)) {
-        $data = $storage->getApprovals($token->resource_owner_id);
+        $data = $storage->getApprovals($rs->getResourceOwnerId());
         $response->setContent(json_encode($data));      
     } else if($request->matchRest("GET", "applications", FALSE)) {
         $data = $storage->getClients();
