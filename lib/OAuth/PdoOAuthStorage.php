@@ -313,7 +313,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             CREATE TABLE IF NOT EXISTS `Client` (
             `id` varchar(64) NOT NULL,
             `name` text NOT NULL,
-            `description` text NOT NULL,
+            `description` text DEFAULT NULL,
             `secret` text DEFAULT NULL,
             `redirect_uri` text NOT NULL,
             `type` text NOT NULL,
