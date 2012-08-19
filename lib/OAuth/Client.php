@@ -13,32 +13,28 @@ class Client {
 
     private $_client;
 
-    public function __construct($id, $name, $type, $redirect_uri) {
+    public function __construct($id, $secret, $type, $redirect_uri, $name) {
         $this->_client = array();
         $this->setId($id);
-        $this->setName($name);
+        $this->setSecret($secret);
         $this->setType($type);
         $this->setRedirectUri($redirect_uri);
-
-        $this->_client['secret'] = NULL;
-        $this->_client['allowed_scope'] = NULL;
-        $this->_client['icon'] = NULL;
-        $this->_client['description'] = NULL;
-        $this->_client['contact_email'] = NULL;
+        $this->setName($name);
+        $this->setAllowedScope(NULL);
+        $this->setIcon(NULL);
+        $this->setDescription(NULL);
+        $this->setContactEmail(NULL);
     }
 
     public static function fromArray(array $a) {
-        $requiredFields = array ("id", "redirect_uri", "type", "name");
+        $requiredFields = array ("id", "secret", "redirect_uri", "type", "name");
         foreach($requiredFields as $r) {
             if(!array_key_exists($r, $a)) {
                 throw new ClientException("not a valid client, '" . $r . "' not set");
             }
         }
-        $c = new static($a['id'], $a['name'], $a['type'], $a['redirect_uri']);
+        $c = new static($a['id'], $a['secret'], $a['type'], $a['redirect_uri'], $a['name']);
 
-        if(array_key_exists("secret", $a)) {
-            $c->setSecret($a['secret']);
-        }
         if(array_key_exists("allowed_scope", $a)) {
             $c->setAllowedScope($a['allowed_scope']);
         }
@@ -63,11 +59,19 @@ class Client {
         $this->_client['id'] = empty($i) ? NULL : $i;
     }
 
+    public function getId() {
+        return $this->_client['id'];
+    }
+
     public function setName($n) {
         if(empty($n)) {
 		        throw new ClientException("name cannot be empty");
         }
         $this->_client['name'] = $n;
+    }
+
+    public function getName() {
+        return $this->_client['name'];
     }
 
     public function setSecret($s) {
@@ -76,6 +80,10 @@ class Client {
             throw new ClientException("secret contains invalid character");
         }
         $this->_client['secret'] = empty($s) ? NULL : $s;
+    }
+
+    public function getSecret() {
+        return $this->_client['secret'];
     }
 
     public function setRedirectUri($r) {
@@ -89,11 +97,30 @@ class Client {
         $this->_client['redirect_uri'] = $r;
     }
 
+    public function getRedirectUri() {
+        return $this->_client['redirect_uri'];
+    }
+
+
     public function setType($t) {
         if(!in_array($t, array ("user_agent_based_application", "web_application", "native_application"))) {
 	        throw new ClientException("type not supported");
         }
+        if("web_application" === $t) {
+            // secret cannot be empty when type is "web_application"
+            if(NULL === $this->_client['secret']) {
+                throw new ClientException("secret should be set for web application type");
+            }
+            // if web_application type id cannot contain a ":" as it would break Basic authentication
+            if(FALSE !== strpos($this->_client['id'], ":")) {
+                throw new ClientException("client_id cannot contain a colon when using web application type");
+            }
+        }
         $this->_client['type'] = $t;
+    }
+
+    public function getType() {
+        return $this->_client['type'];
     }
 
     public function setAllowedScope($a) {
@@ -106,6 +133,10 @@ class Client {
         $this->_client['allowed_scope'] = empty($a) ? NULL : $a;
     }
     
+    public function getAllowedScope() {
+        return $this->_client['allowed_scope'];
+    }
+
     public function setIcon($i) {
         // icon should be empty, or URL with path
         if(!empty($i)) { 
@@ -116,8 +147,16 @@ class Client {
         $this->_client['icon'] = empty($i) ? NULL : $i;
     }
     
+    public function getIcon() {
+        return $this->_client['icon'];
+    }
+
     public function setDescription($d) {
         $this->_client['description'] = empty($d) ? NULL : $d;
+    }
+
+    public function getDescription() {
+        return $this->_client['description'];
     }
 
     public function setContactEmail($c) {
@@ -129,28 +168,11 @@ class Client {
         $this->_client['contact_email'] = empty($c) ? NULL : $c;
     }
 
-    private function _validateClient() {
-        $requiredFields = array ("id", "redirect_uri", "type", "name");
-        foreach($requiredFields as $r) {
-            if(NULL === $this->_client[$r]) {
-                throw new ClientException("not a valid client, '" . $r . "' not set");
-            }
-        }
-
-        if("web_application" === $this->_client['type']) {
-            // secret cannot be empty when type is "web_application"
-            if(NULL === $this->_client['secret']) {
-                throw new ClientException("secret should be set for web application type");
-            }
-            // if web_application type id cannot contain a ":" as it would break Basic authentication
-            if(FALSE !== strpos($this->_client['id'], ":")) {
-                throw new ClientException("client_id cannot contain a colon when using web application type");
-            }
-        }
+    public function getContactEmail() {
+        return $this->_client['contact_email'];
     }
 
     public function getClientAsArray() {
-        $this->_validateClient();
         return $this->_client;
     }
 
