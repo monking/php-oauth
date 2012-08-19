@@ -36,3 +36,10 @@ echo "---- cut ----"
 cat docs/apache.conf | sed "s|/PATH/TO/APP|${INSTALL_DIR}|g" | sed "s|APPNAME|${APP_NAME}|g"
 echo "---- cut ----"
 
+# robots
+echo "****************************"
+echo "* robots.txt configuration *"
+echo "****************************"
+echo "---- cut ----"
+cat docs/robots.txt | sed "s|APPNAME|${APP_NAME}|g"
+echo "---- cut ----"
