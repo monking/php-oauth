@@ -26,13 +26,13 @@ try {
 
     $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
 
-    $rs = new ResourceServer($storage, $config);
+    $rs = new ResourceServer();
     
     $authorizationHeader = $request->getHeader("HTTP_AUTHORIZATION");
     if(NULL === $authorizationHeader) {
         throw new VerifyException("invalid_token", "no token provided");
     }
-    $rs->verifyBearerToken($authorizationHeader);
+    $rs->verifyAuthorizationHeader($authorizationHeader);
 
     // verify the scope permissions
     if(in_array($request->getCollection(), array ("applications", "authorizations"))) {

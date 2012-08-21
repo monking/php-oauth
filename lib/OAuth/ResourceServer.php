@@ -12,14 +12,21 @@ class ResourceServer {
     private $_bearerToken;
     private $_grantedEntitlement;
 
-    public function __construct(IOAuthStorage $storage, Config $c) {
-        $this->_storage = $storage;
-        $this->_c = $c;
+    public function __construct(Config $c = NULL) {
+        // it is possible to override the config from the default...
+        if(NULL === $c) {
+            $this->_c = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
+        } else {
+            $this->_c = $c;
+        }
+        $oauthStorageBackend = $this->_c->getValue('storageBackend');
+        require_once __DIR__ . DIRECTORY_SEPARATOR . $oauthStorageBackend . ".php";
+        $this->_storage = new $oauthStorageBackend($this->_c);
         $this->_bearerToken = NULL;
         $this->_grantedEntitlement = NULL;
     }
 
-    public function verifyBearerToken($authorizationHeader) {
+    public function verifyAuthorizationHeader($authorizationHeader) {
         // b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
         $b64TokenRegExp = '(?:[[:alpha:][:digit:]-._~+/]+=*)';
         $result = preg_match('|^Bearer (?P<value>' . $b64TokenRegExp . ')$|', $authorizationHeader, $matches);
@@ -28,7 +35,7 @@ class ResourceServer {
         }
         $accessToken = $matches['value'];
         $token = $this->_storage->getAccessToken($accessToken);
-        if($token === FALSE) {
+        if(FALSE === $token) {
             throw new VerifyException("invalid_token", "the access token is invalid");
         }
         if(time() > $token->issue_time + $token->expires_in) {

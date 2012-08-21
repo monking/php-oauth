@@ -334,6 +334,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
 
+        // FIXME: merge this with approval
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `RefreshToken` (
             `refresh_token` varchar(64) NOT NULL,

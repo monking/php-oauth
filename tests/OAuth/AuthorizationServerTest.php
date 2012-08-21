@@ -58,7 +58,7 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
 
         // initialize authorization server
         $this->_as = new AuthorizationServer($this->_storage, $c);
-        $this->_rs = new ResourceServer($this->_storage, $c);
+        $this->_rs = new ResourceServer($c);
         $this->_ro = new DummyResourceOwner($c);
     }
 
@@ -126,40 +126,28 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         // .. redirect_uri
 
         // verify token
-        $t = $this->_rs->verify("Bearer " . $response->access_token);
-        $this->assertEquals("fkooman", $t->resource_owner_id);
+        $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
+        $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
 
         // wait for 6 seconds so the token should be expired...
         sleep(6);
 
         try { 
-            $t = $this->_rs->verify("Bearer " . $response->access_token);
-            $this->assertEquals("fkooman", $t->resource_owner_id);
+            $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
+            $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
         } catch(VerifyException $e) {
             $this->assertEquals("invalid_token", $e->getMessage());
             $this->assertEquals("the access token expired", $e->getDescription());
         }
 
         // use the refresh token to get a new access token
-
         $post = array ("grant_type" => "refresh_token",
                        "refresh_token" => $response->refresh_token);
         $response = $this->_as->token($post, "testcodeclient", "abcdef");
         
         $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->access_token);
-        $t = $this->_rs->verify("Bearer " . $response->access_token);
-        $this->assertEquals("fkooman", $t->resource_owner_id);
-
-
-#        // validate access_token at token endpoint
-#        $post = array ("grant_type" => "urn:pingidentity.com:oauth2:grant_type:validate_bearer", "token" => $response->access_token);
-#        $response = $this->_as->token($post, NULL);
-
-#        $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->access_token);
-#        $this->assertEquals(5, $response->expires_in);
-#        $this->assertEquals("read", $response->scope);
-#        $this->assertEquals("urn:pingidentity.com:oauth2:validated_token", $response->token_type);
-#        
+        $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
+        $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
     }
 
 }
