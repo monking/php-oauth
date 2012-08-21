@@ -1,5 +1,9 @@
 <?php
 
+namespace Tuxed\OAuth;
+
+use \Tuxed\Config as Config;
+
 class SspResourceOwner implements IResourceOwner {
 
     private $_c;
@@ -64,5 +68,3 @@ class SspResourceOwner implements IResourceOwner {
     }
 
 }
-
-?>

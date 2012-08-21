@@ -1,5 +1,7 @@
 <?php
 
+namespace Tuxed;
+
 class Logger {
 
     private $_logFile;
@@ -49,5 +51,3 @@ class Logger {
     }
 
 }
-
-?>

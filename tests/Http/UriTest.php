@@ -1,6 +1,11 @@
 <?php
 
-require_once "lib/Http/Uri.php";
+require_once "lib/SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", "lib");
+$c->register();
+
+use \Tuxed\Http\Uri as Uri;
+use \Tuxed\Http\UriException as UriException;
 
 class UriTest extends PHPUnit_Framework_TestCase {
 
@@ -97,7 +102,7 @@ class UriTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException UriException
+     * @expectedException \Tuxed\Http\UriException
      */
     function testMalformedUri() {
         $h = new Uri("http://:80");

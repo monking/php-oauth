@@ -1,5 +1,9 @@
 <?php
 
+namespace Tuxed\OAuth;
+
+use \Tuxed\Config as Config;
+
 class BrowserIDResourceOwner implements IResourceOwner {
 
     private $_config;

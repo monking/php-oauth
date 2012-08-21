@@ -1,6 +1,13 @@
 <?php
 
-require_once "lib/Http/HttpRequest.php";
+require_once "lib/SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", "lib");
+$c->register();
+
+use \Tuxed\Http\HttpRequestException as HttpRequestException;
+use \Tuxed\Http\HttpRequest as HttpRequest;
+use \Tuxed\Http\Uri as Uri;
+use \Tuxed\Http\UriException as UriException;
 
 class HttpRequestTest extends PHPUnit_Framework_TestCase {
 
@@ -143,7 +150,7 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException HttpRequestException
+     * @expectedException \Tuxed\Http\HttpRequestException
      */
     function testTryGetPostParametersOnGetRequest() {
         $h = new HttpRequest("http://www.example.com/request", "GET");
@@ -151,7 +158,7 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException HttpRequestException
+     * @expectedException \Tuxed\Http\HttpRequestException
      */
     function testTrySetPostParametersOnGetRequest() {
         $h = new HttpRequest("http://www.example.com/request", "GET");
@@ -159,7 +166,7 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException HttpRequestException
+     * @expectedException \Tuxed\Http\HttpRequestException
      */
 /*    function testTryGetPostParametersWithoutParameters() {
         $h = new HttpRequest("http://www.example.com/request", "POST");
@@ -167,7 +174,7 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
     }*/
 
     /**
-     * @expectedException HttpRequestException
+     * @expectedException \Tuxed\Http\HttpRequestException
      */
 /*    function testTryGetPostParametersWithRawContent() {
         $h = new HttpRequest("http://www.example.com/request", "POST");
@@ -176,14 +183,14 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
     }*/
 
     /**
-     * @expectedException UriException
+     * @expectedException \Tuxed\Http\UriException
      */
     function testInvalidUri() {
         $h = new HttpRequest("foo");
     }
 
     /**
-     * @expectedException HttpRequestException
+     * @expectedException \Tuxed\Http\HttpRequestException
      */
     function testUnsupportedRequestMethod() {
         $h = new HttpRequest("http://www.example.com/request", "FOO");

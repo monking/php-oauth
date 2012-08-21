@@ -1,10 +1,15 @@
 <?php
 
-require_once 'lib/Config.php';
-require_once 'lib/OAuth/AuthorizationServer.php';
-require_once 'lib/OAuth/ResourceServer.php';
-require_once 'lib/OAuth/PdoOAuthStorage.php';
-require_once 'lib/OAuth/DummyResourceOwner.php';
+require_once "lib/SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", "lib");
+$c->register();
+
+use \Tuxed\Config as Config;
+use \Tuxed\OAuth\PdoOAuthStorage as PdoOAuthStorage;
+use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
+use \Tuxed\OAuth\ResourceServer as ResourceServer;
+use \Tuxed\OAuth\DummyResourceOwner as DummyResourceOwner;
+use \Tuxed\OAuth\VerifyException as VerifyException;
 
 class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace Tuxed\OAuth;
+
 interface IOAuthStorage {
     public function storeAccessToken         ($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry);
     public function getAccessToken           ($accessToken);
@@ -24,5 +26,3 @@ interface IOAuthStorage {
     public function updateApproval           ($clientId, $resourceOwnerId, $scope);
     public function deleteApproval           ($clientId, $resourceOwnerId);
 }
-
-?>

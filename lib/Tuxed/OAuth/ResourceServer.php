@@ -1,9 +1,8 @@
 <?php
 
-require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "Config.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "VerifyException.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "Scope.php";
+namespace Tuxed\OAuth;
+
+use \Tuxed\Config as Config;
 
 class ResourceServer {
 
@@ -15,12 +14,12 @@ class ResourceServer {
     public function __construct(Config $c = NULL) {
         // it is possible to override the config from the default...
         if(NULL === $c) {
-            $this->_c = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
+            $this->_c = new Config(dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
         } else {
             $this->_c = $c;
         }
-        $oauthStorageBackend = $this->_c->getValue('storageBackend');
-        require_once __DIR__ . DIRECTORY_SEPARATOR . $oauthStorageBackend . ".php";
+        $oauthStorageBackend = '\\Tuxed\\OAuth\\' . $this->_c->getValue('storageBackend');
+        // require_once __DIR__ . DIRECTORY_SEPARATOR . $oauthStorageBackend . ".php";
         $this->_storage = new $oauthStorageBackend($this->_c);
         $this->_bearerToken = NULL;
         $this->_grantedEntitlement = NULL;
@@ -79,5 +78,3 @@ class ResourceServer {
     }
 
 }
-
-?>

@@ -1,8 +1,9 @@
 <?php
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
-require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "Config.php";
+namespace Tuxed\OAuth;
+
+use \Tuxed\Config as Config;
+use \PDO as PDO;
 
 /**
  * Class to implement storage for the OAuth Authorization Server using PDO.
@@ -368,5 +369,3 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     }
 
 }
-
-?>

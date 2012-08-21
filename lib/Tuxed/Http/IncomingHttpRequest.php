@@ -1,8 +1,6 @@
 <?php
 
-class IncomingHttpRequestException extends Exception {
-
-}
+namespace Tuxed\Http;
 
 class IncomingHttpRequest {
 
@@ -80,5 +78,3 @@ class IncomingHttpRequest {
     }
 
 }
-
-?>

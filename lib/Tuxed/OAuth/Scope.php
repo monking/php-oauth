@@ -1,8 +1,6 @@
 <?php
 
-class ScopeException extends Exception {
-
-}
+namespace Tuxed\OAuth;
 
 class Scope {
 
@@ -71,5 +69,3 @@ class Scope {
     }
 
 }
-
-?>

@@ -1,5 +1,9 @@
 <?php
 
+namespace Tuxed\OAuth;
+
+use \Tuxed\Config as Config;
+
 class DummyResourceOwner implements IResourceOwner {
 
     private $_c;
@@ -30,5 +34,3 @@ class DummyResourceOwner implements IResourceOwner {
         	return empty($entitlements) ? NULL : implode(" ", $entitlements);
     }
 }
-
-?>

@@ -1,8 +1,6 @@
 <?php
 
-class HttpResponseException extends Exception {
-
-}
+namespace Tuxed\Http;
 
 class HttpResponse {
 
@@ -141,5 +139,3 @@ class HttpResponse {
     }
 
 }
-
-?>

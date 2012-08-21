@@ -1,8 +1,6 @@
 <?php
 
-class UriException extends Exception {
-
-}
+namespace Tuxed\Http;
 
 class Uri {
 
@@ -112,5 +110,3 @@ class Uri {
     }
 
 }
-
-?>

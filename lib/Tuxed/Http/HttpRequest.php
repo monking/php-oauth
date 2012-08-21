@@ -1,8 +1,6 @@
 <?php
 
-class HttpRequestException extends Exception {
-
-}
+namespace Tuxed\Http;
 
 class HttpRequest {
 
@@ -206,5 +204,3 @@ class HttpRequest {
     }
 
 }
-
-?>

@@ -1,10 +1,14 @@
 <?php
 
-require_once 'lib/Config.php';
-require_once 'lib/OAuth/AuthorizationServer.php';
-require_once 'lib/OAuth/ResourceServer.php';
-require_once 'lib/OAuth/PdoOAuthStorage.php';
-require_once 'lib/OAuth/DummyResourceOwner.php';
+require_once "lib/SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", "lib");
+$c->register();
+
+use \Tuxed\Config as Config;
+use \Tuxed\OAuth\PdoOAuthStorage as PdoOAuthStorage;
+use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
+use \Tuxed\OAuth\ResourceServer as ResourceServer;
+use \Tuxed\OAuth\DummyResourceOwner as DummyResourceOwner;
 
 class AuthorizeTest extends PHPUnit_Framework_TestCase {
 
@@ -65,7 +69,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException ResourceOwnerException
+     * @expectedException \Tuxed\OAuth\ResourceOwnerException
      * @expectedExceptionMessage client_id missing
      */
     public function testMissingClientId() {
@@ -74,7 +78,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException ResourceOwnerException
+     * @expectedException \Tuxed\OAuth\ResourceOwnerException
      * @expectedExceptionMessage response_type missing
      */
     public function testMissingResponseType() {
@@ -83,7 +87,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException ClientException
+     * @expectedException \Tuxed\OAuth\ClientException
      * @expectedExceptionMessage invalid_scope
      */
     /*public function testMissingScope() {
@@ -92,7 +96,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }*/
 
     /**
-     * @expectedException ResourceOwnerException
+     * @expectedException \Tuxed\OAuth\ResourceOwnerException
      * @expectedExceptionMessage client not registered
      */
     public function testUnregisteredClient() {
@@ -101,7 +105,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException ResourceOwnerException
+     * @expectedException \Tuxed\OAuth\ResourceOwnerException
      * @expectedExceptionMessage specified redirect_uri not the same as registered redirect_uri
      */
     public function testWrongRedirectUri() {
@@ -110,7 +114,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException ClientException
+     * @expectedException \Tuxed\OAuth\ClientException
      * @expectedExceptionMessage unsupported_response_type
      */
     public function testWrongClientType() {
@@ -119,7 +123,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException ClientException
+     * @expectedException \Tuxed\OAuth\ClientException
      * @expectedExceptionMessage invalid_scope
      */
     public function testUnsupportedScope() {

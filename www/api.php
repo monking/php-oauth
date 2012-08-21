@@ -1,27 +1,30 @@
 <?php
 
-require_once "../lib/OAuth/ApiException.php";
-require_once "../lib/Config.php";
-require_once "../lib/Http/Uri.php";
-require_once "../lib/Http/HttpRequest.php";
-require_once "../lib/Http/HttpResponse.php";
-require_once "../lib/Http/IncomingHttpRequest.php";
-require_once "../lib/OAuth/Scope.php";
-require_once "../lib/OAuth/Client.php";
-require_once "../lib/OAuth/ResourceServer.php";
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib");
+$c->register();
+
+use \Tuxed\Http\HttpResponse as HttpResponse;
+use \Tuxed\Config as Config;
+use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
+use \Tuxed\Http\HttpRequest as HttpRequest;
+use \Tuxed\OAuth\ApiException as ApiException;
+use \Tuxed\OAuth\ResourceServer as ResourceServer;
+use \Tuxed\OAuth\VerifyException as VerifyException;
+use \Tuxed\OAuth\Client as Client;
 
 $response = new HttpResponse();
 $response->setHeader("Content-Type", "application/json");
 
-try { 
+try {
+
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
 
     if(!$config->getSectionValue("Api", "enableApi")) {
         throw new ApiException("forbidden","api disabled");
     }
 
-    $oauthStorageBackend = $config->getValue('storageBackend');
-    require_once "../lib/OAuth/$oauthStorageBackend.php";
+    $oauthStorageBackend = '\\Tuxed\\OAuth\\' . $config->getValue('storageBackend');
     $storage = new $oauthStorageBackend($config);
 
     $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
@@ -102,7 +105,7 @@ try {
                 throw new ApiException("invalid_request", "application already exists");
             }
             $response->setStatusCode(201);
-        } catch(ClientException $e) {
+        } catch(ClientRegistrationException $e) {
             throw new ApiException("invalid_request", $e->getMessage());
         }
     } else if($request->matchRest("PUT", "applications", TRUE)) {
@@ -115,7 +118,7 @@ try {
             if(FALSE === $storage->updateClient($request->getResource(), $data)) {
                 throw new ApiException("invalid_request", "unable to update application");
             }
-        } catch(ClientException $e) {
+        } catch(ClientRegistrationException $e) {
             throw new ApiException("invalid_request", $e->getMessage());
         }        
     } else {
@@ -123,13 +126,13 @@ try {
     }
 } catch (Exception $e) {
     switch(get_class($e)) {
-        case "VerifyException":
+        case "Tuxed\\OAuth\\VerifyException":
             $response->setStatusCode($e->getResponseCode());
             $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
             $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
             break;
 
-        case "ApiException":
+        case "Tuxed\\OAuth\\ApiException":
             $response->setStatusCode($e->getResponseCode());
             $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
             break;

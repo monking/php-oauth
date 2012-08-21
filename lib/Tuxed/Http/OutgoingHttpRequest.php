@@ -1,5 +1,7 @@
 <?php
 
+namespace Tuxed\Http;
+
 class OutgoingHttpRequest {
 
     public function makeRequest(HttpRequest $request) {
@@ -50,5 +52,3 @@ class OutgoingHttpRequest {
     }
 
 }
-
-?>

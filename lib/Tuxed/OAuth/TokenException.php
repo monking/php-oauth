@@ -1,10 +1,12 @@
 <?php
 
+namespace Tuxed\OAuth;
+
 /**
  * Thrown when interaction with the token endpoint fails
  * https://tools.ietf.org/html/draft-ietf-oauth-v2-26#section-5.2
  */
-class TokenException extends Exception {
+class TokenException extends \Exception {
 
     private $_description;
 
@@ -36,5 +38,3 @@ class TokenException extends Exception {
     }
 
 }
-
-?>

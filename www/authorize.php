@@ -1,23 +1,26 @@
 <?php
 
-require_once "../lib/Config.php";
-require_once "../lib/OAuth/AuthorizationServer.php";
-require_once "../lib/Http/Uri.php";
-require_once "../lib/Http/HttpRequest.php";
-require_once "../lib/Http/HttpResponse.php";
-require_once "../lib/Http/IncomingHttpRequest.php";
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib");
+$c->register();
+
+use \Tuxed\Http\HttpResponse as HttpResponse;
+use \Tuxed\Config as Config;
+use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
+use \Tuxed\Http\HttpRequest as HttpRequest;
+use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
+use \Tuxed\OAuth\ResourceOwnerException as ResourceOwnerException;
+use \Tuxed\OAuth\ClientException as ClientException;
 
 $response = new HttpResponse();
 
 try { 
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
 
-    $authMech = $config->getValue('authenticationMechanism');
-    require_once "../lib/OAuth/$authMech.php";
+    $authMech = '\\Tuxed\OAuth\\' . $config->getValue('authenticationMechanism');
     $resourceOwner = new $authMech($config);
 
-    $oauthStorageBackend = $config->getValue('storageBackend');
-    require_once "../lib/OAuth/$oauthStorageBackend.php";
+    $oauthStorageBackend = '\\Tuxed\OAuth\\' . $config->getValue('storageBackend');
     $storage = new $oauthStorageBackend($config);
 
     $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
@@ -82,7 +85,7 @@ try {
 
 } catch (Exception $e) {
     switch(get_class($e)) {
-        case "ClientException":
+        case "Tuxed\\OAuth\\ClientException":
             // tell the client about the error
             $client = $e->getClient();
             $separator = ($client->type === "user_agent_based_application") ? "#" : "?";
@@ -94,7 +97,7 @@ try {
             $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
             break;
 
-        //case "ResourceOwnerException":
+        //case "Tuxed\\OAuth\\ResourceOwnerException":
         default:
             // tell resource owner about the error (through browser)
 

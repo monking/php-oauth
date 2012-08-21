@@ -1,12 +1,8 @@
 <?php 
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . "IOAuthStorage.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "IResourceOwner.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "StorageException.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "Scope.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "TokenException.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "ClientException.php";
-require_once __DIR__ . DIRECTORY_SEPARATOR . "ResourceOwnerException.php";
+namespace Tuxed\OAuth;
+
+use \Tuxed\Config as Config;
 
 class AuthorizationServer {
 
@@ -267,5 +263,3 @@ class AuthorizationServer {
     }
 
 }
-
-?>

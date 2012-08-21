@@ -1,7 +1,13 @@
 <?php
 
-require_once "lib/Http/HttpRequest.php";
-require_once "lib/Http/IncomingHttpRequest.php";
+require_once "lib/SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", "lib");
+$c->register();
+
+use \Tuxed\Http\HttpRequest as HttpRequest;
+use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
+use \Tuxed\Http\IncomingHttpRequestException as IncomingHttpRequestException;
+use \Tuxed\Http\Uri as Uri;
 
 class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
 
@@ -18,7 +24,7 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
         $_SERVER['PHP_AUTH_USER'] = "user";
         $_SERVER['PHP_AUTH_PW'] = "pass";
 
-        $stub = $this->getMock('IncomingHttpRequest', array('getRequestHeaders'));
+        $stub = $this->getMock('\Tuxed\Http\IncomingHttpRequest', array('getRequestHeaders'));
         $stub->expects($this->any())
                 ->method('getRequestHeaders')
                 ->will($this->returnValue(array("A" => "B")));
@@ -56,7 +62,7 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
         $_SERVER['CONTENT_LENGTH'] = strlen($content);
         $_SERVER['HTTPS'] = $https;
 
-        $stub = $this->getMock('IncomingHttpRequest', array('getRequestHeaders', 'getRawContent'));
+        $stub = $this->getMock('\Tuxed\Http\IncomingHttpRequest', array('getRequestHeaders', 'getRawContent'));
         $stub->expects($this->any())
                 ->method('getRequestHeaders')
                 ->will($this->returnValue(array("A" => "B")));
@@ -83,7 +89,7 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @expectedException IncomingHttpRequestException
+     * @expectedException \Tuxed\Http\IncomingHttpRequestException
      */
     function testNoServer() {
         $i = new IncomingHttpRequest();

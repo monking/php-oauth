@@ -1,9 +1,11 @@
 <?php
 
+namespace Tuxed\OAuth;
+
 /**
  * Thrown when the client needs to be informed of an error
  */
-class ClientException extends Exception {
+class ClientException extends \Exception {
 
     private $_description;
     private $_client;
@@ -40,5 +42,3 @@ class ClientException extends Exception {
     }
 
 }
-
-?>

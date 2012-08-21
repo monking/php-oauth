@@ -1,6 +1,11 @@
 <?php
 
-class ApiException extends Exception {
+namespace Tuxed\OAuth;
+
+/**
+ * Thrown when the verification of the access token fails
+ */
+class VerifyException extends \Exception {
 
     private $_description;
 
@@ -15,11 +20,12 @@ class ApiException extends Exception {
 
     public function getResponseCode() {
         switch($this->message) {
-            case "not_found":
-                return 404;
             case "invalid_request":
                 return 400;
-            case "forbidden":
+            case "invalid_token":
+                return 401;
+            case "insufficient_scope":
+            case "insufficient_entitlement":
                 return 403;
             default:
                 return 400;
@@ -37,5 +43,3 @@ class ApiException extends Exception {
 
 
 }
-
-?>

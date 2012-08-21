@@ -1,9 +1,12 @@
 <?php
 
+namespace Tuxed\OAuth;
+
 /**
- * Thrown when the resource owner needs to be  informed of an error
+ * When something went wrong with storing or retrieving 
+ * something storage
  */
-class ResourceOwnerException extends Exception {
+class StorageException extends \Exception {
 
     public function getLogMessage($includeTrace = FALSE) {
         $msg = 'Message    : ' . $this->getMessage() . PHP_EOL;
@@ -14,5 +17,3 @@ class ResourceOwnerException extends Exception {
     }
 
 }
-
-?>

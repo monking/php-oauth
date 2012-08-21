@@ -1,19 +1,23 @@
 <?php
 
-require_once "../lib/Config.php";
-require_once "../lib/OAuth/AuthorizationServer.php";
-require_once "../lib/Http/Uri.php";
-require_once "../lib/Http/HttpRequest.php";
-require_once "../lib/Http/HttpResponse.php";
-require_once "../lib/Http/IncomingHttpRequest.php";
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "SplClassLoader.php";
+$c =  new SplClassLoader("Tuxed", dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib");
+$c->register();
+
+use \Tuxed\Http\HttpResponse as HttpResponse;
+use \Tuxed\Config as Config;
+use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
+use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
+use \Tuxed\Http\HttpRequest as HttpRequest;
+use \Tuxed\OAuth\TokenException as TokenException;
 
 $response = new HttpResponse();
+$response->setHeader("Content-Type", "application/json");
 
 try { 
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
 
-    $oauthStorageBackend = $config->getValue('storageBackend');
-    require_once "../lib/OAuth/$oauthStorageBackend.php";
+    $oauthStorageBackend = '\\Tuxed\OAuth\\' . $config->getValue('storageBackend');
     $storage = new $oauthStorageBackend($config);
 
     $authorizationServer = new AuthorizationServer($storage, $config);
@@ -38,7 +42,7 @@ try {
     }
 } catch (Exception $e) {
     switch(get_class($e)) {
-        case "TokenException":
+        case "Tuxed\\OAuth\\TokenException":
             if($e->getResponseCode() === 401) {
                 $response->setHeader("WWW-Authenticate", 'Basic realm="OAuth Server"');
             }

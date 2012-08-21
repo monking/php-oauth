@@ -1,10 +1,6 @@
 <?php
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . "Scope.php";
-
-class ClientException extends Exception {
-
-}
+namespace Tuxed\OAuth;
 
 // FIXME: enforce maximum length of fields, match with database!
 class Client {
@@ -30,7 +26,7 @@ class Client {
         $requiredFields = array ("id", "secret", "redirect_uri", "type", "name");
         foreach($requiredFields as $r) {
             if(!array_key_exists($r, $a)) {
-                throw new ClientException("not a valid client, '" . $r . "' not set");
+                throw new ClientRegistrationException("not a valid client, '" . $r . "' not set");
             }
         }
         $c = new static($a['id'], $a['secret'], $a['type'], $a['redirect_uri'], $a['name']);
@@ -53,11 +49,11 @@ class Client {
 
     public function setId($i) {
         if(empty($i)) {
-	        throw new ClientException("id cannot be empty");
+	        throw new ClientRegistrationException("id cannot be empty");
         }
         $result = preg_match($this->regExpVSCHAR, $i);
 	    if(1 !== $result) {
-            throw new ClientException("id contains invalid character");
+            throw new ClientRegistrationException("id contains invalid character");
         }
         $this->_client['id'] = $i;
     }
@@ -68,7 +64,7 @@ class Client {
 
     public function setName($n) {
         if(empty($n)) {
-	        throw new ClientException("name cannot be empty");
+	        throw new ClientRegistrationException("name cannot be empty");
         }
         $this->_client['name'] = $n;
     }
@@ -80,7 +76,7 @@ class Client {
     public function setSecret($s) {
         $result = preg_match($this->regExpVSCHAR, $s);
 	    if(1 !== $result) {
-            throw new ClientException("secret contains invalid character");
+            throw new ClientRegistrationException("secret contains invalid character");
         }
         $this->_client['secret'] = empty($s) ? NULL : $s;
     }
@@ -91,11 +87,11 @@ class Client {
 
     public function setRedirectUri($r) {
         if(FALSE === filter_var($r, FILTER_VALIDATE_URL)) {
-            throw new ClientException("redirect_uri should be valid URL");
+            throw new ClientRegistrationException("redirect_uri should be valid URL");
         }
         // not allowed to have a fragment (#) in it
         if(NULL !== parse_url($r, PHP_URL_FRAGMENT)) {
-            throw new ClientException("redirect_uri cannot contain a fragment");
+            throw new ClientRegistrationException("redirect_uri cannot contain a fragment");
         }
         $this->_client['redirect_uri'] = $r;
     }
@@ -106,16 +102,16 @@ class Client {
 
     public function setType($t) {
         if(!in_array($t, array ("user_agent_based_application", "web_application", "native_application"))) {
-	        throw new ClientException("type not supported");
+	        throw new ClientRegistrationException("type not supported");
         }
         if("web_application" === $t) {
             // secret cannot be empty when type is "web_application"
             if(NULL === $this->_client['secret']) {
-                throw new ClientException("secret should be set for web application type");
+                throw new ClientRegistrationException("secret should be set for web application type");
             }
             // if web_application type id cannot contain a ":" as it would break Basic authentication
             if(FALSE !== strpos($this->_client['id'], ":")) {
-                throw new ClientException("client_id cannot contain a colon when using web application type");
+                throw new ClientRegistrationException("client_id cannot contain a colon when using web application type");
             }
         }
         $this->_client['type'] = $t;
@@ -129,7 +125,7 @@ class Client {
         try {
             $s = new Scope($a);
         } catch (ScopeException $e) {
-            throw new ClientException("scope is invalid");
+            throw new ClientRegistrationException("scope is invalid");
         }
         $this->_client['allowed_scope'] = empty($a) ? NULL : $a;
     }
@@ -142,7 +138,7 @@ class Client {
         // icon should be empty, or URL with path
         if(!empty($i)) { 
             if(FALSE === filter_var($i, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
-                throw new ClientException("icon should be either empty or valid URL with path");
+                throw new ClientRegistrationException("icon should be either empty or valid URL with path");
             }
         }
         $this->_client['icon'] = empty($i) ? NULL : $i;
@@ -163,7 +159,7 @@ class Client {
     public function setContactEmail($c) {
         if(!empty($c)) { 
             if(FALSE === filter_var($c, FILTER_VALIDATE_EMAIL)) {
-                throw new ClientException("contact email should be either empty or valid email address");
+                throw new ClientRegistrationException("contact email should be either empty or valid email address");
             }
         }
         $this->_client['contact_email'] = empty($c) ? NULL : $c;
@@ -178,5 +174,3 @@ class Client {
     }
 
 }
-
-?>
