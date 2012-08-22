@@ -219,6 +219,59 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("xyz", $h->getQueryParameter("foobar"));
     }
 
+    function testMatchRestNice() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("/foo/bar/baz");
+        $self = &$this;
+        $this->assertTrue($h->matchRestNice("GET", "/:one/:two/:three", function($one, $two, $three) use ($self) {
+            $self->assertEquals($one, "foo");
+            $self->assertEquals($two, "bar");
+            $self->assertEquals($three, "baz");
+        }));
+    }
+
+    function testMatchRestNiceWrongMethod() {
+        $h = new HttpRequest("http://www.example.org/api.php", "POST");
+        $h->setPathInfo("/foo/bar/baz");
+        $this->assertFalse($h->matchRestNice("GET", "/:one/:two/:three", NULL));
+    }
+
+    function testMatchRestNiceNoMatch() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("/foo/bar/baz/foobar");
+        $this->assertFalse($h->matchRestNice("GET", "/:one/:two/:three", NULL));
+    }
+
+    function testMatchRestNiceNoAbsPath() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("foo");
+        $this->assertFalse($h->matchRestNice("GET", "foo", NULL));
+    }
+
+    function testMatchRestNiceEmptyPath() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("");
+        $this->assertFalse($h->matchRestNice("GET", "", NULL));
+    }
+
+    function testMatchRestNiceEmptyRequestPath() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("/foo");
+        $this->assertFalse($h->matchRestNice("GET", "x", NULL));
+    }
+
+    function testMatchRestNiceNoMatchWithoutReplacement() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("/foo");
+        $this->assertFalse($h->matchRestNice("GET", "/bar", NULL));
+    }
+
+    function testMatchRestNiceNoMatchWithoutReplacementLong() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("/foo/bar/foo/bar/baz");
+        $this->assertFalse($h->matchRestNice("GET", "/foo/bar/foo/bar/bar", NULL));
+    }
+
 }
 
 ?>
