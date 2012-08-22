@@ -3,6 +3,7 @@
 namespace Tuxed\OAuth;
 
 use \Tuxed\Config as Config;
+use \BrowserIDVerifier as BrowserIDVerifier;
 
 class BrowserIDResourceOwner implements IResourceOwner {
 
