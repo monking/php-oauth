@@ -12,6 +12,7 @@ use \Tuxed\OAuth\ApiException as ApiException;
 use \Tuxed\OAuth\ResourceServer as ResourceServer;
 use \Tuxed\OAuth\VerifyException as VerifyException;
 use \Tuxed\OAuth\Client as Client;
+use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
 
 $response = new HttpResponse();
 $response->setHeader("Content-Type", "application/json");
@@ -50,9 +51,11 @@ try {
         }
     }
 
-    if($request->matchRest("GET", "resource_owner", "id")) {
+    $request->matchRestNice("GET", "/resource_owner/id", function() use ($response, $rs) {
         $response->setContent(json_encode(array("id" => $rs->getResourceOwnerId())));
-    } else if($request->matchRest("POST", "authorizations", FALSE)) {
+    });
+
+    $request->matchRestNice("POST", "/authorizations", function() use ($request, $response, $storage, $rs) {
         $data = json_decode($request->getContent(), TRUE);
         if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
             throw new ApiException("invalid_request", "missing required parameters");
@@ -66,33 +69,56 @@ try {
             throw new ApiException("invalid_request", "authorization already exists for this client and resource owner");
         }
         $response->setStatusCode(201);
-    } else if($request->matchRest("GET", "authorizations", TRUE)) {
-        $data = $storage->getApproval($request->getResource(), $rs->getResourceOwnerId());
+    });
+
+    $request->matchRestNice("GET", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
+        $data = $storage->getApproval($id, $rs->getResourceOwnerId());
         if(FALSE === $data) {
             throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
         }
         $response->setContent(json_encode($data));      
-    } else if($request->matchRest("DELETE", "authorizations", TRUE)) {
-        if(FALSE === $storage->deleteApproval($request->getResource(), $rs->getResourceOwnerId())) {
+    });
+
+
+    $request->matchRestNice("GET", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
+        $data = $storage->getApproval($id, $rs->getResourceOwnerId());
+        if(FALSE === $data) {
+            throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
+        }
+        $response->setContent(json_encode($data));      
+    });
+
+    $request->matchRestNice("DELETE", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
+        if(FALSE === $storage->deleteApproval($id, $rs->getResourceOwnerId())) {
             throw new ApiException("not_found", "the resource you are trying to delete does not exist");
         }
-    } else if($request->matchRest("GET", "authorizations", FALSE)) {
+    });
+
+    $request->matchRestNice("GET", "/authorizations/", function() use ($request, $response, $storage, $rs) {
         $data = $storage->getApprovals($rs->getResourceOwnerId());
-        $response->setContent(json_encode($data));      
-    } else if($request->matchRest("GET", "applications", FALSE)) {
+        $response->setContent(json_encode($data));
+    });
+
+    $request->matchRestNice("GET", "/applications/", function() use ($request, $response, $storage, $rs) {
         $data = $storage->getClients();
         $response->setContent(json_encode($data)); 
-    } else if($request->matchRest("DELETE", "applications", TRUE)) {
-        if(FALSE === $storage->deleteClient($request->getResource())) {
+    });
+
+    $request->matchRestNice("DELETE", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
+        if(FALSE === $storage->deleteClient($id)) {
             throw new ApiException("not_found", "the resource you are trying to delete does not exist");
         }
-    } else if($request->matchRest("GET", "applications", TRUE)) {
-        $data = $storage->getClient($request->getResource());
+    });
+
+    $request->matchRestNice("GET", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
+        $data = $storage->getClient($id);
         if(FALSE === $data) {
             throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
         }
         $response->setContent(json_encode($data));
-    } else if($request->matchRest("POST", "applications", FALSE)) {
+    });
+
+    $request->matchRestNice("POST", "/applications/", function() use ($request, $response, $storage, $rs) {
         try { 
             $client = Client::fromArray(json_decode($request->getContent(), TRUE));
             $data = $client->getClientAsArray();
@@ -108,11 +134,13 @@ try {
         } catch(ClientRegistrationException $e) {
             throw new ApiException("invalid_request", $e->getMessage());
         }
-    } else if($request->matchRest("PUT", "applications", TRUE)) {
+    });
+
+    $request->matchRestNice("PUT", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
         try {
             $client = Client::fromArray(json_decode($request->getContent(), TRUE));
             $data = $client->getClientAsArray();
-            if($data['id'] !== $request->getResource()) {
+            if($data['id'] !== $id) {
                 throw new ApiException("invalid_request", "resource does not match client id value");
             }
             if(FALSE === $storage->updateClient($request->getResource(), $data)) {
@@ -121,29 +149,29 @@ try {
         } catch(ClientRegistrationException $e) {
             throw new ApiException("invalid_request", $e->getMessage());
         }        
-    } else {
-        throw new ApiException("invalid_request", "unsupported collection or resource request");
-    }
+    });
+
+    $request->matchDefault(function($methodMatch, $patternMatch) use ($request, $response) {
+        if(in_array($request->getRequestMethod(), $methodMatch)) {
+            if(!$patternMatch) {
+                throw new ApiException("not_found", "resource not found");
+            }
+        } else {
+            throw new ApiException("method_not_allowed", "request method not allowed");
+        }
+    });
+
+} catch (VerifyException $e) {
+    $response->setStatusCode($e->getResponseCode());
+    $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
+    $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
+} catch (ApiException $e) {
+    $response->setStatusCode($e->getResponseCode());
+    $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
 } catch (Exception $e) {
-    switch(get_class($e)) {
-        case "Tuxed\\OAuth\\VerifyException":
-            $response->setStatusCode($e->getResponseCode());
-            $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
-            $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
-            break;
-
-        case "Tuxed\\OAuth\\ApiException":
-            $response->setStatusCode($e->getResponseCode());
-            $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
-            break;
-
-        default:
-            // any other error thrown by any of the modules, assume internal server error
-            $response->setStatusCode(500);
-            $response->setContent(json_encode(array("error" => "internal_server_error", "error_description" => $e->getMessage())));
-            break;
-    }
-
+    // any other error thrown by any of the modules, assume internal server error
+    $response->setStatusCode(500);
+    $response->setContent(json_encode(array("error" => "internal_server_error", "error_description" => $e->getMessage())));
 }
 
 $response->sendResponse();

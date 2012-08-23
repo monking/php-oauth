@@ -83,33 +83,29 @@ try {
             break;
     }
 
-} catch (Exception $e) {
-    switch(get_class($e)) {
-        case "Tuxed\\OAuth\\ClientException":
-            // tell the client about the error
-            $client = $e->getClient();
-            $separator = ($client->type === "user_agent_based_application") ? "#" : "?";
-            $parameters = array("error" => $e->getMessage(), "error_description" => $e->getDescription());
-            if(NULL !== $e->getState()) {
-                $parameters['state'] = $e->getState();
-            }
-            $response->setStatusCode(302);
-            $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
-            break;
 
-        //case "Tuxed\\OAuth\\ResourceOwnerException":
-        default:
-            // tell resource owner about the error (through browser)
-
-            $templateData = array ("error" => $e->getMessage());
-
-            extract($templateData);
-            ob_start();
-            require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
-            $response->setStatusCode(500);
-            $response->setContent(ob_get_clean());
-            break;
+} catch (ClientException $e) { 
+    // tell the client about the error
+    $client = $e->getClient();
+    $separator = ($client->type === "user_agent_based_application") ? "#" : "?";
+    $parameters = array("error" => $e->getMessage(), "error_description" => $e->getDescription());
+    if(NULL !== $e->getState()) {
+        $parameters['state'] = $e->getState();
     }
+    $response->setStatusCode(302);
+    $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
+
+//} catch (ResourceOwnerException $e) {
+    // FIXME: implement a different error for this, probably with more details!
+
+} catch (Exception $e) {
+    // tell resource owner about the error (through browser)
+    $templateData = array ("error" => $e->getMessage());
+    extract($templateData);
+    ob_start();
+    require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
+    $response->setStatusCode(500);
+    $response->setContent(ob_get_clean());
 }
 
 $response->sendResponse();
