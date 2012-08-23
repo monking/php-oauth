@@ -10,6 +10,7 @@ class ResourceServer {
     private $_c;
     private $_bearerToken;
     private $_grantedEntitlement;
+    private $_entitlementEnforcement;
 
     public function __construct(Config $c = NULL) {
         // it is possible to override the config from the default...
@@ -23,6 +24,7 @@ class ResourceServer {
         $this->_storage = new $oauthStorageBackend($this->_c);
         $this->_bearerToken = NULL;
         $this->_grantedEntitlement = NULL;
+        $this->_entitlementEnforcement = TRUE;
     }
 
     public function verifyAuthorizationHeader($authorizationHeader) {
@@ -46,21 +48,26 @@ class ResourceServer {
         $this->_grantedEntitlement = $entitlement->entitlement;
     }
 
+    public function setEntitlementEnforcement($enforce = TRUE) {
+        $this->_entitlementEnforcement = $enforce;
+    }
+
     public function requireEntitlement($entitlement) {
-        if(NULL === $this->_grantedEntitlement) {
-            // FIXME: is this actually true? maybe the entitlement can truely be "null"?
-            throw new Exception("need to verify the token first");
-        }
-        $grantedEntitlement = explode(" ", $this->_grantedEntitlement);
-        if(!in_array($entitlement, $grantedEntitlement)) {
-            throw new VerifyException("insufficient_entitlement", "no permission for this call with granted entitlement");
+        if($this->_entitlementEnforcement) {
+            if(NULL === $this->_grantedEntitlement) {
+                throw new VerifyException("insufficient_entitlement", "no permission for this call with granted entitlement");
+            }
+            $grantedEntitlement = explode(" ", $this->_grantedEntitlement);
+            if(!in_array($entitlement, $grantedEntitlement)) {
+                throw new VerifyException("insufficient_entitlement", "no permission for this call with granted entitlement");
+            }
         }
     }
 
     public function requireScope($scope) {
         if(NULL === $this->_bearerToken) {
             // this is a programmer error
-            throw new Exception("need to verify the token first");
+            throw new \Exception("need to verify the token first");
         }
         $grantedScope = new Scope($this->_bearerToken->scope);
         $requiredScope = new Scope($scope);
@@ -72,7 +79,7 @@ class ResourceServer {
     public function getResourceOwnerId() {
         if(NULL === $this->_bearerToken) {
             // this is a programmer error
-            throw new Exception("need to verify the token first");
+            throw new \Exception("need to verify the token first");
         }
         return $this->_bearerToken->resource_owner_id;
     }

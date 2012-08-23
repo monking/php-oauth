@@ -38,17 +38,8 @@ try {
     }
     $rs->verifyAuthorizationHeader($authorizationHeader);
 
-    // verify the scope permissions
-    if(in_array($request->getCollection(), array ("applications", "authorizations"))) {
-        $rs->requireScope($request->getCollection());
-    }
-
-    // verify the entitlement, to manage clients one needs to have the 
-    // "applications" entitlement
-    if(!$config->getSectionValue("Api", "disableEntitlementEnforcement")) {
-        if(in_array($request->getCollection(), array ("applications"))) {
-            $rs->requireEntitlement($request->getCollection());
-        }
+    if($config->getSectionValue("Api", "disableEntitlementEnforcement")) {
+        $rs->setEntitlementEnforcement(FALSE);
     }
 
     $request->matchRestNice("GET", "/resource_owner/id", function() use ($response, $rs) {
@@ -56,6 +47,7 @@ try {
     });
 
     $request->matchRestNice("POST", "/authorizations", function() use ($request, $response, $storage, $rs) {
+        $rs->requireScope("authorizations");
         $data = json_decode($request->getContent(), TRUE);
         if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
             throw new ApiException("invalid_request", "missing required parameters");
@@ -72,6 +64,7 @@ try {
     });
 
     $request->matchRestNice("GET", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
+        $rs->requireScope("authorizations");
         $data = $storage->getApproval($id, $rs->getResourceOwnerId());
         if(FALSE === $data) {
             throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
@@ -81,6 +74,7 @@ try {
 
 
     $request->matchRestNice("GET", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
+        $rs->requireScope("authorizations");
         $data = $storage->getApproval($id, $rs->getResourceOwnerId());
         if(FALSE === $data) {
             throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
@@ -89,28 +83,37 @@ try {
     });
 
     $request->matchRestNice("DELETE", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
+        $rs->requireScope("authorizations");
         if(FALSE === $storage->deleteApproval($id, $rs->getResourceOwnerId())) {
             throw new ApiException("not_found", "the resource you are trying to delete does not exist");
         }
     });
 
     $request->matchRestNice("GET", "/authorizations/", function() use ($request, $response, $storage, $rs) {
+        $rs->requireScope("authorizations");
         $data = $storage->getApprovals($rs->getResourceOwnerId());
         $response->setContent(json_encode($data));
     });
 
     $request->matchRestNice("GET", "/applications/", function() use ($request, $response, $storage, $rs) {
+        $rs->requireScope("applications");
+        // $rs->requireEntitlement("applications");    // do not require entitlement to list clients...
         $data = $storage->getClients();
         $response->setContent(json_encode($data)); 
     });
 
     $request->matchRestNice("DELETE", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
+        $rs->requireScope("applications");
+        $rs->requireEntitlement("applications");
         if(FALSE === $storage->deleteClient($id)) {
             throw new ApiException("not_found", "the resource you are trying to delete does not exist");
         }
     });
 
     $request->matchRestNice("GET", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
+        $rs->requireScope("applications");
+        $rs->requireEntitlement("applications");    // FIXME: for now require entitlement as long as password hashing is not
+                                                    // implemented...
         $data = $storage->getClient($id);
         if(FALSE === $data) {
             throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
@@ -119,6 +122,8 @@ try {
     });
 
     $request->matchRestNice("POST", "/applications/", function() use ($request, $response, $storage, $rs) {
+        $rs->requireScope("applications");
+        $rs->requireEntitlement("applications");
         try { 
             $client = Client::fromArray(json_decode($request->getContent(), TRUE));
             $data = $client->getClientAsArray();
@@ -137,6 +142,8 @@ try {
     });
 
     $request->matchRestNice("PUT", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
+        $rs->requireScope("applications");
+        $rs->requireEntitlement("applications");
         try {
             $client = Client::fromArray(json_decode($request->getContent(), TRUE));
             $data = $client->getClientAsArray();

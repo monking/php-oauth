@@ -30,7 +30,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function getClients() {
-        $stmt = $this->_pdo->prepare("SELECT * FROM Client");
+        $stmt = $this->_pdo->prepare("SELECT id, name, description, redirect_uri, type, icon, allowed_scope FROM Client");
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to retrieve clients");
@@ -217,7 +217,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     }
 
     public function getApprovals($resourceOwnerId) {
-        $stmt = $this->_pdo->prepare("SELECT c.id, a.scope, c.name, c.description, c.icon, c.redirect_uri FROM Approval a, Client c WHERE resource_owner_id = :resource_owner_id AND a.client_id = c.id");
+        $stmt = $this->_pdo->prepare("SELECT a.scope, c.id, c.name, c.description, c.redirect_uri, c.type, c.icon, c.allowed_scope FROM Approval a, Client c WHERE resource_owner_id = :resource_owner_id AND a.client_id = c.id");
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
@@ -227,12 +227,19 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     }
 
     public function deleteApproval($clientId, $resourceOwnerId) {
+        // remove access token
+        $stmt = $this->_pdo->prepare("DELETE FROM AccessToken WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
+        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
+        $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
+        if (FALSE === $stmt->execute()) {
+            throw new StorageException("unable to delete access token");
+        }
         // remove refresh token
         $stmt = $this->_pdo->prepare("DELETE FROM RefreshToken WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         if (FALSE === $stmt->execute()) {
-            throw new StorageException("unable to delete approval");
+            throw new StorageException("unable to delete refresh token");
         }
         // remove approval
         $stmt = $this->_pdo->prepare("DELETE FROM Approval WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");

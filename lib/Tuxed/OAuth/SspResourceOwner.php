@@ -56,7 +56,7 @@ class SspResourceOwner implements IResourceOwner {
         }
 
         if(!array_key_exists($entitlementAttributeName, $attributes)) {
-            throw new ResourceOwnerException("entitlementAttributeName is not available in SAML attributes");
+            return NULL;
         }
 
         $entitlements = array();
