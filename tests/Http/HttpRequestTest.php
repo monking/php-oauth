@@ -272,6 +272,17 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse($h->matchRestNice("GET", "/foo/bar/foo/bar/bar", NULL));
     }
 
+    function testMatchRestNiceEmptyResource() {
+        $h = new HttpRequest("http://www.example.org/api.php", "GET");
+        $h->setPathInfo("/foo/");
+        $this->assertFalse($h->matchRestNice("GET", "/foo/:bar", NULL));
+        $self = &$this;
+        $h->matchDefault(function($methodMatch, $patternMatch) use ($self) {
+            $self->assertEquals(array("GET"), $methodMatch);
+            $self->assertFalse($patternMatch);
+        });
+    }
+
 }
 
 ?>
