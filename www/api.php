@@ -46,7 +46,7 @@ try {
         $response->setContent(json_encode(array("id" => $rs->getResourceOwnerId())));
     });
 
-    $request->matchRest("POST", "/authorizations", function() use ($request, $response, $storage, $rs) {
+    $request->matchRest("POST", "/authorizations/", function() use ($request, $response, $storage, $rs) {
         $rs->requireScope("authorizations");
         $data = json_decode($request->getContent(), TRUE);
         if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
