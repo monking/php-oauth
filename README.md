@@ -15,18 +15,18 @@ without requiring extensive changes.
 # Requirements
 The installation requirements on Fedora/CentOS can be installed like this:
 
-    $ su -c 'yum install git php-pdo php httpd unzip wget'
+    $ su -c 'yum install git php-pdo php httpd'
 
 On Debian/Ubuntu:
 
-    $ sudo apt-get install git sqlite3 php5 php5-sqlite wget unzip
+    $ sudo apt-get install git sqlite3 php5 php5-sqlite
 
 # Installation
 *NOTE*: in the `chown` line you need to use your own user account name!
 
     $ cd /var/www/html
     $ su -c 'mkdir php-oauth'
-    $ su -c 'chown fkooman.fkooman php-oauth'
+    $ su -c 'chown fkooman:fkooman php-oauth'
     $ git clone git://github.com/fkooman/php-oauth.git
     $ cd php-oauth
 
@@ -41,12 +41,19 @@ Next make sure to configure the database settings in `config/oauth.ini`, and
 possibly other settings. If you want to keep using SQlite you are good to go 
 without fiddling with the database settings. Now to initialize the database:
 
+    $ sed -i 's|http://localhost|https://www.example.org|g' docs/initOAuthDatabase.php
     $ php docs/initOAuthDatabase.php
+
+Where the `sed` command replaces the domain name for some initial client 
+registrations that will be performed on the same domain. You still need to 
+install those as well, see the next section, but with this you will already
+have the client registration done, otherwise they will all point to 
+`http://localhost` instead.
 
 *NOTE*: On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
 in `/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
 
-# Management Client
+# Management Clients
 There are two reference management clients available:
 
 * [Manage Applications](https://github.com/fkooman/html-manage-applications/). 
@@ -92,33 +99,30 @@ A more complex part of the authentication and authorization is the use of
 entitlements. This is a bit similar to scope in OAuth, only entitlements are 
 for resource owner, while scope is only for OAuth clients.
 
-The entitlements are used in the `php-oauth` API. It is for example possible to 
+The entitlements are for example used by the `php-oauth` API. It is possible to 
 write a client application that uses the `php-oauth` API to manage OAuth client 
 registrations. The problem now is how to decide who is allowed to manage 
 OAuth client registrations. Clearly not all users who can successfully 
 authenticate, but only a subset. The way now to determine who gets to do what
 is accomplished through entitlements. 
 
-In the `[Api]` section the following is configured:
+In the `[Api]` section the management API can be enabled:
 
-    ; manage OAuth clients (global)
-    requireEntitlement["applications"] = TRUE
-    ; manage OAuth consent/authorization/approval (per resource owner)
-    requireEntitlement["authorizations"] = FALSE
-    ; retrieve resource owner information (per resource owner)
-    requireEntitlement["resource_owner"] = FALSE
+    [Api]
+    enableApi = TRUE
 
-This tells the `php-oauth` API that for management applications an entitlement
-is required in this case the `applications` entitlement. In the authentication
-module it can then be specified what particular resource owner will get this
-entitlement. For instance in the `DummyResourceOwner` section:
+In particular, the authenticated user (resouce owner) needs to have the 
+`applications` entitlement in order to be able to modify application 
+registrations.
+
+In the authentication modules one can then specify what particular resource 
+owner will get this entitlement. For instance in the `DummyResourceOwner` 
+section:
 
     ; Dummy Configuration
     [DummyResourceOwner]
     resourceOwnerId = "fkooman"
-
     resourceOwnerEntitlement["applications"] = "fkooman"
-    ;resourceOwnerEntitlement["authorizations"] = "fkooman"
 
 Here you can see that the resource owner `fkooman` will be granted the 
 `applications` entitlement. As there is only one account in the 
@@ -128,10 +132,8 @@ Now, for the `SspResourceOwner` configuration it is a little bit more complex,
 all non relevant configuration was stripped:
 
     [SspResourceOwner]
-    ; by default we recommend to use an entitlement SAML attribute to indicate
-    ; who is allowed to access certain restricted API calls
     entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
-    entitlementFromAttributeValue["applications"] = "urn:vnd:oauth2:applications"
+    entitlementValueMapping["applications"] = "urn:vnd:oauth2:applications"
 
 This means that the entitlement is determined by looking at the SAML attribute 
 `urn:mace:dir:attribute-def:eduPersonEntitlement` provided as part
@@ -141,11 +143,12 @@ of the SAML assertion. If (one of the values) of this attribute contains
 users that are allowed to perform OAuth client registrations. This is 
 convenient as you no longer need to modify the configuration of `php-oauth` to
 add a new "administrator", but can just add the entitlement to the user in the
-IdP.
+IdP user directory.
 
 ## simpleSAMLphp
 In the configuration file `config/oauth.ini` various aspects can be configured. 
-To configure the SAML integration, make sure the following settings are correct:
+To configure the SAML integration, make sure the following settings are
+at least correct. See above for the entitlement configuration.
 
     authenticationMechanism = "SspResourceOwner"
 
@@ -158,7 +161,8 @@ To configure the SAML integration, make sure the following settings are correct:
     ; assertion as the user identifier (RECOMMENDED)
     useNameID = TRUE
 
-    ; you can also use an attribute to determine the UID, but this is not 
-    ; recommended and should only be used for testing purposes!
+    ; you can also use an attribute as a unique identifier for a user instead 
+    ; of the NameID, but set 'useNameID' to FALSE then!
     ;resourceOwnerIdAttributeName = "uid"
     ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
+
