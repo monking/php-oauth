@@ -14,13 +14,17 @@ use \Tuxed\OAuth\VerifyException as VerifyException;
 use \Tuxed\OAuth\Client as Client;
 use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
 use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
+use \Tuxed\Logger as Logger;
 
 $response = new HttpResponse();
 $response->setHeader("Content-Type", "application/json");
 
+$logger = NULL;
+
 try {
 
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
+    $logger = new Logger($config->getValue('serviceName'), $config->getValue('logFile'), $config->getValue('logMail', FALSE));
 
     if(!$config->getSectionValue("Api", "enableApi")) {
         throw new ApiException("forbidden","api disabled");
@@ -30,6 +34,7 @@ try {
     $storage = new $oauthStorageBackend($config);
 
     $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
+    $logger->logDebug($request->toString());
 
     $rs = new ResourceServer();
     
@@ -174,15 +179,21 @@ try {
     $response->setStatusCode($e->getResponseCode());
     $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
+    $logger->logFatal($e->getLogMessage(TRUE));
 } catch (ApiException $e) {
     $response->setStatusCode($e->getResponseCode());
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
+    $logger->logFatal($e->getLogMessage(TRUE));
 } catch (Exception $e) {
     // any other error thrown by any of the modules, assume internal server error
     $response->setStatusCode(500);
     $response->setContent(json_encode(array("error" => "internal_server_error", "error_description" => $e->getMessage())));
+    $logger->logFatal($e->getMessage());
 }
 
+if(NULL !== $logger) {
+    $logger->logDebug($response->toString());
+}
 $response->sendResponse();
 
 ?>

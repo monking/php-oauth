@@ -11,11 +11,14 @@ use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
 use \Tuxed\OAuth\ResourceOwnerException as ResourceOwnerException;
 use \Tuxed\OAuth\ClientException as ClientException;
+use \Tuxed\Logger as Logger;
 
 $response = new HttpResponse();
+$logger = NULL;
 
 try { 
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
+    $logger = new Logger($config->getValue('serviceName'), $config->getValue('logFile'), $config->getValue('logMail', FALSE));
 
     $authMech = '\\Tuxed\OAuth\\' . $config->getValue('authenticationMechanism');
     $resourceOwner = new $authMech($config);
@@ -24,6 +27,7 @@ try {
     $storage = new $oauthStorageBackend($config);
 
     $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
+    $logger->logDebug($request->toString());
 
     $resourceOwner->setHint($request->getQueryParameter("user_address"));
 
@@ -94,9 +98,10 @@ try {
     }
     $response->setStatusCode(302);
     $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
-
+    $logger->logFatal($e->getLogMessage(TRUE));
 //} catch (ResourceOwnerException $e) {
     // FIXME: implement a different error for this, probably with more details!
+    // so it won't be a HTTP 500! 
 
 } catch (Exception $e) {
     // tell resource owner about the error (through browser)
@@ -106,8 +111,12 @@ try {
     require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
     $response->setStatusCode(500);
     $response->setContent(ob_get_clean());
+    $logger->logFatal($e->getMessage());
 }
 
+if(NULL !== $logger) {
+    $logger->logDebug($response->toString());
+}
 $response->sendResponse();
 
 ?>

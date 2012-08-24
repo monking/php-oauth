@@ -33,7 +33,7 @@ class ClientException extends \Exception {
     public function getLogMessage($includeTrace = FALSE) {
         $msg = 'Message    : ' . $this->getMessage() . PHP_EOL .
                'Description: ' . $this->getDescription() . PHP_EOL .
-               'Client     : ' . $this->getClient() . PHP_EOL .
+               'Client     : ' . $this->getClient()->id . PHP_EOL .
                'State      : ' . $this->getState() . PHP_EOL;
         if($includeTrace) {
             $msg .= 'Trace      : ' . PHP_EOL . $this->getTraceAsString() . PHP_EOL;

@@ -19,6 +19,10 @@ allowResourceOwnerScopeFiltering = FALSE
 ; the access token expiry time (in seconds)
 accessTokenExpiry = 3600
 
+logFile = "/PATH/TO/APP/data/logs/oauth2.txt"
+;logMail[] = "fkooman@example.org"
+;logMail[] = "foo@example.com"
+
 ; Options for the HTTP REST based API for managing the OAuth AS
 [Api]
 enableApi = FALSE

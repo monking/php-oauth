@@ -138,4 +138,18 @@ class HttpResponse {
         echo $this->getContent();
     }
 
+    public function toString() {
+        $s  = PHP_EOL;
+        $s .= "HttpResponse" . PHP_EOL;
+        $s .= "STATUS:" . PHP_EOL;
+        $s .= "\t" . $this->getStatusLine() . PHP_EOL;
+        $s .= "HEADERS:" . PHP_EOL;
+        foreach ($this->getHeaders() as $k => $v) {
+            $s .= "\t" . ($k . ": " . $v) . PHP_EOL;
+        }
+        $s .= "CONTENT:" . PHP_EOL;
+        $s .= "\t" . $this->getContent() . PHP_EOL;
+        return $s;
+    }
+
 }

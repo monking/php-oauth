@@ -197,4 +197,16 @@ class HttpRequest {
         $callback($this->_methodMatch, $this->_patternMatch);
     }
 
+    public function toString() {
+        $s  = PHP_EOL;
+        $s .= "HttpRequest" . PHP_EOL;
+        $s .= "HEADERS:" . PHP_EOL;
+        foreach($this->getHeaders(TRUE) as $v) {
+            $s .= "\t" . $v . PHP_EOL;
+        }
+        $s .= "CONTENT:" . PHP_EOL;
+        $s .= "\t" . $this->getContent();
+        return $s;
+    }
+
 }
