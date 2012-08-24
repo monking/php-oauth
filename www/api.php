@@ -13,6 +13,7 @@ use \Tuxed\OAuth\ResourceServer as ResourceServer;
 use \Tuxed\OAuth\VerifyException as VerifyException;
 use \Tuxed\OAuth\Client as Client;
 use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
+use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
 
 $response = new HttpResponse();
 $response->setHeader("Content-Type", "application/json");
@@ -53,8 +54,10 @@ try {
             throw new ApiException("invalid_request", "missing required parameters");
         }
         // check to see if an authorization for this client/resource_owner already exists
+        // FIXME: should the scope not be updated instead of failing if it exists?
         if(FALSE === $storage->getApproval($data['client_id'], $rs->getResourceOwnerId())) {
-            if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope'])) {
+            $refreshToken = AuthorizationServer::randomHex(16);
+            if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope']), $refreshToken) {
                 throw new ApiException("invalid_request", "unable to add authorization");
             }
         } else {
