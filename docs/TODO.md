@@ -5,6 +5,6 @@
   * make loglevel configurable
 * Warn if not using SSL
 * Fixup token validation grant type (add Basic Auth)
-  * write spec
+  * write spec possibly based on Ping Identity initial work
 * return existing access code when a new request comes in from the same client,ro,scope
-* rename database tables
+* rename database tables to lower case and make them plural
