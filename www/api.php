@@ -50,13 +50,12 @@ try {
     $request->matchRest("POST", "/authorizations/", function() use ($request, $response, $storage, $rs) {
         $rs->requireScope("authorizations");
         $data = json_decode($request->getContent(), TRUE);
-        if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
+        if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data) || !array_key_exists("refresh_token", $data)) {
             throw new ApiException("invalid_request", "missing required parameters");
         }
         // check to see if an authorization for this client/resource_owner already exists
-        // FIXME: should the scope not be updated instead of failing if it exists?
         if(FALSE === $storage->getApproval($data['client_id'], $rs->getResourceOwnerId())) {
-            $refreshToken = AuthorizationServer::randomHex(16);
+            $refreshToken = $data['refresh_token'] ? AuthorizationServer::randomHex(16) : NULL;
             if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope'], $refreshToken)) {
                 throw new ApiException("invalid_request", "unable to add authorization");
             }

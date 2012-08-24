@@ -118,7 +118,7 @@ class AuthorizationServer {
                 $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId());
                 if(FALSE === $approvedScope) {
                     // no approved scope stored yet, new entry
-                    $refreshToken = "web_application" === $client->type ? self::randomHex(16) : NULL;
+                    $refreshToken = ("code" === $responseType) ? self::randomHex(16) : NULL;
                     $this->_storage->addApproval($clientId, $resourceOwner->getResourceOwnerId(), $postScope->getScope(), $refreshToken);
                 } else if(!$postScope->isSubsetOf(new Scope($approvedScope->scope))) {
                     // not a subset, merge and store the new one
