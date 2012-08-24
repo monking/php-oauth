@@ -57,7 +57,7 @@ try {
         // FIXME: should the scope not be updated instead of failing if it exists?
         if(FALSE === $storage->getApproval($data['client_id'], $rs->getResourceOwnerId())) {
             $refreshToken = AuthorizationServer::randomHex(16);
-            if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope']), $refreshToken) {
+            if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope'], $refreshToken)) {
                 throw new ApiException("invalid_request", "unable to add authorization");
             }
         } else {

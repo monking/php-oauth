@@ -9,3 +9,7 @@ do
 	php $i
 done
 
+for i in `find www/ | grep \.php$`
+do
+        php $i
+done
