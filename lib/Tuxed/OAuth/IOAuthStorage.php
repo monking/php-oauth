@@ -11,7 +11,6 @@ interface IOAuthStorage {
     public function deleteExpiredAccessTokens();
 
     public function getRefreshToken          ($refreshToken);
-    public function storeRefreshToken        ($refreshToken, $clientId, $resourceOwnerId, $scope);
 
     public function getClients               ();
     public function getClient                ($clientId);
@@ -22,7 +21,13 @@ interface IOAuthStorage {
 
     public function getApprovals             ($resourceOwnerId);
     public function getApproval              ($clientId, $resourceOwnerId);
-    public function addApproval              ($clientId, $resourceOwnerId, $scope);
+    public function addApproval              ($clientId, $resourceOwnerId, $scope, $refreshToken);
+
+    // FIXME: should we also update the refresh_token on token update?
     public function updateApproval           ($clientId, $resourceOwnerId, $scope);
     public function deleteApproval           ($clientId, $resourceOwnerId);
+
+    // FIXME: rename to updateResourceOwner and getResourceOwner I guess...
+    public function updateEntitlement        ($resourceOwnerId, $entitlement);
+    public function getEntitlement           ($resourceOwnerId);
 }

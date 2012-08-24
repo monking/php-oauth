@@ -99,12 +99,6 @@ class PdoOAuthStorage implements IOAuthStorage {
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to delete authorization codes");
         }
-        // delete refresh tokens
-        $stmt = $this->_pdo->prepare("DELETE FROM RefreshToken WHERE client_id = :client_id");
-        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to delete refresh tokens");
-        }
         // delete the client
         $stmt = $this->_pdo->prepare("DELETE FROM Client WHERE id = :client_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
@@ -114,24 +108,26 @@ class PdoOAuthStorage implements IOAuthStorage {
         return 1 === $stmt->rowCount();
     }
 
-    public function addApproval($clientId, $resourceOwnerId, $scope) {
-        $stmt = $this->_pdo->prepare("INSERT INTO Approval (client_id, resource_owner_id, scope) VALUES(:client_id, :resource_owner_id, :scope)");
+    public function addApproval($clientId, $resourceOwnerId, $scope, $refreshToken) {
+        $stmt = $this->_pdo->prepare("INSERT INTO Approval (client_id, resource_owner_id, scope, refresh_token) VALUES(:client_id, :resource_owner_id, :scope, :refresh_token)");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
+        $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to store approved scope");
+            throw new StorageException("unable to store approval");
         }
         return 1 === $stmt->rowCount();
     }
 
     public function updateApproval($clientId, $resourceOwnerId, $scope) {
+        // FIXME: should we regenerate the refresh_token?
         $stmt = $this->_pdo->prepare("UPDATE Approval SET scope = :scope WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to update approved scope");
+            throw new StorageException("unable to update approval");
         }
         return 1 === $stmt->rowCount();
     }
@@ -142,7 +138,7 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
-            throw new StorageException("unable to get approved scope");
+            throw new StorageException("unable to get approval");
         }
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
@@ -234,13 +230,6 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to delete access token");
         }
-        // remove refresh token
-        $stmt = $this->_pdo->prepare("DELETE FROM RefreshToken WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
-        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
-        if (FALSE === $stmt->execute()) {
-            throw new StorageException("unable to delete refresh token");
-        }
         // remove approval
         $stmt = $this->_pdo->prepare("DELETE FROM Approval WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
@@ -252,25 +241,13 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     }
 
     public function getRefreshToken($refreshToken) {
-        $stmt = $this->_pdo->prepare("SELECT * FROM RefreshToken WHERE refresh_token = :refresh_token");
+        $stmt = $this->_pdo->prepare("SELECT * FROM Approval WHERE refresh_token = :refresh_token");
         $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to get refresh token");
         }
         return $stmt->fetch(PDO::FETCH_OBJ);
-    }
-
-    public function storeRefreshToken($refreshToken, $clientId, $resourceOwnerId, $scope) {
-        $stmt = $this->_pdo->prepare("INSERT INTO RefreshToken (client_id, resource_owner_id, scope, refresh_token) VALUES(:client_id, :resource_owner_id, :scope, :refresh_token)");
-        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
-        $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
-        $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to store refresh token");
-        }
-       return 1 === $stmt->rowCount();
     }
 
     public function updateEntitlement($resourceOwnerId, $entitlement) {
@@ -308,7 +285,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-
+    // FIXME: add foreign keys to ResourceOwner table
     public function initDatabase() {
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `ResourceOwner` (
@@ -342,22 +319,12 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
         ");
 
-        // FIXME: merge this with approval
-        $this->_pdo->exec("
-            CREATE TABLE IF NOT EXISTS `RefreshToken` (
-            `refresh_token` varchar(64) NOT NULL,
-            `client_id` varchar(64) NOT NULL,
-            `resource_owner_id` varchar(64) NOT NULL,
-            `scope` text DEFAULT NULL,
-            PRIMARY KEY (`refresh_token`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
-        ");
-
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `Approval` (
             `client_id` varchar(64) NOT NULL,
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text DEFAULT NULL,
+            `refresh_token` text DEFAULT NULL,
             FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
             UNIQUE(`client_id`, `resource_owner_id`))
         ");

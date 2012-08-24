@@ -54,6 +54,7 @@ class AuthorizationServer {
                 throw new ClientException("invalid_scope", "not authorized to request this scope", $client, $state);
             }
 
+            // FIXME: add updateEntitlement to IOAuthStorage?
             $this->_storage->updateEntitlement($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement());
 
             $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
@@ -105,6 +106,9 @@ class AuthorizationServer {
                 return $result;
             }
 
+            // FIXME: are we sure this client is always valid?
+            $client = $this->_storage->getClient($clientId);
+
             if("Approve" === $approval) {
                 if(!$postScope->isSubsetOf($scope)) {
                     // FIXME: should this actually be an authorize exception? this is a user error!
@@ -114,7 +118,8 @@ class AuthorizationServer {
                 $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId());
                 if(FALSE === $approvedScope) {
                     // no approved scope stored yet, new entry
-                    $this->_storage->addApproval($clientId, $resourceOwner->getResourceOwnerId(), $postScope->getScope());
+                    $refreshToken = "web_application" === $client->type ? self::randomHex(16) : NULL;
+                    $this->_storage->addApproval($clientId, $resourceOwner->getResourceOwnerId(), $postScope->getScope(), $refreshToken);
                 } else if(!$postScope->isSubsetOf(new Scope($approvedScope->scope))) {
                     // not a subset, merge and store the new one
                     $mergedScopes = clone $postScope;
@@ -127,7 +132,6 @@ class AuthorizationServer {
                 return $this->authorize($resourceOwner, $get);
 
             } else {
-                $client = $this->_storage->getClient($clientId);
                 throw new ClientException("access_denied", "not authorized by resource owner", $client, $state);
             }
         } catch (ScopeException $e) {
@@ -146,6 +150,8 @@ class AuthorizationServer {
         if(NULL === $grantType) {
             throw new TokenException("invalid_request", "the grant_type parameter is missing");
         }
+
+        $result = NULL;
 
         switch($grantType) {
             case "urn:pingidentity.com:oauth2:grant_type:validate_bearer":
@@ -227,10 +233,8 @@ class AuthorizationServer {
             if(FALSE === $this->_storage->deleteAuthorizationCode($code, $redirectUri)) {
                 throw new TokenException("invalid_grant", "this grant was already used");
             }
-            // create a refresh token as well
-            // FIXME: return existing refresh token if it exists for this exact client, resource owner and scope!
-            $token->refresh_token = self::randomHex(16);
-            $this->_storage->storeRefreshToken($token->refresh_token, $token->client_id, $token->resource_owner_id, $token->scope);
+            $approval = $this->_storage->getApproval($result->client_id, $result->resource_owner_id);
+            $token->refresh_token = $approval->refresh_token;
         } else {
             // refresh_token
             // just return the generated access_token
