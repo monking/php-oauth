@@ -46,10 +46,11 @@ class Logger {
         // send out mail
         foreach($this->_sendMail as $v) {
             if(NULL !== $v && !empty($v)) {
-                $mailSubject = "[" . $this->_appName . "] " . $logLevel . " " . substr(strtok($message, PHP_EOL), 0, 50);
+                $mailSubject = "(" . microtime(TRUE) . ") [" . $this->_appName . "] " . $logLevel . " " . substr(strtok($message, PHP_EOL), 0, 50);
                 $mailBody = $message;
                 if(FALSE === mail($v, $mailSubject, $mailBody)) {
-                    throw new LoggerException("unable to mail log entry");
+                    // silently ignore for now... better no mail than breakage
+                    // throw new LoggerException("unable to mail log entry");
                 }
             }
         }
