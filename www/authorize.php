@@ -13,21 +13,24 @@ use \Tuxed\OAuth\ResourceOwnerException as ResourceOwnerException;
 use \Tuxed\OAuth\ClientException as ClientException;
 use \Tuxed\Logger as Logger;
 
-$response = new HttpResponse();
 $logger = NULL;
+$request = NULL;
+$response = NULL;
 
 try { 
+    $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
+    $response = new HttpResponse();
+
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
-    $logger = new Logger($config->getValue('serviceName'), $config->getValue('logFile'), $config->getValue('logMail', FALSE));
+    $logger = new Logger($config->getSectionValue('Log', 'logLevel'), $config->getValue('serviceName'), $config->getSectionValue('Log', 'logFile'), $config->getSectionValue('Log', 'logMail', FALSE));
+
+    $logger->logDebug($request);
 
     $authMech = '\\Tuxed\OAuth\\' . $config->getValue('authenticationMechanism');
     $resourceOwner = new $authMech($config);
 
     $oauthStorageBackend = '\\Tuxed\OAuth\\' . $config->getValue('storageBackend');
     $storage = new $oauthStorageBackend($config);
-
-    $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
-    $logger->logDebug($request->toString());
 
     $resourceOwner->setHint($request->getQueryParameter("user_address"));
 
@@ -87,7 +90,6 @@ try {
             break;
     }
 
-
 } catch (ClientException $e) { 
     // tell the client about the error
     $client = $e->getClient();
@@ -98,25 +100,36 @@ try {
     }
     $response->setStatusCode(302);
     $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
-    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
-//} catch (ResourceOwnerException $e) {
-    // FIXME: implement a different error for this, probably with more details!
-    // so it won't be a HTTP 500! 
-
-} catch (Exception $e) {
+    if(NULL !== $logger) {
+        $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request . PHP_EOL . $response);
+    }
+} catch (ResourceOwnerException $e) {
     // tell resource owner about the error (through browser)
-    $templateData = array ("error" => $e->getMessage());
+    $response->setStatusCode(400);
+    $templateData = array ("error" => $e->getMessage(), "code" => $response->getStatusCode(), "reason" => $response->getStatusReason());
     extract($templateData);
     ob_start();
     require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
-    $response->setStatusCode(500);
     $response->setContent(ob_get_clean());
-    $logger->logFatal($e->getMessage() . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
+    if(NULL !== $logger) {
+        $logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);
+    }
+} catch (Exception $e) {
+    // internal server error, inform resource owner through browser
+    $response->setStatusCode(500);
+    $templateData = array ("error" => $e->getMessage(), "code" => $response->getStatusCode(), "reason" => $response->getStatusReason());
+    extract($templateData);
+    ob_start();
+    require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
+    $response->setContent(ob_get_clean());
+    if(NULL !== $logger) {
+        $logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);
+    }
 }
 
 if(NULL !== $logger) {
-    $logger->logDebug($response->toString());
+    $logger->logDebug($response);
 }
-$response->sendResponse();
-
-?>
+if(NULL !== $response) {
+    $response->sendResponse();
+}

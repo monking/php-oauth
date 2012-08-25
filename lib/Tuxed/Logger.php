@@ -4,11 +4,16 @@ namespace Tuxed;
 
 class Logger {
 
+    private $_logLevel;
     private $_appName;
     private $_logFile;
     private $_sendMail;
 
-    public function __construct($appName, $logFile, $sendMail = NULL) {
+    public function __construct($logLevel, $appName, $logFile, $sendMail = NULL) {
+        if(!in_array($logLevel, array(100, 200, 300, 400))) {
+            $logLevel = 300;
+        }
+        $this->_logLevel = $logLevel;
         $this->_appName = $appName;
         $this->_logFile = $logFile;
         if(NULL === $sendMail || !is_array($sendMail)) {
@@ -19,6 +24,9 @@ class Logger {
     }
 
     public function logMessage($level, $message) {
+        if($level < $this->_logLevel) {
+            return;
+        }
         switch($level) {
             case 100:
                 $logLevel = "[DEBUG]  ";

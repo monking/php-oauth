@@ -138,7 +138,7 @@ class HttpResponse {
         echo $this->getContent();
     }
 
-    public function toString() {
+    public function __toString() {
         $s  = PHP_EOL;
         $s .= "HttpResponse" . PHP_EOL;
         $s .= "STATUS:" . PHP_EOL;

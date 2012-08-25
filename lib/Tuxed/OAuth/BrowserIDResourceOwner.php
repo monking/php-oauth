@@ -16,7 +16,7 @@ class BrowserIDResourceOwner implements IResourceOwner {
 
         $bPath = $this->_c->getSectionValue('BrowserIDResourceOwner', 'browserIDPath') . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'BrowserIDVerifier.php';
         if(!file_exists($bPath) || !is_file($bPath) || !is_readable($bPath)) {
-            throw new ResourceOwnerException("invalid path to php-browserid");
+            throw new BrowserIDResourceOwnerException("invalid path to php-browserid");
         }
         require_once $bPath;
 

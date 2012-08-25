@@ -197,7 +197,7 @@ class HttpRequest {
         $callback($this->_methodMatch, $this->_patternMatch);
     }
 
-    public function toString() {
+    public function __toString() {
         $s  = PHP_EOL;
         $s .= "HttpRequest" . PHP_EOL;
         $s .= "HEADERS:" . PHP_EOL;

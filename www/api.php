@@ -16,15 +16,19 @@ use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
 use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
 use \Tuxed\Logger as Logger;
 
-$response = new HttpResponse();
-$response->setHeader("Content-Type", "application/json");
-
 $logger = NULL;
+$request = NULL;
+$response = NULL;
 
 try {
+    $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
+    $response = new HttpResponse();
+    $response->setHeader("Content-Type", "application/json");
 
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
-    $logger = new Logger($config->getValue('serviceName'), $config->getValue('logFile'), $config->getValue('logMail', FALSE));
+    $logger = new Logger($config->getSectionValue('Log', 'logLevel'), $config->getValue('serviceName'), $config->getSectionValue('Log', 'logFile'), $config->getSectionValue('Log', 'logMail', FALSE));
+
+    $logger->logDebug($request);
 
     if(!$config->getSectionValue("Api", "enableApi")) {
         throw new ApiException("forbidden","api disabled");
@@ -32,9 +36,6 @@ try {
 
     $oauthStorageBackend = '\\Tuxed\\OAuth\\' . $config->getValue('storageBackend');
     $storage = new $oauthStorageBackend($config);
-
-    $request = HttpRequest::fromIncomingHttpRequest(new IncomingHttpRequest());
-    $logger->logDebug($request->toString());
 
     $rs = new ResourceServer();
     
@@ -179,21 +180,27 @@ try {
     $response->setStatusCode($e->getResponseCode());
     $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
-    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
+    if(NULL !== $logger) {
+        $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request . PHP_EOL . $response);
+    }
 } catch (ApiException $e) {
     $response->setStatusCode($e->getResponseCode());
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
-    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
+    if(NULL !== $logger) {
+        $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request . PHP_EOL . $response);
+    }
 } catch (Exception $e) {
     // any other error thrown by any of the modules, assume internal server error
     $response->setStatusCode(500);
     $response->setContent(json_encode(array("error" => "internal_server_error", "error_description" => $e->getMessage())));
-    $logger->logFatal($e->getMessage() . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
+    if(NULL !== $logger) {
+        $logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);
+    }
 }
 
 if(NULL !== $logger) {
-    $logger->logDebug($response->toString());
+    $logger->logDebug($response);
 }
-$response->sendResponse();
-
-?>
+if(NULL !== $response) {
+    $response->sendResponse();
+}
