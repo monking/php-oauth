@@ -49,11 +49,11 @@ try {
     $response->setHeader('Cache-Control', 'no-store');
     $response->setHeader('Pragma', 'no-cache');
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription()))); 
-    $logger->logFatal($e->getLogMessage(TRUE));
+    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 } catch (Exception $e) {
     $response->setStatusCode(500);
     $response->setContent(json_encode(array("error" => $e->getMessage())));
-    $logger->logFatal($e->getMessage());
+    $logger->logFatal($e->getMessage() . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 }
 
 if(NULL !== $logger) {

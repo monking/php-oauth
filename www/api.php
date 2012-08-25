@@ -179,16 +179,16 @@ try {
     $response->setStatusCode($e->getResponseCode());
     $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
-    $logger->logFatal($e->getLogMessage(TRUE));
+    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 } catch (ApiException $e) {
     $response->setStatusCode($e->getResponseCode());
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
-    $logger->logFatal($e->getLogMessage(TRUE));
+    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 } catch (Exception $e) {
     // any other error thrown by any of the modules, assume internal server error
     $response->setStatusCode(500);
     $response->setContent(json_encode(array("error" => "internal_server_error", "error_description" => $e->getMessage())));
-    $logger->logFatal($e->getMessage());
+    $logger->logFatal($e->getMessage() . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 }
 
 if(NULL !== $logger) {

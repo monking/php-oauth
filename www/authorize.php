@@ -98,7 +98,7 @@ try {
     }
     $response->setStatusCode(302);
     $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
-    $logger->logFatal($e->getLogMessage(TRUE));
+    $logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 //} catch (ResourceOwnerException $e) {
     // FIXME: implement a different error for this, probably with more details!
     // so it won't be a HTTP 500! 
@@ -111,7 +111,7 @@ try {
     require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
     $response->setStatusCode(500);
     $response->setContent(ob_get_clean());
-    $logger->logFatal($e->getMessage());
+    $logger->logFatal($e->getMessage() . PHP_EOL . $request->toString() . PHP_EOL . $response->toString());
 }
 
 if(NULL !== $logger) {
