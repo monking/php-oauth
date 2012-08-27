@@ -199,14 +199,21 @@ class HttpRequest {
 
     public function __toString() {
         $s  = PHP_EOL;
-        $s .= "HttpRequest" . PHP_EOL;
-        $s .= "HEADERS:" . PHP_EOL;
+        $s .= "*HttpRequest*" . PHP_EOL;
+        $s .= "Headers:" . PHP_EOL;
         foreach($this->getHeaders(TRUE) as $v) {
             $s .= "\t" . $v . PHP_EOL;
         }
-        $s .= "CONTENT:" . PHP_EOL;
+        $s .= "Content:" . PHP_EOL;
         $s .= "\t" . $this->getContent();
         return $s;
+
+#        // only log certain headers?
+#        $logHeaders = array("HTTPS", "HTTP_USER_AGENT", "REMOTE_ADDR", "REQUEST_METHOD", "REQUEST_URI", "HTTP_AUTHORIZATION");
+#        foreach($logHeaders as $v) {
+#            $s .= "\t" . $v . ": " . $this->getHeader($v) . PHP_EOL;
+#        }
+
     }
 
 }
