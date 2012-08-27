@@ -2,31 +2,17 @@
 
 namespace Tuxed\OAuth;
 
-use \Tuxed\Config as Config;
-
 class ResourceServer {
 
     private $_storage;
-    private $_c;
-
     private $_entitlementEnforcement;
-
     private $_grantedEntitlement;
     private $_grantedScope;
     private $_resourceOwnerId;
 
-    public function __construct(Config $c = NULL) {
-        // FIXME: just pass the IOAuthStorage        
-        if(NULL === $c) {
-            $this->_c = new Config(dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
-        } else {
-            $this->_c = $c;
-        }
-        $oauthStorageBackend = '\\Tuxed\\OAuth\\' . $this->_c->getValue('storageBackend');
-        $this->_storage = new $oauthStorageBackend($this->_c);
-
+    public function __construct(IOAuthStorage $s) {
+        $this->_storage = $s;
         $this->_entitlementEnforcement = TRUE;
-
         $this->_resourceOwnerId = NULL;
         $this->_grantedScope = NULL;
         $this->_grantedEntitlement = NULL;

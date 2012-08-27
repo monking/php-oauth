@@ -60,7 +60,7 @@ class AuthorizeTest extends PHPUnit_Framework_TestCase {
 
         // initialize authorization server
         $this->_as = new AuthorizationServer($this->_storage, $c);
-        $this->_rs = new ResourceServer($c);
+        $this->_rs = new ResourceServer($this->_storage);
         $this->_ro = new DummyResourceOwner($c);
     }
 
