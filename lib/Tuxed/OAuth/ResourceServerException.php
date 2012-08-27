@@ -2,10 +2,7 @@
 
 namespace Tuxed\OAuth;
 
-/**
- * Thrown when the verification of the access token fails
- */
-class VerifyException extends \Exception {
+class ResourceServerException extends \Exception {
 
     private $_description;
 

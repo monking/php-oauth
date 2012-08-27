@@ -10,7 +10,7 @@ use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
 use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\OAuth\ApiException as ApiException;
 use \Tuxed\OAuth\ResourceServer as ResourceServer;
-use \Tuxed\OAuth\VerifyException as VerifyException;
+use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
 use \Tuxed\OAuth\ClientRegistration as ClientRegistration;
 use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
 use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
@@ -41,7 +41,7 @@ try {
     
     $authorizationHeader = $request->getHeader("HTTP_AUTHORIZATION");
     if(NULL === $authorizationHeader) {
-        throw new VerifyException("invalid_token", "no token provided");
+        throw new ResourceServerException("invalid_token", "no token provided");
     }
     $rs->verifyAuthorizationHeader($authorizationHeader);
 
@@ -176,7 +176,7 @@ try {
         }
     });
 
-} catch (VerifyException $e) {
+} catch (ResourceServerException $e) {
     $response->setStatusCode($e->getResponseCode());
     $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
     $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));

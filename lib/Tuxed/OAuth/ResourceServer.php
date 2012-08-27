@@ -8,23 +8,28 @@ class ResourceServer {
 
     private $_storage;
     private $_c;
-    private $_bearerToken;
-    private $_grantedEntitlement;
+
     private $_entitlementEnforcement;
 
+    private $_grantedEntitlement;
+    private $_grantedScope;
+    private $_resourceOwnerId;
+
     public function __construct(Config $c = NULL) {
-        // it is possible to override the config from the default...
+        // FIXME: just pass the IOAuthStorage        
         if(NULL === $c) {
             $this->_c = new Config(dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
         } else {
             $this->_c = $c;
         }
         $oauthStorageBackend = '\\Tuxed\\OAuth\\' . $this->_c->getValue('storageBackend');
-        // require_once __DIR__ . DIRECTORY_SEPARATOR . $oauthStorageBackend . ".php";
         $this->_storage = new $oauthStorageBackend($this->_c);
-        $this->_bearerToken = NULL;
-        $this->_grantedEntitlement = NULL;
+
         $this->_entitlementEnforcement = TRUE;
+
+        $this->_resourceOwnerId = NULL;
+        $this->_grantedScope = NULL;
+        $this->_grantedEntitlement = NULL;
     }
 
     public function verifyAuthorizationHeader($authorizationHeader) {
@@ -32,18 +37,18 @@ class ResourceServer {
         $b64TokenRegExp = '(?:[[:alpha:][:digit:]-._~+/]+=*)';
         $result = preg_match('|^Bearer (?P<value>' . $b64TokenRegExp . ')$|', $authorizationHeader, $matches);
         if($result === FALSE || $result === 0) {
-            throw new VerifyException("invalid_token", "the access token is malformed");
+            throw new ResourceServerException("invalid_token", "the access token is malformed");
         }
         $accessToken = $matches['value'];
         $token = $this->_storage->getAccessToken($accessToken);
         if(FALSE === $token) {
-            throw new VerifyException("invalid_token", "the access token is invalid");
+            throw new ResourceServerException("invalid_token", "the access token is invalid");
         }
         if(time() > $token->issue_time + $token->expires_in) {
-            throw new VerifyException("invalid_token", "the access token expired");
+            throw new ResourceServerException("invalid_token", "the access token expired");
         }
-        $this->_bearerToken = $token;
-
+        $this->_resourceOwnerId = $token->resource_owner_id;
+        $this->_grantedScope = $token->scope;
         $entitlement = $this->_storage->getEntitlement($token->resource_owner_id);
         $this->_grantedEntitlement = $entitlement->entitlement;
     }
@@ -52,36 +57,40 @@ class ResourceServer {
         $this->_entitlementEnforcement = $enforce;
     }
 
-    public function requireEntitlement($entitlement) {
-        if($this->_entitlementEnforcement) {
-            if(NULL === $this->_grantedEntitlement) {
-                throw new VerifyException("insufficient_entitlement", "no permission for this call with granted entitlement");
-            }
-            $grantedEntitlement = explode(" ", $this->_grantedEntitlement);
-            if(!in_array($entitlement, $grantedEntitlement)) {
-                throw new VerifyException("insufficient_entitlement", "no permission for this call with granted entitlement");
-            }
-        }
+    public function getResourceOwnerId() {
+        // FIXME: should we die when the resourceOwnerId is NULL?
+        return $this->_resourceOwnerId;
+    }
+
+    public function hasScope($scope) {
+        $grantedScope = new Scope($this->_grantedScope);
+        $requiredScope = new Scope($scope);
+        return $grantedScope->hasScope($requiredScope);
     }
 
     public function requireScope($scope) {
-        if(NULL === $this->_bearerToken) {
-            // this is a programmer error
-            throw new \Exception("need to verify the token first");
-        }
-        $grantedScope = new Scope($this->_bearerToken->scope);
-        $requiredScope = new Scope($scope);
-        if(FALSE === $grantedScope->hasScope($requiredScope)) {
-            throw new VerifyException("insufficient_scope", "no permission for this call with granted scope");
+        if(FALSE === $this->hasScope($scope)) {
+            throw new ResourceServerException("insufficient_scope", "no permission for this call with granted scope");
         }
     }
 
-    public function getResourceOwnerId() {
-        if(NULL === $this->_bearerToken) {
-            // this is a programmer error
-            throw new \Exception("need to verify the token first");
+    public function hasEntitlement($entitlement) {
+        if(NULL === $this->_grantedEntitlement) {
+            return FALSE;
         }
-        return $this->_bearerToken->resource_owner_id;
+        $grantedEntitlement = explode(" ", $this->_grantedEntitlement);
+        if(in_array($entitlement, $grantedEntitlement)) {
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    public function requireEntitlement($entitlement) {
+        if($this->_entitlementEnforcement) {
+            if(FALSE === $this->hasEntitlement($entitlement)) {
+                throw new ResourceServerException("insufficient_entitlement", "no permission for this call with granted entitlement");
+            }
+        }
     }
 
 }

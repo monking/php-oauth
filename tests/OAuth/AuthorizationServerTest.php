@@ -9,7 +9,7 @@ use \Tuxed\OAuth\PdoOAuthStorage as PdoOAuthStorage;
 use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
 use \Tuxed\OAuth\ResourceServer as ResourceServer;
 use \Tuxed\OAuth\DummyResourceOwner as DummyResourceOwner;
-use \Tuxed\OAuth\VerifyException as VerifyException;
+use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
 
 class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
 
@@ -34,6 +34,8 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         // override DB config in memory only
         $c->setValue("storageBackend", "PdoOAuthStorage");
         $c->setSectionValue("PdoOAuthStorage", "dsn", $dsn);
+
+        //$c->setSectionValue("DummyResourceOwner", "resourceOwnerEntitlement") = array ("foo" => array("fkooman"));
 
         // intialize storage
         $this->_storage = new PdoOAuthStorage($c);
@@ -133,14 +135,34 @@ class ImplicitGrantTest extends PHPUnit_Framework_TestCase {
         // verify token
         $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
         $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
+        $this->assertTrue($this->_rs->hasEntitlement("applications"));
+        $this->assertFalse($this->_rs->hasEntitlement("foo"));
+        $this->assertTrue($this->_rs->hasScope("read"));
+        $this->assertFalse($this->_rs->hasScope("foo"));
+
+        try {
+            $this->_rs->requireScope("foo");
+            $this->assertTrue(FALSE);
+        } catch(ResourceServerException $e) {
+            $this->assertEquals("insufficient_scope", $e->getMessage());
+            $this->assertEquals("no permission for this call with granted scope", $e->getDescription());
+        }
+
+        try {
+            $this->_rs->requireEntitlement("foo");
+            $this->assertTrue(FALSE);
+        } catch(ResourceServerException $e) {
+            $this->assertEquals("insufficient_entitlement", $e->getMessage());
+            $this->assertEquals("no permission for this call with granted entitlement", $e->getDescription());
+        }
 
         // wait for 6 seconds so the token should be expired...
         sleep(6);
 
         try { 
             $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
-            $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
-        } catch(VerifyException $e) {
+            $this->assertTrue(FALSE);
+        } catch(ResourceServerException $e) {
             $this->assertEquals("invalid_token", $e->getMessage());
             $this->assertEquals("the access token expired", $e->getDescription());
         }
