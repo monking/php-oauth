@@ -11,7 +11,7 @@ use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\OAuth\ApiException as ApiException;
 use \Tuxed\OAuth\ResourceServer as ResourceServer;
 use \Tuxed\OAuth\VerifyException as VerifyException;
-use \Tuxed\OAuth\Client as Client;
+use \Tuxed\OAuth\ClientRegistration as ClientRegistration;
 use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
 use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
 use \Tuxed\Logger as Logger;
@@ -133,7 +133,7 @@ try {
         $rs->requireScope("applications");
         $rs->requireEntitlement("applications");
         try { 
-            $client = Client::fromArray(json_decode($request->getContent(), TRUE));
+            $client = ClientRegistration::fromArray(json_decode($request->getContent(), TRUE));
             $data = $client->getClientAsArray();
             // check to see if an application with this id already exists
             if(FALSE === $storage->getClient($data['id'])) {
@@ -153,7 +153,7 @@ try {
         $rs->requireScope("applications");
         $rs->requireEntitlement("applications");
         try {
-            $client = Client::fromArray(json_decode($request->getContent(), TRUE));
+            $client = ClientRegistration::fromArray(json_decode($request->getContent(), TRUE));
             $data = $client->getClientAsArray();
             if($data['id'] !== $id) {
                 throw new ApiException("invalid_request", "resource does not match client id value");

@@ -3,7 +3,7 @@
 namespace Tuxed\OAuth;
 
 // FIXME: enforce maximum length of fields, match with database!
-class Client {
+class ClientRegistration {
     // VSCHAR     = %x20-7E
     public $regExpVSCHAR = '/^(?:[\x20-\x7E])*$/';
 
