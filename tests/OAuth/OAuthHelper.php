@@ -18,6 +18,7 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
     protected $_as;
     protected $_rs;
     protected $_storage;
+    protected $_config;
 
     public function setUp() {
         $this->_tmpDb = tempnam(sys_get_temp_dir(), "oauth_");
@@ -27,18 +28,18 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
         $dsn = "sqlite:" . $this->_tmpDb;
 
         // load default config
-        $c = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
+        $this->_config = new Config(dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini.defaults");
 
-        $c->setValue("accessTokenExpiry", 5);
+        $this->_config->setValue("accessTokenExpiry", 5);
 
         // override DB config in memory only
-        $c->setValue("storageBackend", "PdoOAuthStorage");
-        $c->setSectionValue("PdoOAuthStorage", "dsn", $dsn);
+        $this->_config->setValue("storageBackend", "PdoOAuthStorage");
+        $this->_config->setSectionValue("PdoOAuthStorage", "dsn", $dsn);
 
-        //$c->setSectionValue("DummyResourceOwner", "resourceOwnerEntitlement") = array ("foo" => array("fkooman"));
+        //$this->_config->setSectionValue("DummyResourceOwner", "resourceOwnerEntitlement") = array ("foo" => array("fkooman"));
 
         // intialize storage
-        $this->_storage = new PdoOAuthStorage($c);
+        $this->_storage = new PdoOAuthStorage($this->_config);
         
         $this->_storage->initDatabase();
 
@@ -64,9 +65,9 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
         $this->_storage->addClient($wa);
 
         // initialize authorization server
-        $this->_as = new AuthorizationServer($this->_storage, $c);
+        $this->_as = new AuthorizationServer($this->_storage, $this->_config);
         $this->_rs = new ResourceServer($this->_storage);
-        $this->_ro = new DummyResourceOwner($c);
+        $this->_ro = new DummyResourceOwner($this->_config);
     }
 
     public function tearDown() {
