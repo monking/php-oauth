@@ -7,8 +7,14 @@ authorizations.
 
 # User Info API
 
-This API call is used to retrieve the user identifier of the resource owner
-that authorized the application.
+This API call can be used by the authorized applications to retrieve some 
+information about the resource owner that granted the authorization.
+
+The calls are under the `resource_owner` path and the following attributes can
+be retrieved: 
+
+* `id` - get the persistent, possibly opague, identifier of the resource owner
+* `entitlement` - get the entitlements granted to the resource owner.
 
 ### Request
 
@@ -20,7 +26,10 @@ that authorized the application.
     HTTP/1.1 200 OK
     Content-Type: application/json
 
-    {'id': 'fkooman'}
+    {"id":"fkooman"}
+
+This information is meant to improve the user experience. For example, to alter 
+the user interface based on entitlements.
 
 # Authorizations API
 

@@ -38,6 +38,10 @@ class Api {
             $response->setContent(json_encode(array("id" => $rs->getResourceOwnerId())));
         });
 
+        $request->matchRest("GET", "/resource_owner/entitlement", function() use ($response, $rs) {
+            $response->setContent(json_encode(array("entitlement" => $rs->getEntitlement())));
+        });
+
         $request->matchRest("POST", "/authorizations/", function() use ($request, $response, $storage, $rs) {
             $rs->requireScope("authorizations");
             $data = json_decode($request->getContent(), TRUE);

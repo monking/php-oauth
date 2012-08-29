@@ -48,6 +48,10 @@ class ResourceServer {
         return $this->_resourceOwnerId;
     }
 
+    public function getEntitlement() {
+        return $this->_grantedEntitlement;
+    }
+
     public function hasScope($scope) {
         $grantedScope = new Scope($this->_grantedScope);
         $requiredScope = new Scope($scope);
