@@ -172,7 +172,7 @@ the following JSON parameters are required in the POST body:
 * `id`
 * `name`
 * `description`
-* `secret (only for `web_application` type)
+* `secret` (only for `web_application` type)
 * `type` (`web_application`, `user_agent_based_application` or `native_application`)
 * `redirect_uri`
 * `icon` (full absolute URL to icon)
