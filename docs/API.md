@@ -50,13 +50,19 @@ The parameters `client_id` and `scope` are required. The resource owner is
 determined through the OAuth access token for which the resource owner gave
 consent.
 
+The parameter `refresh_token` is optional. If set it should be a boolean 
+indicating whether or not a refresh token should be generated.
+
+You cannot request a scope that is not listed in the `allowed_scope` attribute
+for the client.
+ 
 ### Request
 
     POST /php-oauth/api.php/authorizations/ HTTP/1.1
     Authorization: Bearer xyz
     Content-Type: application/json
 
-    {"client_id":"democlient","scope":"read write"}
+    {"client_id":"democlient","scope":"read write","refresh_token":false}
 
 ### Response
 

@@ -41,13 +41,28 @@ class Api {
         $request->matchRest("POST", "/authorizations/", function() use ($request, $response, $storage, $rs) {
             $rs->requireScope("authorizations");
             $data = json_decode($request->getContent(), TRUE);
-            if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data) || !array_key_exists("refresh_token", $data)) {
+            if(NULL === $data || !is_array($data) || !array_key_exists("client_id", $data) || !array_key_exists("scope", $data)) {
                 throw new ApiException("invalid_request", "missing required parameters");
             }
+
+            // client needs to exist
+            $clientId = $data['client_id'];
+            $client = $storage->getClient($clientId);
+            if(FALSE === $client) {
+                throw new ApiException("invalid_request", "client is not registered");
+            }
+
+            // scope should be part of "allowed_scope" of client registration
+            $clientAllowedScope = new Scope($client->allowed_scope);
+            $requestedScope = new Scope($data['scope']);
+            if(!$requestedScope->isSubSetOf($clientAllowedScope)) {
+                throw new ApiException("invalid_request", "invalid scope for this client");
+            }
+            $refreshToken = (array_key_exists("refresh_token", $data) && $data['refresh_token']) ? AuthorizationServer::randomHex(16) : NULL;
+
             // check to see if an authorization for this client/resource_owner already exists
-            if(FALSE === $storage->getApproval($data['client_id'], $rs->getResourceOwnerId())) {
-                $refreshToken = $data['refresh_token'] ? AuthorizationServer::randomHex(16) : NULL;
-                if(FALSE === $storage->addApproval($data['client_id'], $rs->getResourceOwnerId(), $data['scope'], $refreshToken)) {
+            if(FALSE === $storage->getApproval($clientId, $rs->getResourceOwnerId())) {
+                if(FALSE === $storage->addApproval($clientId, $rs->getResourceOwnerId(), $data['scope'], $refreshToken)) {
                     throw new ApiException("invalid_request", "unable to add authorization");
                 }
             } else {

@@ -3,6 +3,7 @@
 require_once 'OAuthHelper.php';
 
 use \Tuxed\OAuth\Api as Api;
+use \Tuxed\OAuth\ApiException as ApiException;
 use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
 
@@ -38,10 +39,39 @@ class ApiTest extends OAuthHelper {
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
         $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
-        // FIXME: test with non existing client_id and not allowed scope!
         $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "read", "refresh_token" => NULL)));
         $response = $this->_api->handleRequest($h);
         $this->assertEquals(201, $response->getStatusCode());
+    }
+
+    public function testAddAuthorizationsUnregisteredClient() {
+        try { 
+            $h = new HttpRequest("http://www.example.org/api.php");
+            $h->setRequestMethod("POST");
+            $h->setPathInfo("/authorizations/");
+            $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+            $h->setContent(json_encode(array("client_id" => "nonexistingclient", "scope" => "read")));
+            $response = $this->_api->handleRequest($h);
+            $this->assertTrue(FALSE);
+        } catch (ApiException $e) {
+            $this->assertEquals("invalid_request", $e->getMessage());
+            $this->assertEquals("client is not registered", $e->getDescription());
+        }
+    }
+
+    public function testAddAuthorizationsUnsupportedScope() {
+        try { 
+            $h = new HttpRequest("http://www.example.org/api.php");
+            $h->setRequestMethod("POST");
+            $h->setPathInfo("/authorizations/");
+            $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "foo")));
+            $response = $this->_api->handleRequest($h);
+            $this->assertTrue(FALSE);
+        } catch (ApiException $e) {
+            $this->assertEquals("invalid_request", $e->getMessage());
+            $this->assertEquals("invalid scope for this client", $e->getDescription());
+        }
     }
 
     public function testGetAuthorization() {
