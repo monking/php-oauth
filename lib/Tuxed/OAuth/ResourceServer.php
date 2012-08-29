@@ -49,7 +49,10 @@ class ResourceServer {
     }
 
     public function getEntitlement() {
-        return $this->_grantedEntitlement;
+        if(NULL === $this->_grantedEntitlement) {
+            return array();
+        }
+        return explode(" ", $this->_grantedEntitlement);
     }
 
     public function hasScope($scope) {

@@ -14,14 +14,15 @@ The calls are under the `resource_owner` path and the following attributes can
 be retrieved: 
 
 * `id` - get the persistent, possibly opague, identifier of the resource owner
-* `entitlement` - get the entitlements granted to the resource owner.
+* `entitlement` - get the entitlements granted to the resource owner, as an 
+  array.
 
-### Request
+### Request `id`
 
     GET /php-oauth/api.php/resource_owner/id
     Authorization: Bearer xyz
 
-### Response
+### Response `id`
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -30,6 +31,18 @@ be retrieved:
 
 This information is meant to improve the user experience. For example, to alter 
 the user interface based on entitlements.
+
+### Request `entitlement`
+
+    GET /php-oauth/api.php/resource_owner/entitlement
+    Authorization: Bearer xyz
+
+### Response `entitlement`
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {"entitlement":["applications","administration"]}
 
 # Authorizations API
 
