@@ -37,5 +37,4 @@ class ApiException extends \Exception {
         return $msg;
     }
 
-
 }
