@@ -4,6 +4,9 @@ Although this is really out of scope here, I found it useful to keep this
 information here as documentation about this doesn't seem to be widely 
 available on the Internet, at least not for 389 Directory Server.
 
+This document is only relevant if you are using the simpleSAMLphp 
+authentication backend together with some LDAP server.
+
 ## 389 Directory Server
 
 We assume you are running a recently modern 389 Directory Server instance, for 
