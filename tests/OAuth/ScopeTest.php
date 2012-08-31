@@ -17,6 +17,11 @@ class ScopeTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("delete read write", $s->getScope());
     }
 
+    function testBasicScopeArray() {
+        $s = new Scope(array("read", "write", "delete"));
+        $this->assertEquals("delete read write", $s->getScope());
+    }
+
     function testEmptyScope() {
         $s = new Scope(NULL);
         $this->assertEquals("", $s->getScope());

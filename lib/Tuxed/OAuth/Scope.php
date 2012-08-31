@@ -10,6 +10,9 @@ class Scope {
         if(NULL === $scope || empty($scope)) {
             $this->_scope = array();
         } else {
+            if(is_array($scope)) {
+                $scope = implode(" ", array_values($scope));
+            }
             $this->_scope = $this->_normalizeScope($scope);
         }
     }
