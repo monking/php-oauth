@@ -71,6 +71,11 @@ class HttpRequest {
         return (array_key_exists($key, $parameters) && !empty($parameters[$key])) ? $parameters[$key] : NULL;
     }
 
+    public function getPostParameter($key) {
+        $parameters = $this->getPostParameters();
+        return (array_key_exists($key, $parameters) && !empty($parameters[$key])) ? $parameters[$key] : NULL;
+    }
+
     public function getPostParameters() {
         if ($this->getRequestMethod() !== "POST") {
             throw new HttpRequestException("request method should be POST");
@@ -200,6 +205,7 @@ class HttpRequest {
     public function __toString() {
         $s  = PHP_EOL;
         $s .= "*HttpRequest*" . PHP_EOL;
+        $s .= "Request URI: " . $this->getRequestUri()->getUri() . PHP_EOL;
         $s .= "Headers:" . PHP_EOL;
         foreach($this->getHeaders(TRUE) as $v) {
             $s .= "\t" . $v . PHP_EOL;

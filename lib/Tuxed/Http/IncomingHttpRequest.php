@@ -23,8 +23,13 @@ class IncomingHttpRequest {
 
     public function getRequestUri() {
         // scheme
+        $proxy = FALSE;
         if (array_key_exists("HTTPS", $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
             $scheme = "https";
+        } elseif (array_key_exists("HTTP_X_FORWARDED_PROTO", $_SERVER) && "https" === $_SERVER["HTTP_X_FORWARDED_PROTO"]) {
+            // HTTPS to HTTP proxy is present
+            $scheme = "https";
+            $proxy = TRUE;
         } else {
             $scheme = "http";
         }
@@ -37,7 +42,7 @@ class IncomingHttpRequest {
         }
 
         // server port
-        if (($_SERVER['SERVER_PORT'] === "80" && $scheme === "http") || ($_SERVER['SERVER_PORT'] === "443" && $scheme === "https")) {
+        if (($_SERVER['SERVER_PORT'] === "80" && ($scheme === "http" || $proxy)) || ($_SERVER['SERVER_PORT'] === "443" && $scheme === "https")) {
             $port = "";
         } else {
             $port = ":" . $_SERVER['SERVER_PORT'];
