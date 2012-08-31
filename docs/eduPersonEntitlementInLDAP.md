@@ -55,4 +55,5 @@ And added to the LDAP like this:
     $ ldapmodify -W -H ldap://localhost -D 'cn=Directory Manager' < add_eduPersonEntitlement.ldif
 
 The `urn:vnd:oauth2:applications` entitlement will make it possible for this 
-user to manage the OAuth client registrations using the API.
+user to manage the OAuth client registrations using the API assuming this is
+configured according to the example in `config/oauth.ini`.
