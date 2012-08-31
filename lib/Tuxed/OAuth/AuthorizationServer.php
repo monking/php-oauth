@@ -68,8 +68,11 @@ class AuthorizationServer {
                     $this->_storage->storeAccessToken($accessToken, time(), $clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope(), $this->_c->getValue('accessTokenExpiry'));
                     $token = array("access_token" => $accessToken, 
                                    "expires_in" => $this->_c->getValue('accessTokenExpiry'), 
-                                   "token_type" => "bearer", 
-                                   "scope" => $scope->getScope());
+                                   "token_type" => "bearer");
+                    $s = $scope->getScope();
+                    if(!empty($s)) {
+                        $token += array ("scope" => $s);
+                    }
                     if(NULL !== $state) {
                         $token += array ("state" => $state);
                     }
@@ -99,7 +102,8 @@ class AuthorizationServer {
             $state        = self::getParameter($get, 'state');
 
             $result = $this->authorize($resourceOwner, $get);
-            $postScope = new Scope(implode(" ", self::getParameter($post, 'scope')));
+
+            $postScope = new Scope(self::getParameter($post, 'scope'));
             $approval = self::getParameter($post, 'approval');
 
             if($result['action'] !== "ask_approval") {

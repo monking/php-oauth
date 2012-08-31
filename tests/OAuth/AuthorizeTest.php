@@ -22,14 +22,11 @@ class AuthorizeTest extends OAuthHelper {
         $this->_as->authorize($this->_ro, $get);
     }
 
-    /**
-     * @expectedException \Tuxed\OAuth\ClientException
-     * @expectedExceptionMessage invalid_scope
-     */
-    /*public function testMissingScope() {
+
+    public function testWithoutScope() {
         $get = array("client_id" => "testclient", "response_type" => "token");
         $this->_as->authorize($this->_ro, $get);
-    }*/
+    }
 
     /**
      * @expectedException \Tuxed\OAuth\ResourceOwnerException

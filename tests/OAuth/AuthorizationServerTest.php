@@ -30,6 +30,29 @@ class ImplicitGrantTest extends OAuthHelper {
         $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read$|', $url);
     }
 
+    public function testImplicitGrantWithoutScope() {
+        // now we ask the authorize endpoint
+        $get = array("client_id" => "testclient", 
+                     "response_type" => "token");
+        $response = $this->_as->authorize($this->_ro, $get);
+        $action = $response['action'];
+        $client = $response['client'];
+
+        $this->assertEquals("ask_approval", $action);
+        $this->assertEquals("testclient", $client->id);
+
+        // now we approve
+        $post = array("approval" => "Approve", "scope" => array());
+        $response = $this->_as->approve($this->_ro, $get, $post);
+
+        $action = $response['action'];
+        $url = $response['url'];
+
+        $this->assertEquals("redirect", $action);
+        // regexp match to deal with random access token
+        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer$|', $url);
+    }
+
     public function testAuthorizationCode() {
         $get = array("client_id" => "testcodeclient", 
                      "response_type" => "code",
