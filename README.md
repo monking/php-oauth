@@ -78,8 +78,17 @@ access the network. These permissions can be given by using `setsebool` as root:
 
     $ sudo setsebool -P httpd_can_network_connect=on
 
+If you want the logger to send out email, you need the following as well:
+
+    $ sudo setsebool -P httpd_can_sendmail=on
+
 This is only for Red Hat based Linux distributions like RHEL, CentOS and 
 Fedora.
+
+If you want the labeling of the `data/` directory to survive file system 
+relabling you have to update the policy as well.
+
+FIXME: add how to update the policy...
 
 # Apache
 There is an example configuration file in `docs/apache.conf`. 
@@ -89,8 +98,8 @@ On Red Hat based distributions the file can be placed in
 be placed in `/etc/apache2/conf.d/php-oauth`. Be sure to modify it to suit your 
 environment and do not forget to restart Apache. 
 
-The install script from the previous section outputs a config for your system
-which replaces the `/PATH/TO/APP` with the actual directory.
+The `docs/configure.sh` script from the previous section outputs a config for 
+your system which replaces the `/PATH/TO/APP` with the actual install directory.
 
 # Authentication
 There are thee plugins provided to authenticate users:
@@ -152,6 +161,16 @@ users that are allowed to perform OAuth client registrations. This is
 convenient as you no longer need to modify the configuration of `php-oauth` to
 add a new "administrator", but can just add the entitlement to the user in the
 IdP user directory.
+
+See the 
+[eduPersonEntitlementInLDAP](https://github.com/fkooman/php-oauth/blob/master/docs/eduPersonEntitlementInLDAP.md) 
+document for more information about adding this entitlement to some directory
+servers.
+
+See
+[API documentation](https://github.com/fkooman/php-oauth/blob/master/docs/API.md) 
+for more information about the exposed API so you can write your own client 
+interfacing with it.
 
 ## simpleSAMLphp
 In the configuration file `config/oauth.ini` various aspects can be configured. 
