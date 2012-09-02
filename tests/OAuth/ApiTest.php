@@ -19,9 +19,9 @@ class ApiTest extends OAuthHelper {
         $this->_api = new Api($this->_config, $this->_storage);
 
         // add some token and entitlement
-        $this->_storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
-        $this->_storage->addApproval('testclient', 'fkooman', 'read', NULL);
         $this->_storage->updateEntitlement('fkooman', NULL);
+        $this->_storage->addApproval('testclient', 'fkooman', 'read', NULL);
+        $this->_storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
     }
 
     public function testRetrieveAuthorizations() {
