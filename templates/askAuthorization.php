@@ -14,23 +14,23 @@
   <div id="wrapper">
       <div id="container">
         <form method="post" action="">
-          <h1><?php echo $serviceName; ?></h1>
+          <h1><?php echo $config->getValue('serviceName'); ?></h1>
 
-          <p><strong><?php echo $clientName; ?></strong> wants to
+          <p><strong><?php echo $client->name; ?></strong> wants to
           access your
-          <strong><?php echo $serviceResources; ?></strong>.</p>
+          <strong><?php echo $config->getValue('serviceResources'); ?></strong>.</p>
 
           <table id="detailsTable">
             <tr>
               <th>Application Identifier</th>
 
-              <td><?php echo $clientId; ?></td>
+              <td><?php echo $client->id; ?></td>
             </tr>
 
             <tr>
               <th>Description</th>
 
-              <td><span><?php echo $clientDescription; ?></span></td>
+              <td><span><?php echo $client->description; ?></span></td>
             </tr>
 
             <tr>
@@ -40,10 +40,10 @@
               <td><em>None</em></td>
               <?php } else { ?>
               <td>
-                <?php if($allowFilter) { ?><?php foreach($scope as $s) { ?><label><input type="checkbox"
+                <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?><?php foreach($scope as $s) { ?><label><input type="checkbox"
                 checked="checked" name="scope[]" value=
                 "<?php echo $s; ?>"> <?php echo $s; ?></label>
-                <?php } ?> <?php if($allowFilter) { ?>
+                <?php } ?> <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?>
 
                 <div class="warnBox">
                   By removing permissions, the application may not work
@@ -67,7 +67,7 @@
             <tr>
               <th>Redirect URI</th>
 
-              <td><?php echo $clientRedirectUri; ?></td>
+              <td><?php echo $client->redirect_uri; ?></td>
             </tr>
           </table><button id="showDetails" type=
           "button">Details</button> <input type="submit" class=

@@ -36,8 +36,12 @@ class Scope {
         return array_values(array_unique($scopeArray, SORT_STRING));
     }
 
-    public function getScope($asArray = FALSE) {
-        return $asArray ? $this->_scope : implode(" ", $this->_scope);
+    public function getScope() {
+        return implode(" ", $this->_scope);
+    }
+
+    public function getScopeAsArray() {
+        return $this->_scope;
     }
 
     /**
@@ -45,7 +49,7 @@ class Scope {
      * scope object.
      */
     public function hasScope(Scope $scope) {
-        $s = $scope->getScope(TRUE);
+        $s = $scope->getScopeAsArray();
         foreach($s as $v) {
             if(!in_array($v, $this->_scope)) {
                 return FALSE;
@@ -58,7 +62,7 @@ class Scope {
      * This object scope needs to be a subset of the provided scope object.
      */
     public function isSubsetOf(Scope $scope) {
-        $s = $scope->getScope(TRUE);
+        $s = $scope->getScopeAsArray();
         foreach($this->_scope as $v) {
             if(!in_array($v, $s)) {
                 return FALSE;
@@ -68,7 +72,7 @@ class Scope {
     }
 
     public function mergeWith(Scope $scope) {
-        $this->_scope = $this->_normalizeScope(implode(" ", array_merge($this->_scope, $scope->getScope(TRUE))));
+        $this->_scope = $this->_normalizeScope(implode(" ", array_merge($this->_scope, $scope->getScopeAsArray())));
     }
 
 }

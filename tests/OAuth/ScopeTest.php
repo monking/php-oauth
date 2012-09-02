@@ -15,18 +15,25 @@ class ScopeTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($s->hasScope(new Scope("read")));
         $this->assertTrue($s->hasScope(new Scope("write")));
         $this->assertEquals("delete read write", $s->getScope());
+        $this->assertEquals(array("delete", "read", "write"), $s->getScopeAsArray());
     }
 
     function testBasicScopeArray() {
         $s = new Scope(array("read", "write", "delete"));
         $this->assertEquals("delete read write", $s->getScope());
+        $this->assertEquals(array("delete", "read", "write"), $s->getScopeAsArray());
     }
 
     function testEmptyScope() {
         $s = new Scope(NULL);
         $this->assertEquals("", $s->getScope());
+        $this->assertEquals(array(), $s->getScopeAsArray());
         $t = new Scope("");
-        $this->assertEquals("", $s->getScope());        
+        $this->assertEquals("", $t->getScope());        
+        $this->assertEquals(array(), $t->getScopeAsArray());
+        $u = new Scope(array());
+        $this->assertEquals("", $u->getScope());        
+        $this->assertEquals(array(), $u->getScopeAsArray());
     }
 
     function testFailingScope() {
@@ -47,6 +54,7 @@ class ScopeTest extends PHPUnit_Framework_TestCase {
         $t = new Scope("write delete");
         $s->mergeWith($t);
         $this->assertEquals("delete merge read write", $s->getScope());
+        $this->assertEquals(array("delete", "merge", "read", "write"), $s->getScopeAsArray());
     }
 
     function testClone() {
@@ -55,6 +63,7 @@ class ScopeTest extends PHPUnit_Framework_TestCase {
         $c = clone $s;
         $c->mergeWith($t);
         $this->assertEquals("delete merge read write", $c->getScope());
+        $this->assertEquals(array("delete", "merge", "read", "write"), $c->getScopeAsArray());
     }
 
 }

@@ -38,27 +38,14 @@ try {
 
     switch($request->getRequestMethod()) {
         case "GET":
-                $result = $authorizationServer->authorize($resourceOwner, $_GET);
-
+                $result = $authorizationServer->authorize($resourceOwner, $request->getQueryParameters());
                 // we know that all request parameters we used below are acceptable because they were verified by the authorize method.
                 // Do something with case where no scope is requested!
                 if($result['action'] === 'ask_approval') {
                     // prevent loading the authorization window in an iframe
                     $response->setHeader("X-Frame-Options", "deny");
-
                     $client = $result['client'];
-
-                    $templateData = array (
-                        'clientId' => $client->id,
-                        'clientName' => $client->name,
-                        'clientDescription' => $client->description,
-                        'clientRedirectUri' => $client->redirect_uri,
-                        'scope' => (NULL !== $request->getQueryParameter("scope")) ? explode(" ", $request->getQueryParameter("scope")) : NULL, 
-                        'serviceName' => $config->getValue('serviceName'),
-                        'serviceResources' => $config->getValue('serviceResources'),
-                        'allowFilter' => $config->getValue('allowResourceOwnerScopeFiltering')
-                    );
-                    extract($templateData);
+                    $scope = (NULL !== $request->getQueryParameter("scope")) ? explode(" ", $request->getQueryParameter("scope")) : NULL;
                     ob_start();
                     require "../templates" . DIRECTORY_SEPARATOR . "askAuthorization.php";
                     $response->setContent(ob_get_clean());
@@ -106,8 +93,6 @@ try {
 } catch (ResourceOwnerException $e) {
     // tell resource owner about the error (through browser)
     $response->setStatusCode(400);
-    $templateData = array ("error" => $e->getMessage(), "code" => $response->getStatusCode(), "reason" => $response->getStatusReason());
-    extract($templateData);
     ob_start();
     require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
     $response->setContent(ob_get_clean());
@@ -117,8 +102,6 @@ try {
 } catch (Exception $e) {
     // internal server error, inform resource owner through browser
     $response->setStatusCode(500);
-    $templateData = array ("error" => $e->getMessage(), "code" => $response->getStatusCode(), "reason" => $response->getStatusReason());
-    extract($templateData);
     ob_start();
     require "../templates" . DIRECTORY_SEPARATOR . "errorPage.php";
     $response->setContent(ob_get_clean());
