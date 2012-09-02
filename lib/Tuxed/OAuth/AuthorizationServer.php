@@ -20,6 +20,7 @@ class AuthorizationServer {
             $clientId     = self::getParameter($get, 'client_id');
             $responseType = self::getParameter($get, 'response_type');
             $redirectUri  = self::getParameter($get, 'redirect_uri');
+            // FIXME: scope can never be empty, if the client requests no scope we should have a default scope!
             $scope        = new Scope(self::getParameter($get, 'scope'));
             $state        = self::getParameter($get, 'state');
 
@@ -257,6 +258,7 @@ class AuthorizationServer {
         $token->expires_in = $token->issue_time + $token->expires_in - time();
         $token->token_type = 'bearer';
         // filter unwanted response parameters
+        // FIXME: the scope should be from the scope bound to the refresh_token, and not to the approval!
         $responseParameters = array("access_token", "token_type", "expires_in", "refresh_token", "scope");
         foreach($token as $k => $v) {
             if(!in_array($k, $responseParameters)) {

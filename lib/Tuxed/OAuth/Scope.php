@@ -8,6 +8,7 @@ class Scope {
 
     public function __construct($scope) {
         if(NULL === $scope || empty($scope)) {
+            // FIXME: we should have some default scope... maybe "default"
             $this->_scope = array();
         } else {
             if(is_array($scope)) {

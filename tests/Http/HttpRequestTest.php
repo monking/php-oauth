@@ -36,6 +36,8 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         $h->setPostParameters(array("id" => 5, "action" => "help"));
         $this->assertEquals(array("action" => "foo", "method" => "bar"), $h->getQueryParameters());
         $this->assertEquals(array("id" => 5, "action" => "help"), $h->getPostParameters());
+        $this->assertEquals(5, $h->getPostParameter("id"));
+        $this->assertEquals("help", $h->getPostParameter("action"));
     }
 
     function testSetHeaders() {

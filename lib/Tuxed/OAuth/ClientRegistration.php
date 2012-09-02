@@ -23,7 +23,7 @@ class ClientRegistration {
     }
 
     public static function fromArray(array $a) {
-        $requiredFields = array ("id", "secret", "redirect_uri", "type", "name");
+        $requiredFields = array ("id", "secret", "type", "redirect_uri", "name");
         foreach($requiredFields as $r) {
             if(!array_key_exists($r, $a)) {
                 throw new ClientRegistrationException("not a valid client, '" . $r . "' not set");
@@ -109,9 +109,11 @@ class ClientRegistration {
             if(NULL === $this->_client['secret']) {
                 throw new ClientRegistrationException("secret should be set for web application type");
             }
-            // if web_application type id cannot contain a ":" as it would break Basic authentication
+        }
+        if(NULL !== $this->_client['secret']) {
+            // if a secret is set id cannot contain a ":" as it would break Basic authentication
             if(FALSE !== strpos($this->_client['id'], ":")) {
-                throw new ClientRegistrationException("client_id cannot contain a colon when using web application type");
+                throw new ClientRegistrationException("client_id cannot contain a colon when using a secret");
             }
         }
         $this->_client['type'] = $t;
