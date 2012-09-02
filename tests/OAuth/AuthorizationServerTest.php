@@ -3,6 +3,7 @@
 require_once 'OAuthHelper.php';
 
 use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
+use \Tuxed\OAuth\AuthorizeResult as AuthorizeResult;
 
 class ImplicitGrantTest extends OAuthHelper {
 
@@ -12,22 +13,15 @@ class ImplicitGrantTest extends OAuthHelper {
                      "response_type" => "token",
                      "scope" => "read");
         $response = $this->_as->authorize($this->_ro, $get);
-        $action = $response['action'];
-        $client = $response['client'];
-
-        $this->assertEquals("ask_approval", $action);
-        $this->assertEquals("testclient", $client->id);
+        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
+        $this->assertEquals("testclient", $response->getClient()->getId());
 
         // now we approve
         $post = array("approval" => "Approve", "scope" => array("read"));
         $response = $this->_as->approve($this->_ro, $get, $post);
-
-        $action = $response['action'];
-        $url = $response['url'];
-
-        $this->assertEquals("redirect", $action);
+        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
         // regexp match to deal with random access token
-        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read$|', $url);
+        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read$|', $response->getRedirectUri()->getUri());
     }
 
     public function testImplicitGrantWithoutScope() {
@@ -35,22 +29,15 @@ class ImplicitGrantTest extends OAuthHelper {
         $get = array("client_id" => "testclient", 
                      "response_type" => "token");
         $response = $this->_as->authorize($this->_ro, $get);
-        $action = $response['action'];
-        $client = $response['client'];
-
-        $this->assertEquals("ask_approval", $action);
-        $this->assertEquals("testclient", $client->id);
+        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
+        $this->assertEquals("testclient", $response->getClient()->getId());
 
         // now we approve
         $post = array("approval" => "Approve", "scope" => array());
         $response = $this->_as->approve($this->_ro, $get, $post);
-
-        $action = $response['action'];
-        $url = $response['url'];
-
-        $this->assertEquals("redirect", $action);
+        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
         // regexp match to deal with random access token
-        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer$|', $url);
+        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer$|', $response->getRedirectUri()->getUri());
     }
 
     public function testAuthorizationCode() {
@@ -58,24 +45,17 @@ class ImplicitGrantTest extends OAuthHelper {
                      "response_type" => "code",
                      "scope" => "read");
         $response = $this->_as->authorize($this->_ro, $get);
-        $action = $response['action'];
-        $client = $response['client'];
-
-        $this->assertEquals("ask_approval", $action);
-        $this->assertEquals("testcodeclient", $client->id);
+        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
+        $this->assertEquals("testcodeclient", $response->getClient()->getId());
 
         // now we approve
         $post = array("approval" => "Approve", "scope" => array("read"));
         $response = $this->_as->approve($this->_ro, $get, $post);
-
-        $action = $response['action'];
-        $url = $response['url'];
-
-        $this->assertEquals("redirect", $action);
+        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
         // regexp match to deal with random authorization code
-        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html\?code=[a-zA-Z0-9]+$|', $url);
+        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html\?code=[a-zA-Z0-9]+$|', $response->getRedirectUri()->getUri());
 
-        preg_match('|^http://localhost/php-oauth/unit/test.html\?code=([a-zA-Z0-9]+)$|', $url, $matches);
+        preg_match('|^http://localhost/php-oauth/unit/test.html\?code=([a-zA-Z0-9]+)$|', $response->getRedirectUri()->getUri(), $matches);
         
         // exchange code for token
         $post = array ("grant_type" => "authorization_code",

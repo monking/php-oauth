@@ -12,6 +12,7 @@ use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
 use \Tuxed\OAuth\ResourceOwnerException as ResourceOwnerException;
 use \Tuxed\OAuth\ClientException as ClientException;
 use \Tuxed\Logger as Logger;
+use \Tuxed\OAuth\AuthorizeResult as AuthorizeResult;
 
 $logger = NULL;
 $request = NULL;
@@ -39,20 +40,16 @@ try {
     switch($request->getRequestMethod()) {
         case "GET":
                 $result = $authorizationServer->authorize($resourceOwner, $request->getQueryParameters());
-                // we know that all request parameters we used below are acceptable because they were verified by the authorize method.
-                // Do something with case where no scope is requested!
-                if($result['action'] === 'ask_approval') {
-                    // prevent loading the authorization window in an iframe
+                if(AuthorizeResult::ASK_APPROVAL === $result->getAction()) {
                     $response->setHeader("X-Frame-Options", "deny");
-                    $client = $result['client'];
-                    $scope = (NULL !== $request->getQueryParameter("scope")) ? explode(" ", $request->getQueryParameter("scope")) : NULL;
                     ob_start();
                     require "../templates" . DIRECTORY_SEPARATOR . "askAuthorization.php";
                     $response->setContent(ob_get_clean());
-                } else {
-                    // approval already given?! there can also be some error here!
+                } else if (AuthorizeResult::REDIRECT === $result->getAction()) {
                     $response->setStatusCode(302);
-                    $response->setHeader("Location", $result['url']);
+                    $response->setHeader("Location", $result->getRedirectUri()->getUri());
+                } else {
+                    throw new Exception("invalid authorize result");
                 }
             break;
 
@@ -66,8 +63,11 @@ try {
                 throw new ResourceOwnerException("csrf protection triggered, referrer does not match request uri");
             }
             $result = $authorizationServer->approve($resourceOwner, $request->getQueryParameters(), $request->getPostParameters());
+            if(AuthorizeResult::REDIRECT !== $result->getAction()) {
+                throw new ResourceOwnerException("approval not found");
+            }
             $response->setStatusCode(302);
-            $response->setHeader("Location", $result['url']);
+            $response->setHeader("Location", $result->getRedirectUri()->getUri());
             break;
 
         default:

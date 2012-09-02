@@ -16,7 +16,7 @@
         <form method="post" action="">
           <h1><?php echo $config->getValue('serviceName'); ?></h1>
 
-          <p><strong><?php echo $client->name; ?></strong> wants to
+          <p><strong><?php echo $result->getClient()->getName(); ?></strong> wants to
           access your
           <strong><?php echo $config->getValue('serviceResources'); ?></strong>.</p>
 
@@ -24,23 +24,23 @@
             <tr>
               <th>Application Identifier</th>
 
-              <td><?php echo $client->id; ?></td>
+              <td><?php echo $result->getClient()->getId(); ?></td>
             </tr>
 
             <tr>
               <th>Description</th>
 
-              <td><span><?php echo $client->description; ?></span></td>
+              <td><span><?php echo $result->getClient()->getDescription(); ?></span></td>
             </tr>
 
             <tr>
               <th>Requested Permission(s)</th>
 
-              <?php if(empty($scope)) { ?>
+              <?php if(0 === count($result->getScope()->getScopeAsArray())) { ?>
               <td><em>None</em></td>
               <?php } else { ?>
               <td>
-                <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?><?php foreach($scope as $s) { ?><label><input type="checkbox"
+                <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?><?php foreach($result->getScope()->getScopeAsArray() as $s) { ?><label><input type="checkbox"
                 checked="checked" name="scope[]" value=
                 "<?php echo $s; ?>"> <?php echo $s; ?></label>
                 <?php } ?> <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?>
@@ -51,7 +51,7 @@
                 </div><?php } ?><?php } else { ?>
 
                 <ul>
-                  <?php foreach($scope as $s) { ?>
+                  <?php foreach($result->getScope()->getScopeAsArray() as $s) { ?>
 
                   <li><?php echo $s; ?></li>
 
@@ -67,7 +67,7 @@
             <tr>
               <th>Redirect URI</th>
 
-              <td><?php echo $client->redirect_uri; ?></td>
+              <td><?php echo $result->getClient()->getRedirectUri(); ?></td>
             </tr>
           </table><button id="showDetails" type=
           "button">Details</button> <input type="submit" class=

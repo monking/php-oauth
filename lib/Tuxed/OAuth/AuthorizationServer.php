@@ -3,6 +3,7 @@
 namespace Tuxed\OAuth;
 
 use \Tuxed\Config as Config;
+use \Tuxed\Http\Uri as Uri;
 
 class AuthorizationServer {
 
@@ -59,7 +60,10 @@ class AuthorizationServer {
 
             $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
             if(FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
-                return array ("action" => "ask_approval", "client" => $client);
+                $ar = new AuthorizeResult(AuthorizeResult::ASK_APPROVAL);
+                $ar->setClient(ClientRegistration::fromArray((array)$client));
+                $ar->setScope($scope);
+                return $ar;
             } else {
                 if("token" === $responseType) {
                     // implicit grant
@@ -76,7 +80,9 @@ class AuthorizationServer {
                     if(NULL !== $state) {
                         $token += array ("state" => $state);
                     }
-                    return array("action" => "redirect", "url" => $client->redirect_uri . "#" . http_build_query($token));
+                    $ar = new AuthorizeResult(AuthorizeResult::REDIRECT);
+                    $ar->setRedirectUri(new Uri($client->redirect_uri . "#" . http_build_query($token)));
+                    return $ar;
                 } else {
                     // authorization code grant
                     $authorizationCode = self::randomHex(16);
@@ -85,7 +91,9 @@ class AuthorizationServer {
                     if(NULL !== $state) {
                         $token += array ("state" => $state);
                     }
-                    return array("action" => "redirect", "url" => $client->redirect_uri . "?" . http_build_query($token));
+                    $ar = new AuthorizeResult(AuthorizeResult::REDIRECT);
+                    $ar->setRedirectUri(new Uri($client->redirect_uri . "?" . http_build_query($token)));
+                    return $ar;
                 }
             }
         } catch (ScopeException $e) {
@@ -102,13 +110,12 @@ class AuthorizationServer {
             $state        = self::getParameter($get, 'state');
 
             $result = $this->authorize($resourceOwner, $get);
+            if(AuthorizeResult::ASK_APPROVAL !== $result->getAction()) {
+                return $result;
+            }
 
             $postScope = new Scope(self::getParameter($post, 'scope'));
             $approval = self::getParameter($post, 'approval');
-
-            if($result['action'] !== "ask_approval") {
-                return $result;
-            }
 
             // FIXME: are we sure this client is always valid?
             $client = $this->_storage->getClient($clientId);
