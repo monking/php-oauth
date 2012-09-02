@@ -81,25 +81,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function deleteClient($clientId) {
-        // delete approvals
-        $stmt = $this->_pdo->prepare("DELETE FROM Approval WHERE client_id = :client_id");
-        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to delete approvals");
-        }
-        // delete access tokens
-        $stmt = $this->_pdo->prepare("DELETE FROM AccessToken WHERE client_id = :client_id");
-        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to delete access tokens");
-        }
-        // delete authorization codes
-        $stmt = $this->_pdo->prepare("DELETE FROM AuthorizationCode WHERE client_id = :client_id");
-        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
-            throw new StorageException("unable to delete authorization codes");
-        }
-        // delete the client
+        // cascading in foreign keys takes care of deleting all tokens
         $stmt = $this->_pdo->prepare("DELETE FROM Client WHERE id = :client_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
@@ -285,7 +267,6 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    // FIXME: add foreign keys to ResourceOwner table
     public function initDatabase() {
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `ResourceOwner` (
@@ -316,7 +297,8 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `expires_in` int(11) DEFAULT NULL,
             `scope` text NOT NULL,
             PRIMARY KEY (`access_token`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`) ON UPDATE CASCADE ON DELETE CASCADE)
         ");
 
         $this->_pdo->exec("
@@ -325,8 +307,9 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `resource_owner_id` varchar(64) NOT NULL,
             `scope` text DEFAULT NULL,
             `refresh_token` text DEFAULT NULL,
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`),
-            UNIQUE(`client_id`, `resource_owner_id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+            UNIQUE(`client_id`, `resource_owner_id`),
+            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`) ON UPDATE CASCADE ON DELETE CASCADE)
         ");
 
         $this->_pdo->exec("
@@ -338,7 +321,8 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `issue_time` int(11) NOT NULL,
             `scope` text DEFAULT NULL,
             PRIMARY KEY (`authorization_code`),
-            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`))
+            FOREIGN KEY (`client_id`) REFERENCES `Client` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (`resource_owner_id`) REFERENCES `ResourceOwner` (`id`) ON UPDATE CASCADE ON DELETE CASCADE)
         ");
     }
 
