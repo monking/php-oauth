@@ -19,6 +19,15 @@ class OutgoingHttpRequest {
 
         // Including HTTP headers in request
         $headers = $request->getHeaders(TRUE);
+
+        // if Authorization header does not exist, and at least a BasicAuthUser 
+        // is set, add that to the request headers...
+        if(NULL === $request->getHeader("Authorization") && NULL !== $request->getBasicAuthUser()) {
+            $request->setHeader("Authorization", "Basic " . base64_encode($request->getBasicAuthUser() . ":" . $request->getBasicAuthPass()));
+            // FIXME: remove the PHP_X headers
+        }
+
+
         if (!empty($headers)) {
             curl_setopt($curlChannel, CURLOPT_HTTPHEADER, $headers);
         }

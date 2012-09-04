@@ -4,41 +4,63 @@ require_once 'OAuthHelper.php';
 
 use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
 use \Tuxed\OAuth\AuthorizeResult as AuthorizeResult;
+use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
+use \Tuxed\OAuth\ResourceServer as ResourceServer;
 
 class ImplicitGrantTest extends OAuthHelper {
 
-    public function testImplicitGrant() {
-        // now we ask the authorize endpoint
-        $get = array("client_id" => "testclient", 
-                     "response_type" => "token",
-                     "scope" => "read");
-        $response = $this->_as->authorize($this->_ro, $get);
-        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
-        $this->assertEquals("testclient", $response->getClient()->getId());
+    private $_as;
+    private $_ro;
+    private $_rs;
 
-        // now we approve
-        $post = array("approval" => "Approve", "scope" => array("read"));
-        $response = $this->_as->approve($this->_ro, $get, $post);
-        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
-        // regexp match to deal with random access token
-        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read$|', $response->getRedirectUri()->getUri());
+    public function setUp() {
+        parent::setUp();
+
+        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $storage = new $oauthStorageBackend($this->_config);
+
+
+
+        $authMech = '\\Tuxed\OAuth\\' . $this->_config->getValue('authenticationMechanism');
+        $this->_ro = new $authMech($this->_config);
+
+        $this->_rs = new ResourceServer($storage);
+
+        $this->_as = new AuthorizationServer($storage, $this->_config);
     }
 
-    public function testImplicitGrantWithoutScope() {
-        // now we ask the authorize endpoint
-        $get = array("client_id" => "testclient", 
-                     "response_type" => "token");
-        $response = $this->_as->authorize($this->_ro, $get);
-        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
-        $this->assertEquals("testclient", $response->getClient()->getId());
+#    public function testImplicitGrant() {
+#        // now we ask the authorize endpoint
+#        $get = array("client_id" => "testclient", 
+#                     "response_type" => "token",
+#                     "scope" => "read");
+#        $response = $this->_as->authorize($this->_ro, $get);
+#        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
+#        $this->assertEquals("testclient", $response->getClient()->getId());
 
-        // now we approve
-        $post = array("approval" => "Approve", "scope" => array());
-        $response = $this->_as->approve($this->_ro, $get, $post);
-        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
-        // regexp match to deal with random access token
-        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer$|', $response->getRedirectUri()->getUri());
-    }
+#        // now we approve
+#        $post = array("approval" => "Approve", "scope" => array("read"));
+#        $response = $this->_as->approve($this->_ro, $get, $post);
+#        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
+#        // regexp match to deal with random access token
+#        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read$|', $response->getRedirectUri()->getUri());
+#    }
+
+#    public function testImplicitGrantWithoutScope() {
+#        // now we ask the authorize endpoint
+#        $get = array("client_id" => "testclient", 
+#                     "response_type" => "token");
+#        $response = $this->_as->authorize($this->_ro, $get);
+#        $this->assertEquals(AuthorizeResult::ASK_APPROVAL, $response->getAction());
+#        $this->assertEquals("testclient", $response->getClient()->getId());
+
+#        // now we approve
+#        $post = array("approval" => "Approve", "scope" => array());
+#        $response = $this->_as->approve($this->_ro, $get, $post);
+#        $this->assertEquals(AuthorizeResult::REDIRECT, $response->getAction());
+#        // regexp match to deal with random access token
+#        $this->assertRegExp('|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer$|', $response->getRedirectUri()->getUri());
+#    }
 
     public function testAuthorizationCode() {
         $get = array("client_id" => "testcodeclient", 

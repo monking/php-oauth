@@ -53,9 +53,8 @@ class HttpResponse {
 
     public function __construct($statusCode = 200) {
         $this->_headers = array();
-
         $this->setStatusCode($statusCode);
-        $this->setContentType("text/html; charset=utf-8");
+        // if no "Content-Type" header is specified PHP will use "text/html" by default
         $this->setContent(NULL);
     }
 
@@ -90,6 +89,12 @@ class HttpResponse {
         $this->_statusCode = $code;
     }
 
+    public function setHeaders(array $headers) {
+        foreach ($headers as $k => $v) {
+            $this->setHeader($k, $v);
+        }
+    }
+
     public function setHeader($headerKey, $headerValue) {
         $foundHeaderKey = $this->_getHeaderKey($headerKey);
         if ($foundHeaderKey === NULL) {
@@ -99,31 +104,35 @@ class HttpResponse {
         }
     }
 
-    public function getHeaders() {
-        return $this->_headers;
-    }
-
     public function getHeader($headerKey) {
         $headerKey = $this->_getHeaderKey($headerKey);
-        if ($headerKey === NULL) {
-            throw new HttpResponseException("no such header");
-        }
-        return $this->_headers[$headerKey];
+        return $headerKey !== NULL ? $this->_headers[$headerKey] : NULL;
     }
 
     /**
      * Look for a header in a case insensitive way. It is possible to have a 
      * header key "Content-type" or a header key "Content-Type", these should
-     * be treated as the same header.
+     * be treated as the same.
      * 
      * @param headerName the name of the header to search for
      * @returns The name of the header as it was set (original case)
      *
      */
-    private function _getHeaderKey($headerKey) {
+    protected function _getHeaderKey($headerKey) {
         $headerKeys = array_keys($this->_headers);
         $keyPositionInArray = array_search(strtolower($headerKey), array_map('strtolower', $headerKeys));
         return ($keyPositionInArray === FALSE) ? NULL : $headerKeys[$keyPositionInArray];
+    }
+
+    public function getHeaders($formatted = FALSE) {
+        if (!$formatted) {
+            return $this->_headers;
+        }
+        $hdrs = array();
+        foreach ($this->_headers as $k => $v) {
+            array_push($hdrs, $k . ": " . $v);
+        }
+        return $hdrs;
     }
 
     public function getStatusLine() { 

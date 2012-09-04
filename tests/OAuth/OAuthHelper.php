@@ -6,18 +6,10 @@ $c->register();
 
 use \Tuxed\Config as Config;
 use \Tuxed\OAuth\PdoOAuthStorage as PdoOAuthStorage;
-use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
-use \Tuxed\OAuth\ResourceServer as ResourceServer;
-use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
-use \Tuxed\OAuth\DummyResourceOwner as DummyResourceOwner;
 
 class OAuthHelper extends PHPUnit_Framework_TestCase {
 
     protected $_tmpDb;
-    protected $_ro;
-    protected $_as;
-    protected $_rs;
-    protected $_storage;
     protected $_config;
 
     public function setUp() {
@@ -36,14 +28,13 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
         $this->_config->setValue("storageBackend", "PdoOAuthStorage");
         $this->_config->setSectionValue("PdoOAuthStorage", "dsn", $dsn);
 
-        //$this->_config->setSectionValue("DummyResourceOwner", "resourceOwnerEntitlement") = array ("foo" => array("fkooman"));
+#        $this->_config->setSectionValue("DummyResourceOwner", "resourceOwnerEntitlement") = array ("foo" => array("fkooman"));
 
         // intialize storage
-        $this->_storage = new PdoOAuthStorage($this->_config);
-        
-        $this->_storage->initDatabase();
+        $storage = new PdoOAuthStorage($this->_config);
+        $storage->initDatabase();
 
-        // add a client
+        // add some clients
         $uaba = array("id" => "testclient",
                   "name" => "Simple Test Client",
                   "description" => "Client for unit testing",
@@ -61,13 +52,8 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
                   "allowed_scope" => "read",
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "web_application");
-        $this->_storage->addClient($uaba);
-        $this->_storage->addClient($wa);
-
-        // initialize authorization server
-        $this->_as = new AuthorizationServer($this->_storage, $this->_config);
-        $this->_rs = new ResourceServer($this->_storage);
-        $this->_ro = new DummyResourceOwner($this->_config);
+        $storage->addClient($uaba);
+        $storage->addClient($wa);
     }
 
     public function tearDown() {

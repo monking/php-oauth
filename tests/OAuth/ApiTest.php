@@ -15,13 +15,15 @@ class ApiTest extends OAuthHelper {
         parent::setUp();
         // enable Api
         $this->_config->setSectionValue("Api", "enableApi", TRUE);
+        $this->_api = new Api($this->_config, NULL);
 
-        $this->_api = new Api($this->_config, $this->_storage);
+        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $storage = new $oauthStorageBackend($this->_config);
 
-        // add some token and entitlement
-        $this->_storage->updateEntitlement('fkooman', NULL);
-        $this->_storage->addApproval('testclient', 'fkooman', 'read', NULL);
-        $this->_storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
+        $storage->updateEntitlement('fkooman', NULL);
+        $storage->addApproval('testclient', 'fkooman', 'read', NULL);
+        $storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
+
     }
 
     public function testRetrieveAuthorizations() {
@@ -45,33 +47,26 @@ class ApiTest extends OAuthHelper {
     }
 
     public function testAddAuthorizationsUnregisteredClient() {
-        try { 
-            $h = new HttpRequest("http://www.example.org/api.php");
-            $h->setRequestMethod("POST");
-            $h->setPathInfo("/authorizations/");
-            $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
-            $h->setContent(json_encode(array("client_id" => "nonexistingclient", "scope" => "read")));
-            $response = $this->_api->handleRequest($h);
-            $this->assertTrue(FALSE);
-        } catch (ApiException $e) {
-            $this->assertEquals("invalid_request", $e->getMessage());
-            $this->assertEquals("client is not registered", $e->getDescription());
-        }
+        $h = new HttpRequest("http://www.example.org/api.php");
+        $h->setRequestMethod("POST");
+        $h->setPathInfo("/authorizations/");
+        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setContent(json_encode(array("client_id" => "nonexistingclient", "scope" => "read")));
+        $response = $this->_api->handleRequest($h);
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_request","error_description":"client is not registered"}', $response->getContent());
     }
 
     public function testAddAuthorizationsUnsupportedScope() {
-        try { 
-            $h = new HttpRequest("http://www.example.org/api.php");
-            $h->setRequestMethod("POST");
-            $h->setPathInfo("/authorizations/");
-            $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h = new HttpRequest("http://www.example.org/api.php");
+        $h->setRequestMethod("POST");
+        $h->setPathInfo("/authorizations/");
+        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
         $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "foo")));
-            $response = $this->_api->handleRequest($h);
-            $this->assertTrue(FALSE);
-        } catch (ApiException $e) {
-            $this->assertEquals("invalid_request", $e->getMessage());
-            $this->assertEquals("invalid scope for this client", $e->getDescription());
-        }
+        $response = $this->_api->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_request","error_description":"invalid scope for this client"}', $response->getContent());
     }
 
     public function testGetAuthorization() {
