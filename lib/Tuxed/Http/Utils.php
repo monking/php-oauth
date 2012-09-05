@@ -81,4 +81,26 @@ class Utils {
         return $new_json; 
     }
 
+    public static function parseBasicAuthHeader($h) {
+        // RFC 2045, section 6.8
+        $basicTokenRegExp = '(?:[[:alpha:][:digit:]+/]+=*)';    // FIXME, only 1 or 2 "="s at the end
+        $result = preg_match('|^Basic (?P<value>' . $basicTokenRegExp . ')$|', $h, $matches);
+        if($result === FALSE || $result === 0) {
+            throw new UtilsException("invalid basic authentication header value");
+        }
+        $d = base64_decode($matches['value'], TRUE);
+        if(FALSE === $d) {
+            throw new UtilsException("invalid basic authentication header");
+        }
+        // FIXME: better check for allowed decoded characters
+        if(FALSE === strpos($d, ":")) {
+            throw new UtilsException("basic authentication header does not encode username and password");
+        }
+        $userpass = explode(":", $d);
+        if(2 !== count($userpass)) {
+            throw new UtilsException("decoded basic authentication header needs to contain exactly 1 colon");
+        }
+        return $userpass;
+    }
+
 } 

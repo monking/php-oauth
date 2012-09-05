@@ -26,7 +26,6 @@ class Token {
     public function handleRequest(HttpRequest $request) {
         $response = new HttpResponse();
         try { 
-
             if("POST" !== $request->getRequestMethod()) {
                 // method not allowed
                 $response->setStatusCode(405);
@@ -39,7 +38,6 @@ class Token {
                 $response->setHeader('Pragma', 'no-cache');
                 $response->setContent(json_encode($result));
             }
-
         } catch (TokenException $e) {
             if($e->getResponseCode() === 401) {
                 $response->setHeader("WWW-Authenticate", 'Basic realm="OAuth Server"');

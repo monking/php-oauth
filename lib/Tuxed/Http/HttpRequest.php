@@ -156,11 +156,21 @@ class HttpRequest {
     }
 
     public function getBasicAuthUser() {
-        return $this->getHeader("PHP_AUTH_USER");
+        try { 
+            $userpass = Utils::parseBasicAuthHeader($this->getHeader("Authorization"));
+            return $userpass[0];
+        } catch (UtilsException $e) {
+            return NULL;
+        }
     }
 
     public function getBasicAuthPass() {
-        return $this->getHeader("PHP_AUTH_PW");
+        try { 
+            $userpass = Utils::parseBasicAuthHeader($this->getHeader("Authorization"));
+            return $userpass[1];
+        } catch (UtilsException $e) {
+            return NULL;
+        }
     }
 
     public function matchRest($requestMethod, $requestPattern, $callback) {
@@ -219,21 +229,15 @@ class HttpRequest {
         foreach($this->getHeaders(TRUE) as $v) {
             $s .= "\t" . $v . PHP_EOL;
         }
-        $s .= "Content:" . PHP_EOL;
         if(1 === preg_match("|^application/json|", $this->getContentType())) {
             // format JSON
+            $s .= "Content (formatted JSON):" . PHP_EOL;
             $s .= Utils::json_format($this->getContent());
         } else {
+            $s .= "Content:" . PHP_EOL;
             $s .= $this->getContent();
         }
         return $s;
-
-#        // only log certain headers?
-#        $logHeaders = array("HTTPS", "HTTP_USER_AGENT", "REMOTE_ADDR", "REQUEST_METHOD", "REQUEST_URI", "HTTP_AUTHORIZATION");
-#        foreach($logHeaders as $v) {
-#            $s .= "\t" . $v . ": " . $this->getHeader($v) . PHP_EOL;
-#        }
-
     }
 
 }
