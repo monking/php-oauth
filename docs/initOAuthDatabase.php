@@ -49,7 +49,7 @@ if(FALSE === $storage->getClient("remotestorage_portal")) {
 }
 
 if(FALSE === $storage->getClient("php-oauth-code-client")) {
-    $data = array("id" => "demo_web_application",
+    $data = array("id" => "php-oauth-code-client",
                   "name" => "Authorization Code Test Client",
                   "description" => "This application can be used to test REST APIs protected by OAuth.",
                   "secret" => 's3cr3t',
