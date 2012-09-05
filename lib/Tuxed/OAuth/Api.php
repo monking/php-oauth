@@ -33,7 +33,7 @@ class Api {
         $response->setContentType("application/json");
 
         try { 
-            $this->_rs->verifyAuthorizationHeader($request->getHeader("HTTP_AUTHORIZATION"));
+            $this->_rs->verifyAuthorizationHeader($request->getHeader("Authorization"));
 
             $storage = $this->_storage; // FIXME: can this be avoided??
             $rs = $this->_rs; // FIXME: can this be avoided?? 

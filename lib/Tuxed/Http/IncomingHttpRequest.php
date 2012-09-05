@@ -76,7 +76,7 @@ class IncomingHttpRequest {
                 $headerKeys = array_keys($apacheHeaders);
                 $keyPositionInArray = array_search(strtolower("Authorization"), array_map('strtolower', $headerKeys));
                 if(FALSE !== $keyPositionInArray) {
-                    $requestHeaders['HTTP_AUTHORIZATION'] = $apacheHeaders[$headerKeys[$keyPositionInArray]];
+                    $requestHeaders['AUTHORIZATION'] = $apacheHeaders[$headerKeys[$keyPositionInArray]];
                 }
         }
         return $requestHeaders;

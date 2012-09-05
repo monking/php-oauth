@@ -29,7 +29,7 @@ class ApiTest extends OAuthHelper {
     public function testRetrieveAuthorizations() {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setPathInfo("/authorizations/");
-        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setHeader("Authorization", "Bearer 12345abc");
         $response = $this->_api->handleRequest($h);
         $this->assertEquals('[{"scope":"read","id":"testclient","name":"Simple Test Client","description":"Client for unit testing","redirect_uri":"http:\/\/localhost\/php-oauth\/unit\/test.html","type":"user_agent_based_application","icon":null,"allowed_scope":"read"}]', $response->getContent());
         $this->assertEquals(200, $response->getStatusCode());
@@ -40,7 +40,7 @@ class ApiTest extends OAuthHelper {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
-        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setHeader("Authorization", "Bearer 12345abc");
         $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "read", "refresh_token" => NULL)));
         $response = $this->_api->handleRequest($h);
         $this->assertEquals(201, $response->getStatusCode());
@@ -50,7 +50,7 @@ class ApiTest extends OAuthHelper {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
-        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setHeader("Authorization", "Bearer 12345abc");
         $h->setContent(json_encode(array("client_id" => "nonexistingclient", "scope" => "read")));
         $response = $this->_api->handleRequest($h);
 
@@ -62,7 +62,7 @@ class ApiTest extends OAuthHelper {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
-        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setHeader("Authorization", "Bearer 12345abc");
         $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "foo")));
         $response = $this->_api->handleRequest($h);
         $this->assertEquals(400, $response->getStatusCode());
@@ -72,7 +72,7 @@ class ApiTest extends OAuthHelper {
     public function testGetAuthorization() {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setPathInfo("/authorizations/testclient");
-        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setHeader("Authorization", "Bearer 12345abc");
         // FIXME: test with non existing client_id!
         $response = $this->_api->handleRequest($h);
         $this->assertEquals(200, $response->getStatusCode());
@@ -83,7 +83,7 @@ class ApiTest extends OAuthHelper {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("DELETE");
         $h->setPathInfo("/authorizations/testclient");
-        $h->setHeader("HTTP_AUTHORIZATION", "Bearer 12345abc");
+        $h->setHeader("Authorization", "Bearer 12345abc");
         // FIXME: test with non existing client_id!
         $response = $this->_api->handleRequest($h);
         $this->assertEquals(200, $response->getStatusCode());

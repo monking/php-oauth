@@ -191,6 +191,13 @@ class HttpRequestTest extends PHPUnit_Framework_TestCase {
         });
     }
 
+    function testAuthentication() {
+        $h = new HttpRequest("http://www.example.org", "GET");
+        $h->setHeader("Authorization", "Basic " . base64_encode("foo:bar"));
+        $this->assertEquals("foo", $h->getBasicAuthUser());
+        $this->assertEquals("bar", $h->getBasicAuthPass());
+    }
+
 }
 
 ?>
