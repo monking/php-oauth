@@ -139,6 +139,14 @@ class HttpRequest {
         return $this->_content;
     }
 
+    public function setContentType($contentType) {
+        $this->setHeader("Content-Type", $contentType);
+    }
+
+    public function getContentType() {
+        return $this->getHeader("Content-Type");
+    }
+
     public function setPathInfo($pathInfo) {
         $this->_pathInfo = $pathInfo;
     }
@@ -205,13 +213,19 @@ class HttpRequest {
     public function __toString() {
         $s  = PHP_EOL;
         $s .= "*HttpRequest*" . PHP_EOL;
+        $s .= "Request Method: " . $this->getRequestMethod() . PHP_EOL;
         $s .= "Request URI: " . $this->getRequestUri()->getUri() . PHP_EOL;
         $s .= "Headers:" . PHP_EOL;
         foreach($this->getHeaders(TRUE) as $v) {
             $s .= "\t" . $v . PHP_EOL;
         }
         $s .= "Content:" . PHP_EOL;
-        $s .= "\t" . $this->getContent();
+        if(1 === preg_match("|^application/json|", $this->getContentType())) {
+            // format JSON
+            $s .= Utils::json_format($this->getContent());
+        } else {
+            $s .= $this->getContent();
+        }
         return $s;
 
 #        // only log certain headers?

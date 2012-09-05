@@ -157,7 +157,12 @@ class HttpResponse {
             $s .= "\t" . ($k . ": " . $v) . PHP_EOL;
         }
         $s .= "Content:" . PHP_EOL;
-        $s .= "\t" . $this->getContent() . PHP_EOL;
+        if(1 === preg_match("|^application/json|", $this->getContentType())) {
+            // format JSON
+            $s .= Utils::json_format($this->getContent());
+        } else {
+            $s .= $this->getContent();
+        }
         return $s;
     }
 
