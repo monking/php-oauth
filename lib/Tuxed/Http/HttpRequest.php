@@ -39,7 +39,7 @@ class HttpRequest {
     }
 
     public function setRequestMethod($method) {
-        if (!in_array($method, array("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "TRACE", "CONNECT"))) {
+        if (!in_array($method, array("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"))) {
             throw new HttpRequestException("invalid or unsupported request method");
         }
         $this->_method = $method;
@@ -145,14 +145,6 @@ class HttpRequest {
 
     public function getPathInfo() {
         return $this->_pathInfo;
-    }
-
-    public function setBasicAuthUser($u) {
-        $this->setHeader("PHP_AUTH_USER", $u);
-    }
-
-    public function setBasicAuthPass($p) {
-        $this->setHeader("PHP_AUTH_PW", $p);
     }
 
     public function getBasicAuthUser() {
