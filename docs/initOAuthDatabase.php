@@ -53,7 +53,7 @@ if(FALSE === $storage->getClient("php-oauth-code-client")) {
                   "name" => "Authorization Code Test Client",
                   "description" => "This application can be used to test REST APIs protected by OAuth.",
                   "secret" => 's3cr3t',
-                  "redirect_uri" => "http://localhost/php-oauth-demo-client/index.php",
+                  "redirect_uri" => "http://localhost/php-oauth-code-client/index.php",
                   "icon" => NULL,
                   "allowed_scope" => "read",
                   "type" => "web_application");
