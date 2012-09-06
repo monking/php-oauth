@@ -58,7 +58,7 @@
                   as expected!
                 </div><?php } ?><?php } else { ?>
 
-                <ul>
+                <ul class="permissionList">
                   <?php foreach($scope->getScopeAsArray() as $s) { ?>
 
                   <li><?php echo $s; ?></li>
