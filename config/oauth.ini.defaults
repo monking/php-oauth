@@ -3,7 +3,7 @@
 ; name of service
 serviceName = "OAuth Authorization Server"
 ; type of resources you get access too
-serviceResources = "Protected Resource"
+serviceResources = "protected resource"
 
 ; the storage backend, currently only PDO is supported
 storageBackend = "PdoOAuthStorage"
