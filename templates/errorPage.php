@@ -12,11 +12,11 @@
 <body>
   <div id="wrapper">
       <div id="container">
-        <h3>Error [<?php echo $response->getStatusCode(); ?> - <?php echo $response->getStatusReason(); ?>]</h3>
-
+        <div class="httpCode"><?php echo $response->getStatusCode(); ?> - <?php echo $response->getStatusReason(); ?></div>
+        <h3>Error</h3>
         <p>A fatal error occurred!</p>
         <div class="errorBox">
-          <?php echo $e->getMessage(); ?>
+          <strong>ERROR</strong>: <?php echo $e->getMessage(); ?>
         </div>
       </div><!-- /container -->
   </div><!-- /wrapper -->

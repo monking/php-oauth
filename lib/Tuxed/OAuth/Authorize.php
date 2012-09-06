@@ -40,6 +40,7 @@ class Authorize {
                                 "config" => $this->_config,
                                 "client" => $result->getClient(),
                                 "scope" => $result->getScope(),
+                                "sslEnabled" => "https" === $request->getRequestUri()->getScheme(),
                             );
                             extract($tplData);
                             ob_start();

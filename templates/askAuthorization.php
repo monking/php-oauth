@@ -14,11 +14,19 @@
   <div id="wrapper">
       <div id="container">
         <form method="post" action="">
-          <h1><?php echo $config->getValue('serviceName'); ?></h1>
+          <h3><?php echo $config->getValue('serviceName'); ?></h3>
 
           <p><strong><?php echo $client->getName(); ?></strong> wants to
           access your
           <strong><?php echo $config->getValue('serviceResources'); ?></strong>.</p>
+
+        <?php if(!$sslEnabled) { ?>
+
+            <div class="warnBox">
+            <strong>WARNING</strong>: you are not using HTTPS!
+            </div>
+
+        <?php } ?>
 
           <table id="detailsTable">
             <tr>
@@ -46,7 +54,7 @@
                 <?php } ?> <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?>
 
                 <div class="warnBox">
-                  By removing permissions, the application may not work
+                  <strong>WARNING</strong>: by removing permissions, the application may not work
                   as expected!
                 </div><?php } ?><?php } else { ?>
 

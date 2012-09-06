@@ -15,7 +15,7 @@ div#container {
     -webkit-border-radius: 10px;
     border-radius: 10px;
     margin: 0 10px;
-    padding: 25px;
+    padding: 10px 15px 15px 25px;
     -moz-box-shadow:    0 0 3px 0 #8c8c8c;
     -webkit-box-shadow: 0 0 3px 0 #8c8c8c;
     box-shadow:         0 0 3px 0 #8c8c8c;
@@ -54,20 +54,31 @@ label {
 }
 
 div.errorBox {
-    border: 1px dashed #333;
-    background-color: #800;
-    font-weight: bold;
-    color: white;
-    padding: 5px;
-    margin: 5px;
+    border: 1px solid #888;
+    background-color: #f3a4a4;
+    color: black;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 85%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
 
 div.warnBox {
-    border: 1px dashed #333;
-    background-color: #aca;
-    font-weight: bold;
-    color: white;
-    padding: 5px;
-    margin: 5px;
+    border: 1px solid #888;
+    background-color: #ffc;
+    color: black;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 85%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
 }
 
+div.httpCode {
+    float: right;
+    display: absolute;
+    font-size: 85%;
+}
