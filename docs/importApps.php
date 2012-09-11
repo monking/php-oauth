@@ -33,7 +33,7 @@ if(NULL === $data || !is_array($data)) {
 foreach($data as $d) {
         // go over all app entries
         if(FALSE === $storage->getClient($d['key'])) {
-                echo "Adding " . $d['name'] . "..." . PHP_EOL;
+                echo "Adding '" . $d['name'] . "'..." . PHP_EOL;
                 $x = array (
                         "id" => $d['key'],
                         "name" => $d['name'],

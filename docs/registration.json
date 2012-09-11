@@ -1,0 +1,46 @@
+[
+    {
+        "allowed_scope": "authorizations", 
+        "contact_email": null, 
+        "description": "This application can be used by end users to view and revoke application permissions.", 
+        "icon": null, 
+        "id": "authorization_manager", 
+        "name": "Manage Authorizations", 
+        "redirect_uri": "http://localhost/html-manage-authorizations/index.html", 
+        "secret": null, 
+        "type": "user_agent_based_application"
+    }, 
+    {
+        "allowed_scope": "applications", 
+        "contact_email": null, 
+        "description": "This application can be used by administrators to manage applications.", 
+        "icon": null, 
+        "id": "application_manager", 
+        "name": "Manage Applications", 
+        "redirect_uri": "http://localhost/html-manage-applications/index.html", 
+        "secret": null, 
+        "type": "user_agent_based_application"
+    }, 
+    {
+        "allowed_scope": "applications authorizations", 
+        "contact_email": null, 
+        "description": "This application can be used to install and launch 'Unhosted' applications.", 
+        "icon": null, 
+        "id": "remotestorage_portal", 
+        "name": "remoteStorage Portal", 
+        "redirect_uri": "http://localhost/html-remoteStorage-portal/index.html", 
+        "secret": null, 
+        "type": "user_agent_based_application"
+    }, 
+    {
+        "allowed_scope": "read", 
+        "contact_email": null, 
+        "description": "This application can be used to test REST APIs protected by OAuth.", 
+        "icon": null, 
+        "id": "php-oauth-code-client", 
+        "name": "Authorization Code Test Client", 
+        "redirect_uri": "http://localhost/php-oauth-code-client/index.php", 
+        "secret": "s3cr3t", 
+        "type": "web_application"
+    }
+]
