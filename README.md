@@ -47,16 +47,30 @@ Apache configuration).
 
 Next make sure to configure the database settings in `config/oauth.ini`, and 
 possibly other settings. If you want to keep using SQlite you are good to go 
-without fiddling with the database settings. Now to initialize the database:
+without fiddling with the database settings. Now to initialize the database,
+i.e. to install the tables, run:
 
-    $ sed -i 's|http://localhost|https://www.example.org|g' docs/initOAuthDatabase.php
     $ php docs/initOAuthDatabase.php
 
-Where the `sed` command replaces the domain name for some initial client 
-registrations that will be performed on the same domain. You still need to 
-install those as well, see the next section, but with this you will already
-have the client registration done, otherwise they will all point to 
-`http://localhost` instead.
+It is also possible to already preregister some clients which makes sense if 
+you want to use the management clients discussed below. The sample registrations
+are listed in `docs/registration.json`. By default they point to 
+`http://localhost`, but if you run this software on a "real" domain you need to
+modify the `docs/registration.json` file to point to your domain name and 
+full path where the management clients will be installed.
+
+To modify the domain of where the clients will be located in one go, you can
+run the following command:
+
+    $ sed 's|http://localhost|https://www.example.org|g' docs/registration.json > docs/myregistration.json
+
+You can still modify the `docs/myregistration.json` by hand if you desire, and 
+then load them in the database:
+
+    $ php docs/registerClients.php docs/myregistration.json
+
+This should take care of the initial setup and you can now move to the 
+management clients, see below.
 
 *NOTE*: On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
 in `/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
@@ -68,7 +82,10 @@ There are two reference management clients available:
 * [Manage Authorizations](https://github.com/fkooman/html-manage-authorizations/). 
 
 These clients are written in HTML, CSS and JavaScript only and can be hosted on 
-any (static) web server. See the accompanying READMEs for more information.
+any (static) web server. See the accompanying READMEs for more information. If 
+you followed the client registration in the previous section they should start
+working immediately if you install the applications at the correct URL. Do not
+forget to enable the management API, see below in the section on Entitlements.
 
 # SELinux
 The install script already takes care of setting the file permissions of the
