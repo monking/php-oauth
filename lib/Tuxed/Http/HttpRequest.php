@@ -117,6 +117,10 @@ class HttpRequest {
     protected function _getHeaderKey($headerKey) {
         $headerKeys = array_keys($this->_headers);
         $keyPositionInArray = array_search(strtolower($headerKey), array_map('strtolower', $headerKeys));
+        if(FALSE === $keyPositionInArray) {
+            // replaces dashes with underscores and search again
+            $keyPositionInArray = array_search(str_replace('-', '_', strtolower($headerKey)), array_map('strtolower', $headerKeys));
+        }
         return ($keyPositionInArray === FALSE) ? NULL : $headerKeys[$keyPositionInArray];
     }
 

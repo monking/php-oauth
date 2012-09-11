@@ -41,6 +41,7 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
                   "secret" => NULL,
                   "icon" => NULL,
                   "allowed_scope" => "read",
+                  "contact_email" => "foo@example.org",
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "user_agent_based_application");
 
@@ -50,6 +51,7 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
                   "secret" => "abcdef",
                   "icon" => NULL,
                   "allowed_scope" => "read",
+                  "contact_email" => NULL,
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "web_application");
         $storage->addClient($uaba);

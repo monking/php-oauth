@@ -49,7 +49,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function updateClient($clientId, $data) {
-        $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type, icon = :icon, allowed_scope = :allowed_scope WHERE id = :client_id");
+        $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type, icon = :icon, allowed_scope = :allowed_scope, contact_email = :contact_email WHERE id = :client_id");
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
         $stmt->bindValue(":secret", $data['secret'], PDO::PARAM_STR);
@@ -57,6 +57,7 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":type", $data['type'], PDO::PARAM_STR);
         $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
         $stmt->bindValue(":allowed_scope", $data['allowed_scope'], PDO::PARAM_STR);
+        $stmt->bindValue(":contact_email", $data['contact_email'], PDO::PARAM_STR);
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to update client");
@@ -65,7 +66,7 @@ class PdoOAuthStorage implements IOAuthStorage {
     }
 
     public function addClient($data) {
-        $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type, icon, allowed_scope) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type, :icon, :allowed_scope)");
+        $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type, icon, allowed_scope, contact_email) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type, :icon, :allowed_scope, :contact_email)");
         $stmt->bindValue(":client_id", $data['id'], PDO::PARAM_STR);
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
@@ -74,6 +75,7 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":type", $data['type'], PDO::PARAM_STR);
         $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
         $stmt->bindValue(":allowed_scope", $data['allowed_scope'], PDO::PARAM_STR);
+        $stmt->bindValue(":contact_email", $data['contact_email'], PDO::PARAM_STR);
         if(FALSE === $stmt->execute()) {
             throw new StorageException("unable to add client");
         }
@@ -285,6 +287,7 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             `type` text NOT NULL,
             `icon` text DEFAULT NULL,
             `allowed_scope` text DEFAULT NULL,
+            `contact_email` text DEFAULT NULL,
             PRIMARY KEY (`id`))
         ");
 
