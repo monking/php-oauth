@@ -8,10 +8,10 @@ use \Tuxed\Logger as Logger;
 use \Tuxed\Config as Config;
 
 class Api {
-
     private $_config;
-    private $_storage;
+    private $_logger;
 
+    private $_storage;
     private $_rs;
 
     public function __construct(Config $c, Logger $l = NULL) {

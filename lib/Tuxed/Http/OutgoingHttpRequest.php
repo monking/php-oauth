@@ -4,7 +4,7 @@ namespace Tuxed\Http;
 
 class OutgoingHttpRequest {
 
-    public function makeRequest(HttpRequest $request) {
+    public static function makeRequest(HttpRequest $request) {
         $httpResponse = new HttpResponse();
 
         $curlChannel = curl_init();

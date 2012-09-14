@@ -20,7 +20,7 @@ class PdoOAuthStorage implements IOAuthStorage {
         $this->_c = $c;
 
         $driverOptions = array();
-        if(TRUE === $this->_c->getSectionValue('PdoOAuthStorage', 'persistentConnection')) {
+        if($this->_c->getSectionValue('PdoOAuthStorage', 'persistentConnection')) {
             $driverOptions = array(PDO::ATTR_PERSISTENT => TRUE);
         }
 
