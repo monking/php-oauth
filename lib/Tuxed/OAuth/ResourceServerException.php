@@ -19,6 +19,7 @@ class ResourceServerException extends \Exception {
         switch($this->message) {
             case "invalid_request":
                 return 400;
+            case "no_token":            
             case "invalid_token":
                 return 401;
             case "insufficient_scope":

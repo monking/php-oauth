@@ -185,7 +185,15 @@ class Api {
             });
         } catch (ResourceServerException $e) {
             $response->setStatusCode($e->getResponseCode());
-            $response->setHeader("WWW-Authenticate", sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription()));
+            if("no_token" === $e->getMessage()) {
+                // no authorization header is a special case, the client did not know
+                // authentication was required, so tell it now without giving error message
+                $hdr = 'Bearer realm="Resource Server"'; 
+           } else {
+                $hdr = sprintf('Bearer realm="Resource Server",error="%s",error_description="%s"', $e->getMessage(), $e->getDescription());
+            }
+            $response->setHeader("WWW-Authenticate", $hdr);
+
             $response->setContent(json_encode(array("error" => $e->getMessage(), "error_description" => $e->getDescription())));
             if(NULL !== $this->_logger) {
                 $this->_logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request . PHP_EOL . $response);

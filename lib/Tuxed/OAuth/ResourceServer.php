@@ -19,6 +19,9 @@ class ResourceServer {
     }
 
     public function verifyAuthorizationHeader($authorizationHeader) {
+        if(NULL === $authorizationHeader) {
+            throw new ResourceServerException("no_token", "no authorization header in the request");
+        }
         // b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
         $b64TokenRegExp = '(?:[[:alpha:][:digit:]-._~+/]+=*)';
         $result = preg_match('|^Bearer (?P<value>' . $b64TokenRegExp . ')$|', $authorizationHeader, $matches);
