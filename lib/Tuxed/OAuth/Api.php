@@ -21,10 +21,6 @@ class Api {
         $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
         $this->_storage = new $oauthStorageBackend($this->_config);
 
-        if(!$this->_config->getSectionValue("Api", "enableApi")) {
-            throw new ApiException("forbidden","api disabled");
-        }
-
         $this->_rs = new ResourceServer($this->_storage);
     }
 
@@ -33,6 +29,10 @@ class Api {
         $response->setContentType("application/json");
 
         try { 
+            if(!$this->_config->getSectionValue("Api", "enableApi")) {
+                throw new ApiException("forbidden","api disabled");
+            }
+
             $this->_rs->verifyAuthorizationHeader($request->getHeader("Authorization"));
 
             $storage = $this->_storage; // FIXME: can this be avoided??
