@@ -51,7 +51,7 @@ enableApi = FALSE
 disableEntitlementEnforcement = FALSE
 
 [PdoOAuthStorage]
-dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite";
+dsn = "sqlite:/PATH/TO/APP/data/oauth2.sqlite"
 ;dsn = "mysql:host=localhost;dbname=oauth"
 ;username = "oauth"
 ;password = "s3cr3t"
@@ -89,9 +89,9 @@ useNameID = TRUE
 
 ; by default we recommend to use an entitlement SAML attribute to indicate
 ; who is allowed to access certain restricted API calls
-;entitlementAttributeName = "eduPersonEntitlement"
+entitlementAttributeName = "eduPersonEntitlement"
 ;entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
-;entitlementValueMapping["applications"] = "urn:vnd:oauth2:applications"
+entitlementValueMapping["applications"] = "urn:vnd:oauth2:applications"
 
 ; but you can also "cheat" and determine entitlement based on the "uid" 
 ; attribute, or any other attribute that matches a certain value...
