@@ -1,6 +1,6 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "SplClassLoader.php";
 $c =  new SplClassLoader("Tuxed", dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib");
 $c->register();
 

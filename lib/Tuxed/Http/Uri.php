@@ -9,9 +9,6 @@ class Uri {
     public function __construct($inputUri) {
         $this->_validateUri($inputUri);
         $this->_setUriParts($inputUri);
-        if ($this->getUri() !== $inputUri) {
-            throw new UriException("error in uri parsing/constructing");
-        }
     }
 
     private function _validateUri($uri) {
