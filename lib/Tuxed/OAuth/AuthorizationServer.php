@@ -177,7 +177,8 @@ class AuthorizationServer {
 
                 $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
                 // FIXME: update the expires_in field to show the actual amount of seconds it is still valid?
-                $accessToken->resource_owner_entitlement = $this->_storage->getEntitlement($accessToken->resource_owner_id);
+                $entitlement = $this->_storage->getEntitlement($accessToken->resource_owner_id);
+                $accessToken->resource_owner_entitlement = $entitlement->entitlement;
                 return $accessToken;
             
             case "authorization_code":
