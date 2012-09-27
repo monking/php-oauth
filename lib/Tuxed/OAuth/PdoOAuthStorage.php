@@ -234,37 +234,37 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function updateEntitlement($resourceOwnerId, $entitlement) {
-        $result = $this->getEntitlement($resourceOwnerId);
+    public function updateResourceOwner($resourceOwnerId, $resourceOwnerEntitlement, $resourceOwnerAttributes) {
+        $result = $this->getResourceOwner($resourceOwnerId);
         if(FALSE === $result) {
-            $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, entitlement) VALUES(:resource_owner_id, :entitlement)");
+            $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, time, entitlement, attributes) VALUES(:resource_owner_id, :time, :entitlement, :attributes)");
             $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
-            $stmt->bindValue(":entitlement", $entitlement, PDO::PARAM_STR);
+            $stmt->bindValue(":time", time(), PDO::PARAM_INT);
+            $stmt->bindValue(":entitlement", $resourceOwnerEntitlement, PDO::PARAM_STR);
+            $stmt->bindValue(":attributes", $resourceOwnerAttributes, PDO::PARAM_STR);
             if(FALSE === $stmt->execute()) {
-                throw new StorageException("unable to store entitlement");
+                throw new StorageException("unable to add resource owner");
             }
            return 1 === $stmt->rowCount();
         } else {
-            if($result !== $entitlement) {
-                $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET entitlement = :entitlement WHERE id = :resource_owner_id");
-                $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
-                $stmt->bindValue(":entitlement", $entitlement, PDO::PARAM_STR);
-                if(FALSE === $stmt->execute()) {
-                    throw new StorageException("unable to update entitlement");
-                }
-                return 1 === $stmt->rowCount();
-            } else {
-                return TRUE;
+            $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET time = :time, entitlement = :entitlement, attributes = :attributes WHERE id = :resource_owner_id");
+            $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
+            $stmt->bindValue(":time", time(), PDO::PARAM_INT);
+            $stmt->bindValue(":entitlement", $resourceOwnerEntitlement, PDO::PARAM_STR);
+            $stmt->bindValue(":attributes", $resourceOwnerAttributes, PDO::PARAM_STR);
+            if(FALSE === $stmt->execute()) {
+                throw new StorageException("unable to update resource owner");
             }
+            return 1 === $stmt->rowCount();
         }
     }
 
-    public function getEntitlement($resourceOwnerId) {
+    public function getResourceOwner($resourceOwnerId) {
         $stmt = $this->_pdo->prepare("SELECT * FROM ResourceOwner WHERE id = :resource_owner_id");
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
-            throw new StorageException("unable to get entitlement");
+            throw new StorageException("unable to get resource owner");
         }
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
@@ -272,8 +272,10 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
     public function initDatabase() {
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `ResourceOwner` (
-            `id` varchar(64) NOT NULL,
-            `entitlement` text DEFAULT NULL,
+            `id` VARCHAR(64) NOT NULL,
+            `time` INT(11) NOT NULL,
+            `entitlement` TEXT DEFAULT NULL,
+            `attributes` TEXT DEFAULT NULL,
             PRIMARY KEY (`id`))
         ");
 

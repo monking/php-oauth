@@ -15,6 +15,10 @@ class DummyResourceOwner implements IResourceOwner {
     public function setHint($resourceOwnerIdHint = NULL) {
     }
 
+    public function getAttributes() {
+        return json_encode(array());
+    }
+
     public function getResourceOwnerId() {
         return $this->_c->getSectionValue('DummyResourceOwner', 'resourceOwnerId');
     }

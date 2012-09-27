@@ -56,8 +56,7 @@ class AuthorizationServer {
                 throw new ClientException("invalid_scope", "not authorized to request this scope", $client, $state);
             }
 
-            // FIXME: add updateEntitlement to IOAuthStorage?
-            $this->_storage->updateEntitlement($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement());
+            $this->_storage->updateResourceOwner($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement(), $resourceOwner->getAttributes());
 
             $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
             if(FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
@@ -177,8 +176,8 @@ class AuthorizationServer {
 
                 $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
                 // FIXME: update the expires_in field to show the actual amount of seconds it is still valid?
-                $entitlement = $this->_storage->getEntitlement($accessToken->resource_owner_id);
-                $accessToken->resource_owner_entitlement = $entitlement->entitlement;
+                $resourceOwner = $this->_storage->getResourceOwner($accessToken->resource_owner_id);
+                $accessToken->resource_owner_entitlement = $resourceOwner->entitlement;
                 return $accessToken;
             
             case "authorization_code":

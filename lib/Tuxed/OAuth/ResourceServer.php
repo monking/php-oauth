@@ -6,9 +6,10 @@ class ResourceServer {
 
     private $_storage;
     private $_entitlementEnforcement;
-    private $_grantedEntitlement;
-    private $_grantedScope;
     private $_resourceOwnerId;
+    private $_grantedScope;
+    private $_grantedEntitlement;
+    private $_resourceOwnerAttributes;
 
     public function __construct(IOAuthStorage $s) {
         $this->_storage = $s;
@@ -38,8 +39,9 @@ class ResourceServer {
         }
         $this->_resourceOwnerId = $token->resource_owner_id;
         $this->_grantedScope = $token->scope;
-        $entitlement = $this->_storage->getEntitlement($token->resource_owner_id);
-        $this->_grantedEntitlement = $entitlement->entitlement;
+        $resourceOwner = $this->_storage->getResourceOwner($token->resource_owner_id);
+        $this->_grantedEntitlement = $resourceOwner->entitlement;
+        $this->_resourceOwnerAttributes = $resourceOwner->attributes;
     }
 
     public function setEntitlementEnforcement($enforce = TRUE) {
@@ -87,6 +89,10 @@ class ResourceServer {
                 throw new ResourceServerException("insufficient_entitlement", "no permission for this call with granted entitlement");
             }
         }
+    }
+
+    public function getAttributes() {
+        return json_decode($this->_resourceOwnerAttributes, TRUE);
     }
 
 }

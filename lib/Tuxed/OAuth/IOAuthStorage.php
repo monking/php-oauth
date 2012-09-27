@@ -27,7 +27,6 @@ interface IOAuthStorage {
     public function updateApproval           ($clientId, $resourceOwnerId, $scope);
     public function deleteApproval           ($clientId, $resourceOwnerId);
 
-    // FIXME: rename to updateResourceOwner and getResourceOwner I guess...
-    public function updateEntitlement        ($resourceOwnerId, $entitlement);
-    public function getEntitlement           ($resourceOwnerId);
+    public function updateResourceOwner      ($resourceOwnerId, $resourceOwnerEntitlement, $resourceOwnerAttributes);
+    public function getResourceOwner         ($resourceOwnerId);
 }

@@ -20,10 +20,9 @@ class ApiTest extends OAuthHelper {
         $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
-        $storage->updateEntitlement('fkooman', NULL);
+        $storage->updateResourceOwner('fkooman', NULL, NULL);
         $storage->addApproval('testclient', 'fkooman', 'read', NULL);
         $storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
-
     }
 
     public function testRetrieveAuthorizations() {

@@ -27,6 +27,10 @@ class BrowserIDResourceOwner implements IResourceOwner {
         $this->_resourceOwnerIdHint = $resourceOwnerIdHint;
     }
 
+    public function getAttributes() {
+        return json_encode(array());
+    }
+
     public function getResourceOwnerId() {
         return $this->_verifier->authenticate($this->_resourceOwnerIdHint);
     }
