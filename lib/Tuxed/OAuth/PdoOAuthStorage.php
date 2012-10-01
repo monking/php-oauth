@@ -234,23 +234,21 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function updateResourceOwner($resourceOwnerId, $resourceOwnerEntitlement, $resourceOwnerAttributes) {
+    public function updateResourceOwner($resourceOwnerId, $resourceOwnerAttributes) {
         $result = $this->getResourceOwner($resourceOwnerId);
         if(FALSE === $result) {
-            $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, time, entitlement, attributes) VALUES(:resource_owner_id, :time, :entitlement, :attributes)");
+            $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, time, attributes) VALUES(:resource_owner_id, :time, :attributes)");
             $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
             $stmt->bindValue(":time", time(), PDO::PARAM_INT);
-            $stmt->bindValue(":entitlement", $resourceOwnerEntitlement, PDO::PARAM_STR);
             $stmt->bindValue(":attributes", $resourceOwnerAttributes, PDO::PARAM_STR);
             if(FALSE === $stmt->execute()) {
                 throw new StorageException("unable to add resource owner");
             }
            return 1 === $stmt->rowCount();
         } else {
-            $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET time = :time, entitlement = :entitlement, attributes = :attributes WHERE id = :resource_owner_id");
+            $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET time = :time, attributes = :attributes WHERE id = :resource_owner_id");
             $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
             $stmt->bindValue(":time", time(), PDO::PARAM_INT);
-            $stmt->bindValue(":entitlement", $resourceOwnerEntitlement, PDO::PARAM_STR);
             $stmt->bindValue(":attributes", $resourceOwnerAttributes, PDO::PARAM_STR);
             if(FALSE === $stmt->execute()) {
                 throw new StorageException("unable to update resource owner");
@@ -274,7 +272,6 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
             CREATE TABLE IF NOT EXISTS `ResourceOwner` (
             `id` VARCHAR(64) NOT NULL,
             `time` INT(11) NOT NULL,
-            `entitlement` TEXT DEFAULT NULL,
             `attributes` TEXT DEFAULT NULL,
             PRIMARY KEY (`id`))
         ");

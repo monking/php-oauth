@@ -8,7 +8,6 @@ class ResourceServer {
     private $_entitlementEnforcement;
     private $_resourceOwnerId;
     private $_grantedScope;
-    private $_grantedEntitlement;
     private $_resourceOwnerAttributes;
 
     public function __construct(IOAuthStorage $s) {
@@ -16,7 +15,7 @@ class ResourceServer {
         $this->_entitlementEnforcement = TRUE;
         $this->_resourceOwnerId = NULL;
         $this->_grantedScope = NULL;
-        $this->_grantedEntitlement = NULL;
+        $this->_resourceOwnerAttributes = NULL;
     }
 
     public function verifyAuthorizationHeader($authorizationHeader) {
@@ -40,8 +39,7 @@ class ResourceServer {
         $this->_resourceOwnerId = $token->resource_owner_id;
         $this->_grantedScope = $token->scope;
         $resourceOwner = $this->_storage->getResourceOwner($token->resource_owner_id);
-        $this->_grantedEntitlement = $resourceOwner->entitlement;
-        $this->_resourceOwnerAttributes = $resourceOwner->attributes;
+        $this->_resourceOwnerAttributes = json_decode($resourceOwner->attributes, TRUE);
     }
 
     public function setEntitlementEnforcement($enforce = TRUE) {
@@ -54,10 +52,10 @@ class ResourceServer {
     }
 
     public function getEntitlement() {
-        if(NULL === $this->_grantedEntitlement) {
+        if(!array_key_exists("entitlement", $this->_resourceOwnerAttributes)) {
             return array();
         }
-        return explode(" ", $this->_grantedEntitlement);
+        return $this->_resourceOwnerAttributes['entitlement'];
     }
 
     public function hasScope($scope) {
@@ -73,14 +71,10 @@ class ResourceServer {
     }
 
     public function hasEntitlement($entitlement) {
-        if(NULL === $this->_grantedEntitlement) {
+        if(!array_key_exists("entitlement", $this->_resourceOwnerAttributes)) {
             return FALSE;
         }
-        $grantedEntitlement = explode(" ", $this->_grantedEntitlement);
-        if(in_array($entitlement, $grantedEntitlement)) {
-            return TRUE;
-        }
-        return FALSE;
+        return in_array($entitlement, $this->_resourceOwnerAttributes['entitlement']);
     }
 
     public function requireEntitlement($entitlement) {
@@ -92,7 +86,7 @@ class ResourceServer {
     }
 
     public function getAttributes() {
-        return json_decode($this->_resourceOwnerAttributes, TRUE);
+        return $this->_resourceOwnerAttributes;
     }
 
 }

@@ -56,7 +56,7 @@ class AuthorizationServer {
                 throw new ClientException("invalid_scope", "not authorized to request this scope", $client, $state);
             }
 
-            $this->_storage->updateResourceOwner($resourceOwner->getResourceOwnerId(), $resourceOwner->getEntitlement(), $resourceOwner->getAttributes());
+            $this->_storage->updateResourceOwner($resourceOwner->getResourceOwnerId(), json_encode($resourceOwner->getAttributes()));
 
             $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
             if(FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
@@ -177,7 +177,7 @@ class AuthorizationServer {
                 $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
                 // FIXME: update the expires_in field to show the actual amount of seconds it is still valid?
                 $resourceOwner = $this->_storage->getResourceOwner($accessToken->resource_owner_id);
-                $accessToken->resource_owner_entitlement = $resourceOwner->entitlement;
+                $accessToken->resource_owner_attributes = json_decode($resourceOwner->attributes, TRUE);
                 return $accessToken;
             
             case "authorization_code":
