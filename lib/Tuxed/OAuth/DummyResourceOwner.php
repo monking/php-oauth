@@ -17,18 +17,8 @@ class DummyResourceOwner implements IResourceOwner {
     }
 
     public function getAttributes() {
-        $attributes = $this->_c->getSectionValue('DummyResourceOwner', 'resourceOwnerAttribute', FALSE);
-
-        // FIXME: entitlement from config file is not an array :(
-        if(NULL === $attributes) {
-            return array();
-        }
-        if(array_key_exists("entitlement", $attributes)) {
-            $attributes['entitlement'] = array($attributes['entitlement']);
-        }
-        return $attributes;
-        
-        //return (NULL !== $attributes) ? $attributes : array();
+        $attributes = $this->_c->getSectionValues('DummyResourceOwnerAttributes', FALSE);
+        return (NULL !== $attributes) ? $attributes : array();
     }
 
     public function getAttribute($key) {

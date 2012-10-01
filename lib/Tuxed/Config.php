@@ -39,6 +39,17 @@ class Config {
         }
     }
 
+    public function getSectionValues($section, $required = TRUE) {
+        if(array_key_exists($section, $this->_configValues)) {
+            return $this->_configValues[$section];
+        } else {
+            if($required) {
+                throw new ConfigException("configuration section '$section' not set in configuration file'");
+            }
+            return NULL;
+        }
+    }
+
     public function setValue($key, $value) {
         $this->_configValues[$key] = $value;
     }
