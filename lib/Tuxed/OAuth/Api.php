@@ -112,14 +112,14 @@ class Api {
 
             $request->matchRest("GET", "/applications/", function() use ($request, $response, $storage, $rs) {
                 $rs->requireScope("applications");
-                // $rs->requireEntitlement("applications");    // do not require entitlement to list clients...
+                // $rs->requireEntitlement("urn:vnd:oauth2:applications");    // do not require entitlement to list clients...
                 $data = $storage->getClients();
                 $response->setContent(json_encode($data)); 
             });
 
             $request->matchRest("DELETE", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
                 $rs->requireScope("applications");
-                $rs->requireEntitlement("applications");
+                $rs->requireEntitlement("urn:vnd:oauth2:applications");
                 if(FALSE === $storage->deleteClient($id)) {
                     throw new ApiException("not_found", "the resource you are trying to delete does not exist");
                 }
@@ -127,8 +127,10 @@ class Api {
 
             $request->matchRest("GET", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
                 $rs->requireScope("applications");
-                $rs->requireEntitlement("applications");    // FIXME: for now require entitlement as long as password hashing is not
-                                                            // implemented...
+                $rs->requireEntitlement("urn:vnd:oauth2:applications"); 
+                // FIXME: for now require entitlement as long as password hashing is not
+                // implemented...
+
                 $data = $storage->getClient($id);
                 if(FALSE === $data) {
                     throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
@@ -138,7 +140,7 @@ class Api {
 
             $request->matchRest("POST", "/applications/", function() use ($request, $response, $storage, $rs) {
                 $rs->requireScope("applications");
-                $rs->requireEntitlement("applications");
+                $rs->requireEntitlement("urn:vnd:oauth2:applications");
                 try { 
                     $client = ClientRegistration::fromArray(json_decode($request->getContent(), TRUE));
                     $data = $client->getClientAsArray();
@@ -158,7 +160,7 @@ class Api {
 
             $request->matchRest("PUT", "/applications/:id", function($id) use ($request, $response, $storage, $rs) {
                 $rs->requireScope("applications");
-                $rs->requireEntitlement("applications");
+                $rs->requireEntitlement("urn:vnd:oauth2:applications");
                 try {
                     $client = ClientRegistration::fromArray(json_decode($request->getContent(), TRUE));
                     $data = $client->getClientAsArray();

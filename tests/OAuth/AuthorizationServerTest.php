@@ -92,9 +92,9 @@ class ImplicitGrantTest extends OAuthHelper {
 
         // verify token
         $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
-        $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
-        $this->assertTrue($this->_rs->hasEntitlement("applications"));
-        $this->assertFalse($this->_rs->hasEntitlement("foo"));
+        $this->assertEquals("1234-5678-9999", $this->_rs->getResourceOwnerId());
+        $this->assertTrue($this->_rs->hasEntitlement("urn:vnd:oauth2:applications"));
+        $this->assertFalse($this->_rs->hasEntitlement("foobar"));
         $this->assertTrue($this->_rs->hasScope("read"));
         $this->assertFalse($this->_rs->hasScope("foo"));
 
@@ -107,7 +107,7 @@ class ImplicitGrantTest extends OAuthHelper {
         }
 
         try {
-            $this->_rs->requireEntitlement("foo");
+            $this->_rs->requireEntitlement("foobar");
             $this->assertTrue(FALSE);
         } catch(ResourceServerException $e) {
             $this->assertEquals("insufficient_entitlement", $e->getMessage());
@@ -132,7 +132,7 @@ class ImplicitGrantTest extends OAuthHelper {
         
         $this->assertRegExp('|^[a-zA-Z0-9]+$|', $response->access_token);
         $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
-        $this->assertEquals("fkooman", $this->_rs->getResourceOwnerId());
+        $this->assertEquals("1234-5678-9999", $this->_rs->getResourceOwnerId());
     }
 
 }

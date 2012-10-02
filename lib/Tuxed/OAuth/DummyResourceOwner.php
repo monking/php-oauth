@@ -34,4 +34,5 @@ class DummyResourceOwner implements IResourceOwner {
     public function getEntitlement() {
         return $this->getAttribute("entitlement");
     }
+
 }

@@ -22,6 +22,7 @@ class SspResourceOwner implements IResourceOwner {
     }
 
     public function setHint($resourceOwnerIdHint = NULL) {
+        // this resource owner class does not support hinting
     }
 
     private function _authenticateUser() {
@@ -30,47 +31,26 @@ class SspResourceOwner implements IResourceOwner {
 
     public function getAttributes() {
         $this->_authenticateUser();
-        return json_encode($this->_ssp->getAttributes());
+        return $this->_ssp->getAttributes();
+    }
+
+    public function getAttribute($key) {
+        $attributes = $this->getAttributes();
+        return array_key_exists($key, $attributes) ? $attributes[$key] : NULL;
     }
 
     public function getResourceOwnerId() {
         $this->_authenticateUser();
-        if($this->_c->getSectionValue('SspResourceOwner', 'useNameID')) {
-            $nameId = $this->_ssp->getAuthData("saml:sp:NameID");
-            if("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" !== $nameId['Format']) {
-                throw new SspResourceOwnerException("NameID format not equal to 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'");
-            }
-            return $nameId['Value'];
-        } else {
-            $attributes = $this->_ssp->getAttributes();
-            if(!array_key_exists($this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName'), $attributes)) {
-                throw new SspResourceOwnerException("resourceOwnerIdAttributeName is not available in SAML attributes");
-            }
-            return $attributes[$this->_c->getSectionValue('SspResourceOwner', 'resourceOwnerIdAttributeName')][0];
+        $nameId = $this->_ssp->getAuthData("saml:sp:NameID");
+        if("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" !== $nameId['Format']) {
+            throw new SspResourceOwnerException("NameID format not equal to 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'");
         }
+        return $nameId['Value'];
     }
 
+    /* FIXME: DEPRECATED */
     public function getEntitlement() {
-        $this->_authenticateUser();
-        $attributes = $this->_ssp->getAttributes();
-
-        $entitlementAttributeName = $this->_c->getSectionValue('SspResourceOwner', 'entitlementAttributeName', FALSE);
-        $entitlementValueMapping = $this->_c->getSectionValue("SspResourceOwner", "entitlementValueMapping", FALSE);
-        if(NULL === $entitlementAttributeName || !is_array($entitlementValueMapping)) {
-            return NULL;
-        }
-
-        if(!array_key_exists($entitlementAttributeName, $attributes)) {
-            return NULL;
-        }
-
-        $entitlements = array();
-        foreach($entitlementValueMapping as $k => $v) {
-            if(in_array($v, $attributes[$entitlementAttributeName])) {
-                array_push($entitlements, $k);
-            }
-        }
-        return empty($entitlements) ? NULL : implode(" ", $entitlements);
+        return $this->getAttribute("entitlement");
     }
 
 }

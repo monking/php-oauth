@@ -62,40 +62,21 @@ persistentConnection = FALSE
 
 ; Dummy Configuration
 [DummyResourceOwner]
-resourceOwnerId = "fkooman"
-resourceOwnerEntitlement["applications"] = "fkooman"
+resourceOwnerId = "1234-5678-9999"
+
+[DummyResourceOwnerAttributes]
+uid[]         = "fkooman"
+displayName[] = "François Kooman"
+entitlement[] = "urn:vnd:oauth2:applications"
+entitlement[] = "foo"
+entitlement[] = "bar"
 
 ; BrowserID configuration
 [BrowserIDResourceOwner]
-browserIDPath = "/var/www/html/php-browserid"
+browserIDPath   = "/var/www/html/php-browserid"
 verifierAddress = "https://browserid.org/verify"
-
-resourceOwnerEntitlement["applications"] = "fkooman@example.org"
-;resourceOwnerEntitlement["applications"] = "john.doe@example.org"
 
 ; simpleSAMLphp configuration
 [SspResourceOwner]
-sspPath = "/var/simplesamlphp"
+sspPath    = "/var/simplesamlphp"
 authSource = "default-sp"
-
-; by default we use the (persistent) NameID value received from the SAML 
-; assertion as the user identifier (RECOMMENDED)
-useNameID = TRUE
-
-; you can also use an attribute as a unique identifier for a user instead 
-; of the NameID, but set 'useNameID' to FALSE then!
-;resourceOwnerIdAttributeName = "uid"
-;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
-
-; by default we recommend to use an entitlement SAML attribute to indicate
-; who is allowed to access certain restricted API calls
-entitlementAttributeName = "eduPersonEntitlement"
-;entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
-entitlementValueMapping["applications"] = "urn:vnd:oauth2:applications"
-
-; but you can also "cheat" and determine entitlement based on the "uid" 
-; attribute, or any other attribute that matches a certain value...
-;entitlementAttributeName = "uid"
-;entitlementAttributeName = "urn:mace:dir:attribute-def:uid"
-;entitlementValueMapping["applications"] = "fkooman"
-;entitlementValueMapping["applications"] = "john.doe"
