@@ -89,4 +89,9 @@ class ResourceServer {
         return $this->_resourceOwnerAttributes;
     }
 
+    public function getAttribute($key) {
+        $attributes = $this->getAttributes();
+        return array_key_exists($key, $attributes) ? $attributes[$key] : NULL;
+    }
+
 }
