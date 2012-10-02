@@ -15,7 +15,7 @@ $logger = NULL;
 $request = NULL;
 $response = NULL;
 
-try { 
+try {
     $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "oauth.ini");
     $logger = new Logger($config->getSectionValue('Log', 'logLevel'), $config->getValue('serviceName'), $config->getSectionValue('Log', 'logFile'), $config->getSectionValue('Log', 'logMail', FALSE));
 
@@ -30,17 +30,17 @@ try {
     ob_start();
     require dirname(__DIR__) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "errorPage.php";
     $response->setContent(ob_get_clean());
-    if(NULL !== $logger) {
+    if (NULL !== $logger) {
         $logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);
     }
 }
 
-if(NULL !== $logger) {
+if (NULL !== $logger) {
     $logger->logDebug($request);
 }
-if(NULL !== $logger) {
+if (NULL !== $logger) {
     $logger->logDebug($response);
 }
-if(NULL !== $response) {
+if (NULL !== $response) {
     $response->sendResponse();
 }

@@ -2,6 +2,6 @@
 
 namespace Tuxed\OAuth;
 
-class ScopeException extends \Exception {
-
+class ScopeException extends \Exception
+{
 }

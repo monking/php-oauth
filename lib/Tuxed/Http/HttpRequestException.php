@@ -2,6 +2,6 @@
 
 namespace Tuxed\Http;
 
-class HttpRequestException extends \Exception {
-
+class HttpRequestException extends \Exception
+{
 }

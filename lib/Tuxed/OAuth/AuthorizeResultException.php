@@ -2,6 +2,6 @@
 
 namespace Tuxed\OAuth;
 
-class AuthorizeResultException extends \Exception {
-
+class AuthorizeResultException extends \Exception
+{
 }

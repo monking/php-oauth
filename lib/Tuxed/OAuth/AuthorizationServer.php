@@ -1,22 +1,24 @@
-<?php 
+<?php
 
 namespace Tuxed\OAuth;
 
 use \Tuxed\Config as Config;
 use \Tuxed\Http\Uri as Uri;
 
-class AuthorizationServer {
-
+class AuthorizationServer
+{
     private $_storage;
     private $_c;
 
-    public function __construct(IOAuthStorage $storage, Config $c) {
+    public function __construct(IOAuthStorage $storage, Config $c)
+    {
         $this->_storage = $storage;
         $this->_c = $c;
     }
- 
-    public function authorize(IResourceOwner $resourceOwner, array $get) {
-        try { 
+
+    public function authorize(IResourceOwner $resourceOwner, array $get)
+    {
+        try {
             $clientId     = self::getParameter($get, 'client_id');
             $responseType = self::getParameter($get, 'response_type');
             $redirectUri  = self::getParameter($get, 'redirect_uri');
@@ -24,21 +26,21 @@ class AuthorizationServer {
             $scope        = new Scope(self::getParameter($get, 'scope'));
             $state        = self::getParameter($get, 'state');
 
-            if(NULL === $clientId) {
+            if (NULL === $clientId) {
                 throw new ResourceOwnerException('client_id missing');
             }
 
-            if(NULL === $responseType) {
+            if (NULL === $responseType) {
                 throw new ResourceOwnerException('response_type missing');
             }
 
             $client = $this->_storage->getClient($clientId);
-            if(FALSE === $client) {
+            if (FALSE === $client) {
                 throw new ResourceOwnerException('client not registered');
             }
 
-            if(NULL !== $redirectUri) {
-                if($client->redirect_uri !== $redirectUri) {
+            if (NULL !== $redirectUri) {
+                if ($client->redirect_uri !== $redirectUri) {
                     throw new ResourceOwnerException('specified redirect_uri not the same as registered redirect_uri');
                 }
             }
@@ -48,51 +50,54 @@ class AuthorizationServer {
                                              "native_application" => array ("token", "code"),
                                              "user_agent_based_application" => array ("token"));
 
-            if(!in_array($responseType, $allowedClientProfiles[$client->type])) {
+            if (!in_array($responseType, $allowedClientProfiles[$client->type])) {
                 throw new ClientException("unsupported_response_type", "response_type not supported by client profile", $client, $state);
             }
 
-            if(!$scope->isSubsetOf(new Scope($client->allowed_scope))) {
+            if (!$scope->isSubsetOf(new Scope($client->allowed_scope))) {
                 throw new ClientException("invalid_scope", "not authorized to request this scope", $client, $state);
             }
 
             $this->_storage->updateResourceOwner($resourceOwner->getResourceOwnerId(), json_encode($resourceOwner->getAttributes()));
 
             $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
-            if(FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
+            if (FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
                 $ar = new AuthorizeResult(AuthorizeResult::ASK_APPROVAL);
-                $ar->setClient(ClientRegistration::fromArray((array)$client));
+                $ar->setClient(ClientRegistration::fromArray((array) $client));
                 $ar->setScope($scope);
+
                 return $ar;
             } else {
-                if("token" === $responseType) {
+                if ("token" === $responseType) {
                     // implicit grant
                     // FIXME: return existing access token if it exists for this exact client, resource owner and scope?
                     $accessToken = self::randomHex(16);
                     $this->_storage->storeAccessToken($accessToken, time(), $clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope(), $this->_c->getValue('accessTokenExpiry'));
-                    $token = array("access_token" => $accessToken, 
-                                   "expires_in" => $this->_c->getValue('accessTokenExpiry'), 
+                    $token = array("access_token" => $accessToken,
+                                   "expires_in" => $this->_c->getValue('accessTokenExpiry'),
                                    "token_type" => "bearer");
                     $s = $scope->getScope();
-                    if(!empty($s)) {
+                    if (!empty($s)) {
                         $token += array ("scope" => $s);
                     }
-                    if(NULL !== $state) {
+                    if (NULL !== $state) {
                         $token += array ("state" => $state);
                     }
                     $ar = new AuthorizeResult(AuthorizeResult::REDIRECT);
                     $ar->setRedirectUri(new Uri($client->redirect_uri . "#" . http_build_query($token)));
+
                     return $ar;
                 } else {
                     // authorization code grant
                     $authorizationCode = self::randomHex(16);
                     $this->_storage->storeAuthorizationCode($authorizationCode, $resourceOwner->getResourceOwnerId(), time(), $clientId, $redirectUri, $scope->getScope());
                     $token = array("code" => $authorizationCode);
-                    if(NULL !== $state) {
+                    if (NULL !== $state) {
                         $token += array ("state" => $state);
                     }
                     $ar = new AuthorizeResult(AuthorizeResult::REDIRECT);
                     $ar->setRedirectUri(new Uri($client->redirect_uri . "?" . http_build_query($token)));
+
                     return $ar;
                 }
             }
@@ -101,8 +106,9 @@ class AuthorizationServer {
         }
     }
 
-    public function approve(IResourceOwner $resourceOwner, array $get, array $post) {
-        try { 
+    public function approve(IResourceOwner $resourceOwner, array $get, array $post)
+    {
+        try {
             $clientId     = self::getParameter($get, 'client_id');
             $responseType = self::getParameter($get, 'response_type');
             $redirectUri  = self::getParameter($get, 'redirect_uri');
@@ -110,7 +116,7 @@ class AuthorizationServer {
             $state        = self::getParameter($get, 'state');
 
             $result = $this->authorize($resourceOwner, $get);
-            if(AuthorizeResult::ASK_APPROVAL !== $result->getAction()) {
+            if (AuthorizeResult::ASK_APPROVAL !== $result->getAction()) {
                 return $result;
             }
 
@@ -120,18 +126,18 @@ class AuthorizationServer {
             // FIXME: are we sure this client is always valid?
             $client = $this->_storage->getClient($clientId);
 
-            if("Approve" === $approval) {
-                if(!$postScope->isSubsetOf($scope)) {
+            if ("Approve" === $approval) {
+                if (!$postScope->isSubsetOf($scope)) {
                     // FIXME: should this actually be an authorize exception? this is a user error!
                     throw new ClientException("invalid_scope", "approved scope is not a subset of requested scope", $client, $state);
                 }
 
                 $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId());
-                if(FALSE === $approvedScope) {
+                if (FALSE === $approvedScope) {
                     // no approved scope stored yet, new entry
                     $refreshToken = ("code" === $responseType) ? self::randomHex(16) : NULL;
                     $this->_storage->addApproval($clientId, $resourceOwner->getResourceOwnerId(), $postScope->getScope(), $refreshToken);
-                } else if(!$postScope->isSubsetOf(new Scope($approvedScope->scope))) {
+                } elseif (!$postScope->isSubsetOf(new Scope($approvedScope->scope))) {
                     // not a subset, merge and store the new one
                     $mergedScopes = clone $postScope;
                     $mergedScopes->mergeWith(new Scope($approvedScope->scope));
@@ -140,6 +146,7 @@ class AuthorizationServer {
                     // subset, approval for superset of scope already exists, do nothing
                 }
                 $get['scope'] = $postScope->getScope();
+
                 return $this->authorize($resourceOwner, $get);
 
             } else {
@@ -150,7 +157,8 @@ class AuthorizationServer {
         }
     }
 
-    public function token(array $post, $user = NULL, $pass = NULL) {
+    public function token(array $post, $user = NULL, $pass = NULL)
+    {
         // exchange authorization code for access token
         $grantType    = self::getParameter($post, 'grant_type');
         $code         = self::getParameter($post, 'code');
@@ -158,19 +166,19 @@ class AuthorizationServer {
         $refreshToken = self::getParameter($post, 'refresh_token');
         $token        = self::getParameter($post, 'token');
 
-        if(NULL === $grantType) {
+        if (NULL === $grantType) {
             throw new TokenException("invalid_request", "the grant_type parameter is missing");
         }
 
         $result = NULL;
 
-        switch($grantType) {
+        switch ($grantType) {
             case "urn:pingidentity.com:oauth2:grant_type:validate_bearer":
-                if(NULL === $token) {
+                if (NULL === $token) {
                     throw new TokenException("invalid_request", "the token parameter is missing");
                 }
                 $accessToken = $this->_storage->getAccessToken($token);
-                if(FALSE === $accessToken) {
+                if (FALSE === $accessToken) {
                     throw new TokenException("invalid_grant", "the token was not found");
                 }
 
@@ -178,30 +186,31 @@ class AuthorizationServer {
                 // FIXME: update the expires_in field to show the actual amount of seconds it is still valid?
                 $resourceOwner = $this->_storage->getResourceOwner($accessToken->resource_owner_id);
                 $accessToken->resource_owner_attributes = json_decode($resourceOwner->attributes, TRUE);
+
                 return $accessToken;
-            
+
             case "authorization_code":
-                if(NULL === $code) {
+                if (NULL === $code) {
                     throw new TokenException("invalid_request", "the code parameter is missing");
                 }
-                // FIXME: if all of a sudden a redirect_uri is present, it should be allowed? 
+                // FIXME: if all of a sudden a redirect_uri is present, it should be allowed?
                 // spec is vague about this... but then again, it doesn't make sense to not specify it
                 // in the authorize request, and now all of a sudden you specify it
                 $result = $this->_storage->getAuthorizationCode($code, $redirectUri);
-                if(FALSE === $result) {
+                if (FALSE === $result) {
                     throw new TokenException("invalid_grant", "the authorization code was not found");
                 }
-                if(time() > $result->issue_time + 600) {
+                if (time() > $result->issue_time + 600) {
                     throw new TokenException("invalid_grant", "the authorization code expired");
                 }
                 break;
 
             case "refresh_token":
-                if(NULL === $refreshToken) {
+                if (NULL === $refreshToken) {
                     throw new TokenException("invalid_request", "the refresh_token parameter is missing");
                 }
-                $result = $this->_storage->getRefreshToken($refreshToken);        
-                if(FALSE === $result) {
+                $result = $this->_storage->getRefreshToken($refreshToken);
+                if (FALSE === $result) {
                     throw new TokenException("invalid_grant", "the refresh_token was not found");
                 }
                 break;
@@ -211,29 +220,29 @@ class AuthorizationServer {
         }
 
         $client = $this->_storage->getClient($result->client_id);
-        if("user_agent_based_application" === $client->type) {
+        if ("user_agent_based_application" === $client->type) {
             throw new TokenException("unauthorized_client", "this client type is not allowed to use the token endpoint");
         }
-        if("web_application" === $client->type) {
+        if ("web_application" === $client->type) {
             // REQUIRE basic auth
-            if(NULL === $user || empty($user) || NULL === $pass || empty($pass)) {
+            if (NULL === $user || empty($user) || NULL === $pass || empty($pass)) {
                 throw new TokenException("invalid_client", "this client requires authentication");
             }
-        
-            if($user !== $client->id || $pass !== $client->secret) {
+
+            if ($user !== $client->id || $pass !== $client->secret) {
                 throw new TokenException("invalid_client", "client authentication failed");
             }
         }
-        if("native_application" === $client->type) {
+        if ("native_application" === $client->type) {
             // MAY use basic auth, so only check when Authorization header is provided
-            if(NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
-                if($user !== $client->id || $pass !== $client->secret) {
+            if (NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
+                if ($user !== $client->id || $pass !== $client->secret) {
                     throw new TokenException("invalid_client", "client authentication failed");
                 }
             }
         }
 
-        if($client->id !== $result->client_id) {
+        if ($client->id !== $result->client_id) {
             throw new TokenException("invalid_grant", "grant was not issued to this client");
         }
 
@@ -243,9 +252,9 @@ class AuthorizationServer {
         $this->_storage->storeAccessToken($accessToken, time(), $result->client_id, $result->resource_owner_id, $result->scope, $this->_c->getValue('accessTokenExpiry'));
         $token = $this->_storage->getAccessToken($accessToken);
 
-        if("authorization_code" === $grantType) {
+        if ("authorization_code" === $grantType) {
             // we need to be able to delete, otherwise someone else was first!
-            if(FALSE === $this->_storage->deleteAuthorizationCode($code, $redirectUri)) {
+            if (FALSE === $this->_storage->deleteAuthorizationCode($code, $redirectUri)) {
                 throw new TokenException("invalid_grant", "this grant was already used");
             }
             $approval = $this->_storage->getApproval($result->client_id, $result->resource_owner_id);
@@ -260,19 +269,22 @@ class AuthorizationServer {
         // filter unwanted response parameters
         // FIXME: the scope should be from the scope bound to the refresh_token, and not to the approval!
         $responseParameters = array("access_token", "token_type", "expires_in", "refresh_token", "scope");
-        foreach($token as $k => $v) {
-            if(!in_array($k, $responseParameters)) {
+        foreach ($token as $k => $v) {
+            if (!in_array($k, $responseParameters)) {
                 unset($token->$k);
             }
         }
+
         return $token;
     }
 
-    private static function getParameter(array $parameters, $key) {
+    private static function getParameter(array $parameters, $key)
+    {
         return (array_key_exists($key, $parameters) && !empty($parameters[$key])) ? $parameters[$key] : NULL;
     }
 
-    public static function randomHex($len = 16) {
+    public static function randomHex($len = 16)
+    {
         $randomString = bin2hex(openssl_random_pseudo_bytes($len, $strong));
         // @codeCoverageIgnoreStart
         if (FALSE === $strong) {

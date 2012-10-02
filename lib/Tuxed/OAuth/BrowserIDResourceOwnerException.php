@@ -2,6 +2,6 @@
 
 namespace Tuxed\OAuth;
 
-class BrowserIDResourceOwnerException extends \Exception {
-
+class BrowserIDResourceOwnerException extends \Exception
+{
 }

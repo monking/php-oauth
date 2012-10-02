@@ -2,7 +2,8 @@
 
 namespace Tuxed\OAuth;
 
-interface IResourceOwner {
+interface IResourceOwner
+{
     public function setHint                    ($resourceOwnerIdHint = NULL);
     public function getAttributes              ();
     public function getResourceOwnerId         ();

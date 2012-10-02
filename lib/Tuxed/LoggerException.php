@@ -2,6 +2,6 @@
 
 namespace Tuxed;
 
-class LoggerException extends \Exception {
-
+class LoggerException extends \Exception
+{
 }

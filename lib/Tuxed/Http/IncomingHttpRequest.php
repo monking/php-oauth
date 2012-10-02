@@ -2,9 +2,10 @@
 
 namespace Tuxed\Http;
 
-class IncomingHttpRequest {
-
-    public function __construct() {
+class IncomingHttpRequest
+{
+    public function __construct()
+    {
         $required_keys = array("SERVER_NAME", "SERVER_PORT", "REQUEST_URI", "REQUEST_METHOD");
         foreach ($required_keys as $r) {
             if (!array_key_exists($r, $_SERVER) || empty($_SERVER[$r])) {
@@ -13,15 +14,18 @@ class IncomingHttpRequest {
         }
     }
 
-    public function getRequestMethod() {
+    public function getRequestMethod()
+    {
         return $_SERVER['REQUEST_METHOD'];
     }
-    
-    public function getPathInfo() {
+
+    public function getPathInfo()
+    {
         return array_key_exists('PATH_INFO', $_SERVER) ? $_SERVER['PATH_INFO'] : NULL;
     }
 
-    public function getRequestUri() {
+    public function getRequestUri()
+    {
         // scheme
         $proxy = FALSE;
         if (array_key_exists("HTTPS", $_SERVER) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
@@ -51,34 +55,39 @@ class IncomingHttpRequest {
         return $scheme . "://" . $name . $port . $_SERVER['REQUEST_URI'];
     }
 
-    public function getContent() {
+    public function getContent()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== "POST" && $_SERVER['REQUEST_METHOD'] !== "PUT") {
             return NULL;
         }
         if (array_key_exists("CONTENT_LENGTH", $_SERVER) && $_SERVER['CONTENT_LENGTH'] > 0) {
             return $this->getRawContent();
         }
+
         return NULL;
     }
 
-    public function getRawContent() {
+    public function getRawContent()
+    {
         return file_get_contents("php://input");
     }
 
-    public function getRequestHeaders() {
+    public function getRequestHeaders()
+    {
         // The $_SERVER environment does not contain the Authorization
         // header by default. On Apache this header can be extracted with
         // apache_request_headers(), but this does not work on other
         // web servers...
         $requestHeaders = $_SERVER;
-        if(function_exists("apache_request_headers")) {
+        if (function_exists("apache_request_headers")) {
                 $apacheHeaders = apache_request_headers();
                 $headerKeys = array_keys($apacheHeaders);
                 $keyPositionInArray = array_search(strtolower("Authorization"), array_map('strtolower', $headerKeys));
-                if(FALSE !== $keyPositionInArray) {
+                if (FALSE !== $keyPositionInArray) {
                     $requestHeaders['AUTHORIZATION'] = $apacheHeaders[$headerKeys[$keyPositionInArray]];
                 }
         }
+
         return $requestHeaders;
     }
 

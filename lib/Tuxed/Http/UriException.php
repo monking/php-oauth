@@ -2,6 +2,6 @@
 
 namespace Tuxed\Http;
 
-class UriException extends \Exception {
-
+class UriException extends \Exception
+{
 }

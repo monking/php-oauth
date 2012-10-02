@@ -2,6 +2,6 @@
 
 namespace Tuxed\Http;
 
-class UtilsException extends \Exception {
-
+class UtilsException extends \Exception
+{
 }

@@ -2,7 +2,8 @@
 
 namespace Tuxed\OAuth;
 
-interface IOAuthStorage {
+interface IOAuthStorage
+{
     public function storeAccessToken         ($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry);
     public function getAccessToken           ($accessToken);
     public function storeAuthorizationCode   ($authorizationCode, $resourceOwnerId, $issueTime, $clientId, $redirectUri, $scope);

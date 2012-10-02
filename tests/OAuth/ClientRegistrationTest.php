@@ -1,15 +1,16 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once 'lib/SplClassLoader.php';
 $c =  new SplClassLoader("Tuxed", "lib");
 $c->register();
 
 use \Tuxed\OAuth\ClientRegistration as ClientRegistration;
 use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
 
-class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
-
-    public static function validProvider() {
+class ClientRegistrationTest extends PHPUnit_Framework_TestCase
+{
+    public static function validProvider()
+    {
         return array(
             array("foo", NULL, "user_agent_based_application", "http://www.example.org/cb", "Foo Client"),
             array("foo", "s3cr3t", "web_application", "http://www.example.org/cb", "Foo Client"),
@@ -18,14 +19,15 @@ class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public static function validProviderFromArray() {
+    public static function validProviderFromArray()
+    {
         return array(
             array('foo', "bar", "web_application", "http://xyz", "Foo", "foo", "http://x/a.png", "Description", "f@example.org"),
         );
     }
 
-   
-    public static function invalidProvider() {
+    public static function invalidProvider()
+    {
         return array(
             array("foo", NULL, "web_application", "http://www.example.org/cb", "Foo Client", "secret should be set for web application type"),
             array("foo:bar", "s3cr3t", "native_application", "http://www.example.org/cb", "Foo Client", "client_id cannot contain a colon when using a secret"),
@@ -39,7 +41,8 @@ class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public static function invalidProviderFromArray() {
+    public static function invalidProviderFromArray()
+    {
         return array(
             array('foo', "bar", "web_application", "http://xyz", "Foo", "√", NULL, NULL, NULL, "scope is invalid"),
             array('foo', "bar", "web_application", "http://xyz", "Foo", "foo", "x", NULL, NULL, "icon should be either empty or valid URL with path"),
@@ -50,7 +53,8 @@ class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
    /**
      * @dataProvider validProvider
      */
-    public function testValid($id, $secret, $type, $redirectUri, $name) {
+    public function testValid($id, $secret, $type, $redirectUri, $name)
+    {
         $c = new ClientRegistration($id, $secret, $type, $redirectUri, $name);
         $this->assertEquals($id, $c->getId());
         $this->assertEquals($secret, $c->getSecret());
@@ -63,12 +67,12 @@ class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
         $this->assertNull($c->getContactEmail());
     }
 
-    
    /**
      * @dataProvider invalidProvider
      */
-    public function testInvalid($id, $secret, $type, $redirectUri, $name, $exceptionMessage) {
-        try { 
+    public function testInvalid($id, $secret, $type, $redirectUri, $name, $exceptionMessage)
+    {
+        try {
             $c = new ClientRegistration($id, $secret, $type, $redirectUri, $name);
             $this->assertTrue(FALSE);
         } catch (ClientRegistrationException $e) {
@@ -79,25 +83,27 @@ class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
    /**
      * @dataProvider validProviderFromArray
      */
-    public function testValidFromArray($id, $secret, $type, $redirectUri, $name, $allowedScope, $icon, $description, $contactEmail) {
+    public function testValidFromArray($id, $secret, $type, $redirectUri, $name, $allowedScope, $icon, $description, $contactEmail)
+    {
         $c = ClientRegistration::fromArray(array("id" => $id, "secret" => $secret, "type" => $type, "redirect_uri" => $redirectUri, "name" =>$name, "allowed_scope" => $allowedScope, "icon" => $icon, "description" => $description, "contact_email" => $contactEmail));
         $this->assertEquals($id, $c->getId());
         $this->assertEquals($secret, $c->getSecret());
         $this->assertEquals($type, $c->getType());
         $this->assertEquals($redirectUri, $c->getRedirectUri());
-        $this->assertEquals($name, $c->getName());    
+        $this->assertEquals($name, $c->getName());
         $this->assertEquals($allowedScope, $c->getAllowedScope());
         $this->assertEquals($icon, $c->getIcon());
         $this->assertEquals($description, $c->getDescription());
         $this->assertEquals($contactEmail, $c->getContactEmail());
         $this->assertEquals(array("id" => $id, "secret" => $secret, "type" => $type, "redirect_uri" => $redirectUri, "name" => $name, "allowed_scope" => $allowedScope, "icon" => $icon, "description" => $description, "contact_email" => $contactEmail), $c->getClientAsArray());
     }
-    
+
    /**
      * @dataProvider invalidProviderFromArray
      */
-    public function testInvalidFromArray($id, $secret, $type, $redirectUri, $name, $allowedScope, $icon, $description, $contactEmail, $exceptionMessage) {
-        try { 
+    public function testInvalidFromArray($id, $secret, $type, $redirectUri, $name, $allowedScope, $icon, $description, $contactEmail, $exceptionMessage)
+    {
+        try {
             $c = ClientRegistration::fromArray(array("id" => $id, "secret" => $secret, "type" => $type, "redirect_uri" => $redirectUri, "name" =>$name, "allowed_scope" => $allowedScope, "icon" => $icon, "description" => $description, "contact_email" => $contactEmail));
             $this->assertTrue(FALSE);
         } catch (ClientRegistrationException $e) {
@@ -105,11 +111,12 @@ class ClientRegistrationTest extends PHPUnit_Framework_TestCase {
         }
     }
 
-    public function testBrokenFromArray() {
-        try { 
+    public function testBrokenFromArray()
+    {
+        try {
             $c = ClientRegistration::fromArray(array("foo" => "bar"));
             $this->assertTrue(FALSE);
-        } catch(ClientRegistrationException $e) {
+        } catch (ClientRegistrationException $e) {
             $this->assertEquals("not a valid client, 'id' not set", $e->getMessage());
         }
     }

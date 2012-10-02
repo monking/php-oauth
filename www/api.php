@@ -33,17 +33,17 @@ try {
     $response = new HttpResponse();
     $response->setStatusCode(500);
     $response->setContent(json_encode(array("error" => "internal_server_error", "error_description" => $e->getMessage())));
-    if(NULL !== $logger) {
+    if (NULL !== $logger) {
         $logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);
     }
 }
 
-if(NULL !== $logger) {
+if (NULL !== $logger) {
     $logger->logDebug($request);
 }
-if(NULL !== $logger) {
+if (NULL !== $logger) {
     $logger->logDebug($response);
 }
-if(NULL !== $response) {
+if (NULL !== $response) {
     $response->sendResponse();
 }

@@ -1,20 +1,21 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once 'lib/SplClassLoader.php';
 $c =  new SplClassLoader("Tuxed", "lib");
 $c->register();
 
 use \Tuxed\Config as Config;
 use \Tuxed\OAuth\PdoOAuthStorage as PdoOAuthStorage;
 
-class OAuthHelper extends PHPUnit_Framework_TestCase {
-
+class OAuthHelper extends PHPUnit_Framework_TestCase
+{
     protected $_tmpDb;
     protected $_config;
 
-    public function setUp() {
+    public function setUp()
+    {
         $this->_tmpDb = tempnam(sys_get_temp_dir(), "oauth_");
-        if(FALSE === $this->_tmpDb) {
+        if (FALSE === $this->_tmpDb) {
             throw new Exception("unable to generate temporary file for database");
         }
         $dsn = "sqlite:" . $this->_tmpDb;
@@ -58,12 +59,13 @@ class OAuthHelper extends PHPUnit_Framework_TestCase {
         $storage->addClient($wa);
     }
 
-    public function tearDown() {
+    public function tearDown()
+    {
         unlink($this->_tmpDb);
     }
 
-    public function testNop() {
-
+    public function testNop()
+    {
     }
 
 }

@@ -2,6 +2,6 @@
 
 namespace Tuxed;
 
-class ConfigException extends \Exception {
-
+class ConfigException extends \Exception
+{
 }

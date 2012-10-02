@@ -2,9 +2,10 @@
 
 namespace Tuxed\Http;
 
-class OutgoingHttpRequest {
-
-    public static function makeRequest(HttpRequest $request) {
+class OutgoingHttpRequest
+{
+    public static function makeRequest(HttpRequest $request)
+    {
         $httpResponse = new HttpResponse();
 
         $curlChannel = curl_init();
@@ -42,6 +43,7 @@ class OutgoingHttpRequest {
                             $httpResponse->setHeader(trim($key), trim($value));
                         }
                     }
+
                     return strlen($header);
                 });
 
@@ -49,6 +51,7 @@ class OutgoingHttpRequest {
         $httpResponse->setStatusCode(curl_getinfo($curlChannel, CURLINFO_HTTP_CODE));
         $httpResponse->setContent($output);
         curl_close($curlChannel);
+
         return $httpResponse;
     }
 

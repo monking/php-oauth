@@ -5,9 +5,10 @@ require_once 'OAuthHelper.php';
 use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\OAuth\Token as Token;
 
-class TokenTest extends OAuthHelper {
-
-    public function setUp() {
+class TokenTest extends OAuthHelper
+{
+    public function setUp()
+    {
         parent::setUp();
 
         $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
@@ -19,7 +20,8 @@ class TokenTest extends OAuthHelper {
         $storage->storeAuthorizationCode("4uth0r1z4t10n", "fkooman", time(), "testcodeclient", NULL, "read");
 
     }
-    public function testAuthorizationCode() {
+    public function testAuthorizationCode()
+    {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
         $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
         $h->setPostParameters(array("code" => "4uth0r1z4t10n", "grant_type" => "authorization_code"));
@@ -29,7 +31,8 @@ class TokenTest extends OAuthHelper {
         $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read","refresh_token":"r3fr3sh","token_type":"bearer"}$|', $response->getContent());
     }
 
-    public function testRefreshToken() {
+    public function testRefreshToken()
+    {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
         $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
         $h->setPostParameters(array("refresh_token" => "r3fr3sh", "grant_type" => "refresh_token"));
@@ -39,14 +42,16 @@ class TokenTest extends OAuthHelper {
         $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read","token_type":"bearer"}$|', $response->getContent());
     }
 
-    public function testInvalidRequestMethod() {
+    public function testInvalidRequestMethod()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=foo&response_type=token&scope=read&state=xyz", "GET");
         $o = new Token($this->_config);
         $response = $o->handleRequest($h);
         $this->assertEquals(405, $response->getStatusCode());
     }
 
-    public function testWithoutGrantType() {
+    public function testWithoutGrantType()
+    {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
         $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
         $h->setPostParameters(array("code" => "4uth0r1z4t10n"));
@@ -56,7 +61,8 @@ class TokenTest extends OAuthHelper {
         $this->assertEquals('{"error":"invalid_request","error_description":"the grant_type parameter is missing"}', $response->getContent());
     }
 
-    public function testWithoutCredentials() {
+    public function testWithoutCredentials()
+    {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
         $h->setPostParameters(array("code" => "4uth0r1z4t10n", "grant_type" => "authorization_code"));
         $t = new Token($this->_config, NULL);
@@ -64,9 +70,6 @@ class TokenTest extends OAuthHelper {
         $this->assertEquals(401, $response->getStatusCode());
         $this->assertEquals('{"error":"invalid_client","error_description":"this client requires authentication"}', $response->getContent());
 
-
     }
-
-
 
 }

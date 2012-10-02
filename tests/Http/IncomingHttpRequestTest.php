@@ -1,20 +1,20 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once 'lib/SplClassLoader.php';
 $c =  new SplClassLoader("Tuxed", "lib");
 $c->register();
 
 use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
 use \Tuxed\Http\IncomingHttpRequestException as IncomingHttpRequestException;
-use \Tuxed\Http\Uri as Uri;
 
-class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
-
+class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase
+{
     /**
      * @dataProvider getDataProvider
      */
-    function testGetRequests($port, $name, $request, $https, $request_uri) {
+    public function testGetRequests($port, $name, $request, $https, $request_uri)
+    {
         $_SERVER['SERVER_PORT'] = $port;
         $_SERVER['SERVER_NAME'] = $name;
         $_SERVER['REQUEST_URI'] = $request;
@@ -37,13 +37,14 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
         //$this->assertEquals("pass", $request->getBasicAuthPass());
     }
 
-    function getDataProvider() {
+    public function getDataProvider()
+    {
         return array(
             array("80", "www.example.com", "/request", "off", "http://www.example.com/request"),
             array("443", "www.example.com", "/request", "off", "http://www.example.com:443/request"),
             array("443", "www.example.com", "/request", "on", "https://www.example.com/request"),
             array("80", "www.example.com", "/request", "on", "https://www.example.com:80/request"),
-                // can not do IPv6 literals :( 
+                // can not do IPv6 literals :(
                 // PHP missing feature (bug)
                 // array ("80", "2001:610::4", "/request", "off", "http://[2001:610::4]/request"),
                 // array ("443", "2001:610::4", "/request", "on", "https://[2001:610::4]/request"),
@@ -54,7 +55,8 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
     /**
      * @dataProvider postDataProvider
      */
-    function testPostRequests($port, $name, $request, $https, $request_uri, $content) {
+    public function testPostRequests($port, $name, $request, $https, $request_uri, $content)
+    {
         $_SERVER['SERVER_PORT'] = $port;
         $_SERVER['SERVER_NAME'] = $name;
         $_SERVER['REQUEST_URI'] = $request;
@@ -72,14 +74,15 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
                 ->will($this->returnValue($content));
 
         //$this->assertInstanceOf('HttpRequest', $stub->getRequest());
-        
+
         $request = HttpRequest::fromIncomingHttpRequest($stub);
         $this->assertEquals($request_uri, $request->getRequestUri()->getUri());
         $this->assertEquals("POST", $request->getRequestMethod());
         $this->assertEquals($content, $request->getContent());
     }
 
-    function postDataProvider() {
+    public function postDataProvider()
+    {
         return array(
             array("80", "www.example.com", "/request", "off", "http://www.example.com/request", ""),
             array("80", "www.example.com", "/request", "off", "http://www.example.com/request", "action=foo"),
@@ -91,7 +94,8 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
     /**
      * @expectedException \Tuxed\Http\IncomingHttpRequestException
      */
-    function testNoServer() {
+    public function testNoServer()
+    {
         $i = new IncomingHttpRequest();
         $r = $i->getRequest();
     }
@@ -105,5 +109,3 @@ class IncomingHttpRequestTest extends PHPUnit_Framework_TestCase {
       $r = $i->getRequest();
      */
 }
-
-?>

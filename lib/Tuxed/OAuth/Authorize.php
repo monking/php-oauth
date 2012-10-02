@@ -7,14 +7,16 @@ use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\Http\HttpResponse as HttpResponse;
 use \Tuxed\Logger as Logger;
 
-class Authorize {
+class Authorize
+{
     private $_config;
     private $_logger;
 
     private $_resourceOwner;
     private $_as;
 
-    public function __construct(Config $c, Logger $l = NULL) {
+    public function __construct(Config $c, Logger $l = NULL)
+    {
         $this->_config = $c;
         $this->_logger = $l;
 
@@ -28,13 +30,14 @@ class Authorize {
         $this->_as = new AuthorizationServer($storage, $this->_config);
     }
 
-    public function handleRequest(HttpRequest $request) {
+    public function handleRequest(HttpRequest $request)
+    {
         $response = new HttpResponse();
-        try { 
-            switch($request->getRequestMethod()) {
+        try {
+            switch ($request->getRequestMethod()) {
                 case "GET":
                         $result = $this->_as->authorize($this->_resourceOwner, $request->getQueryParameters());
-                        if(AuthorizeResult::ASK_APPROVAL === $result->getAction()) {
+                        if (AuthorizeResult::ASK_APPROVAL === $result->getAction()) {
                             $response->setHeader("X-Frame-Options", "deny");
                             $tplData = array(
                                 "config" => $this->_config,
@@ -46,7 +49,7 @@ class Authorize {
                             ob_start();
                             require dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "askAuthorization.php";
                             $response->setContent(ob_get_clean());
-                        } else if (AuthorizeResult::REDIRECT === $result->getAction()) {
+                        } elseif (AuthorizeResult::REDIRECT === $result->getAction()) {
                             $response->setStatusCode(302);
                             $response->setHeader("Location", $result->getRedirectUri()->getUri());
                         } else {
@@ -56,16 +59,16 @@ class Authorize {
                     break;
 
                 case "POST";
-                    // CSRF protection, check the referrer, it should be equal to the 
+                    // CSRF protection, check the referrer, it should be equal to the
                     // request URI
                     $fullRequestUri = $request->getRequestUri()->getUri();
                     $referrerUri = $request->getHeader("HTTP_REFERER");
 
-                    if($fullRequestUri !== $referrerUri) {
+                    if ($fullRequestUri !== $referrerUri) {
                         throw new ResourceOwnerException("csrf protection triggered, referrer does not match request uri");
                     }
                     $result = $this->_as->approve($this->_resourceOwner, $request->getQueryParameters(), $request->getPostParameters());
-                    if(AuthorizeResult::REDIRECT !== $result->getAction()) {
+                    if (AuthorizeResult::REDIRECT !== $result->getAction()) {
                         // FIXME: this is dead code?
                         throw new ResourceOwnerException("approval not found");
                     }
@@ -79,17 +82,17 @@ class Authorize {
                     $response->setHeader("Allow", "GET, POST");
                     break;
             }
-        } catch (ClientException $e) { 
+        } catch (ClientException $e) {
             // tell the client about the error
             $client = $e->getClient();
             $separator = ($client->type === "user_agent_based_application") ? "#" : "?";
             $parameters = array("error" => $e->getMessage(), "error_description" => $e->getDescription());
-            if(NULL !== $e->getState()) {
+            if (NULL !== $e->getState()) {
                 $parameters['state'] = $e->getState();
             }
             $response->setStatusCode(302);
             $response->setHeader("Location", $client->redirect_uri . $separator . http_build_query($parameters));
-            if(NULL !== $this->_logger) {
+            if (NULL !== $this->_logger) {
                 $this->_logger->logFatal($e->getLogMessage(TRUE) . PHP_EOL . $request . PHP_EOL . $response);
             }
         } catch (ResourceOwnerException $e) {
@@ -98,10 +101,11 @@ class Authorize {
             ob_start();
             require dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "errorPage.php";
             $response->setContent(ob_get_clean());
-            if(NULL !== $this->_logger) {
+            if (NULL !== $this->_logger) {
                 $this->_logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);
             }
         }
+
         return $response;
     }
 

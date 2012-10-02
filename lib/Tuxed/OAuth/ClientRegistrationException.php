@@ -2,6 +2,6 @@
 
 namespace Tuxed\OAuth;
 
-class ClientRegistrationException extends \Exception {
-
+class ClientRegistrationException extends \Exception
+{
 }

@@ -11,44 +11,50 @@ use \PDO as PDO;
  * FIXME: look into throwing exceptions on error instead of returning FALSE?
  * FIXME: switch to ASSOC instead of OBJ return types
  */
-class PdoOAuthStorage implements IOAuthStorage {
-
+class PdoOAuthStorage implements IOAuthStorage
+{
     private $_c;
     private $_pdo;
 
-    public function __construct(Config $c) {
+    public function __construct(Config $c)
+    {
         $this->_c = $c;
 
         $driverOptions = array();
-        if($this->_c->getSectionValue('PdoOAuthStorage', 'persistentConnection')) {
+        if ($this->_c->getSectionValue('PdoOAuthStorage', 'persistentConnection')) {
             $driverOptions = array(PDO::ATTR_PERSISTENT => TRUE);
         }
 
         $this->_pdo = new PDO($this->_c->getSectionValue('PdoOAuthStorage', 'dsn'), $this->_c->getSectionValue('PdoOAuthStorage', 'username', FALSE), $this->_c->getSectionValue('PdoOAuthStorage', 'password', FALSE), $driverOptions);
 
-        	$this->_pdo->exec("PRAGMA foreign_keys = ON");
+            $this->_pdo->exec("PRAGMA foreign_keys = ON");
     }
 
-    public function getClients() {
+    public function getClients()
+    {
         $stmt = $this->_pdo->prepare("SELECT id, name, description, redirect_uri, type, icon, allowed_scope FROM Client");
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to retrieve clients");
         }
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getClient($clientId) {
+    public function getClient($clientId)
+    {
         $stmt = $this->_pdo->prepare("SELECT * FROM Client WHERE id = :client_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to retrieve client");
         }
+
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function updateClient($clientId, $data) {
+    public function updateClient($clientId, $data)
+    {
         $stmt = $this->_pdo->prepare("UPDATE Client SET name = :name, description = :description, secret = :secret, redirect_uri = :redirect_uri, type = :type, icon = :icon, allowed_scope = :allowed_scope, contact_email = :contact_email WHERE id = :client_id");
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
         $stmt->bindValue(":description", $data['description'], PDO::PARAM_STR);
@@ -59,13 +65,15 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":allowed_scope", $data['allowed_scope'], PDO::PARAM_STR);
         $stmt->bindValue(":contact_email", $data['contact_email'], PDO::PARAM_STR);
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to update client");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function addClient($data) {
+    public function addClient($data)
+    {
         $stmt = $this->_pdo->prepare("INSERT INTO Client (id, name, description, secret, redirect_uri, type, icon, allowed_scope, contact_email) VALUES(:client_id, :name, :description, :secret, :redirect_uri, :type, :icon, :allowed_scope, :contact_email)");
         $stmt->bindValue(":client_id", $data['id'], PDO::PARAM_STR);
         $stmt->bindValue(":name", $data['name'], PDO::PARAM_STR);
@@ -76,47 +84,55 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":icon", $data['icon'], PDO::PARAM_STR);
         $stmt->bindValue(":allowed_scope", $data['allowed_scope'], PDO::PARAM_STR);
         $stmt->bindValue(":contact_email", $data['contact_email'], PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to add client");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function deleteClient($clientId) {
+    public function deleteClient($clientId)
+    {
         // cascading in foreign keys takes care of deleting all tokens
         $stmt = $this->_pdo->prepare("DELETE FROM Client WHERE id = :client_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to delete client");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function addApproval($clientId, $resourceOwnerId, $scope, $refreshToken) {
+    public function addApproval($clientId, $resourceOwnerId, $scope, $refreshToken)
+    {
         $stmt = $this->_pdo->prepare("INSERT INTO Approval (client_id, resource_owner_id, scope, refresh_token) VALUES(:client_id, :resource_owner_id, :scope, :refresh_token)");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
         $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to store approval");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function updateApproval($clientId, $resourceOwnerId, $scope) {
+    public function updateApproval($clientId, $resourceOwnerId, $scope)
+    {
         // FIXME: should we regenerate the refresh_token?
         $stmt = $this->_pdo->prepare("UPDATE Approval SET scope = :scope WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to update approval");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function getApproval($clientId, $resourceOwnerId) {
+    public function getApproval($clientId, $resourceOwnerId)
+    {
         $stmt = $this->_pdo->prepare("SELECT * FROM Approval WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
@@ -124,10 +140,12 @@ class PdoOAuthStorage implements IOAuthStorage {
         if (FALSE === $result) {
             throw new StorageException("unable to get approval");
         }
+
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function storeAccessToken($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry) {
+    public function storeAccessToken($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry)
+    {
         $stmt = $this->_pdo->prepare("INSERT INTO AccessToken (client_id, resource_owner_id, issue_time, expires_in, scope, access_token) VALUES(:client_id, :resource_owner_id, :issue_time, :expires_in, :scope, :access_token)");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
@@ -135,22 +153,25 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":expires_in", $expiry, PDO::PARAM_INT);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
         $stmt->bindValue(":access_token", $accessToken, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to store access token");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function deleteExpiredAccessTokens() {
+    public function deleteExpiredAccessTokens()
+    {
         // delete access tokens that expired
         $stmt = $this->_pdo->prepare("DELETE FROM AccessToken WHERE issue_time + expires_in < :now");
         $stmt->bindValue(":now", time(), PDO::PARAM_INT);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to delete access tokens");
         }
     }
 
-    public function storeAuthorizationCode($authorizationCode, $resourceOwnerId, $issueTime, $clientId, $redirectUri, $scope) {
+    public function storeAuthorizationCode($authorizationCode, $resourceOwnerId, $issueTime, $clientId, $redirectUri, $scope)
+    {
         $stmt = $this->_pdo->prepare("INSERT INTO AuthorizationCode (client_id, resource_owner_id, authorization_code, redirect_uri, issue_time, scope) VALUES(:client_id, :resource_owner_id, :authorization_code, :redirect_uri, :issue_time, :scope)");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
@@ -158,13 +179,15 @@ class PdoOAuthStorage implements IOAuthStorage {
         $stmt->bindValue(":redirect_uri", $redirectUri, PDO::PARAM_STR);
         $stmt->bindValue(":issue_time", time(), PDO::PARAM_INT);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
-        if(FALSE === $stmt->execute()) {
+        if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to store authorization code");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function getAuthorizationCode($authorizationCode, $redirectUri) {
+    public function getAuthorizationCode($authorizationCode, $redirectUri)
+    {
 $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorization_code IS :authorization_code AND redirect_uri IS :redirect_uri");
         $stmt->bindValue(":authorization_code", $authorizationCode, PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $redirectUri, PDO::PARAM_STR | PDO::PARAM_NULL);
@@ -172,10 +195,12 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         if (FALSE === $result) {
             throw new StorageException("unable to get authorization code");
         }
+
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function deleteAuthorizationCode($authorizationCode, $redirectUri) {
+    public function deleteAuthorizationCode($authorizationCode, $redirectUri)
+    {
         $stmt = $this->_pdo->prepare("DELETE FROM AuthorizationCode WHERE authorization_code IS :authorization_code AND redirect_uri IS :redirect_uri");
         $stmt->bindValue(":authorization_code", $authorizationCode, PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $redirectUri, PDO::PARAM_STR | PDO::PARAM_NULL);
@@ -183,30 +208,36 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         if (FALSE === $result) {
             throw new StorageException("unable to delete authorization code");
         }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function getAccessToken($accessToken) {
+    public function getAccessToken($accessToken)
+    {
         $stmt = $this->_pdo->prepare("SELECT * FROM AccessToken WHERE access_token = :access_token");
         $stmt->bindValue(":access_token", $accessToken, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to get access token");
         }
-        return $stmt->fetch(PDO::FETCH_OBJ);        
+
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function getApprovals($resourceOwnerId) {
+    public function getApprovals($resourceOwnerId)
+    {
         $stmt = $this->_pdo->prepare("SELECT a.scope, c.id, c.name, c.description, c.redirect_uri, c.type, c.icon, c.allowed_scope FROM Approval a, Client c WHERE resource_owner_id = :resource_owner_id AND a.client_id = c.id");
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to get approvals");
         }
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function deleteApproval($clientId, $resourceOwnerId) {
+    public function deleteApproval($clientId, $resourceOwnerId)
+    {
         // remove access token
         $stmt = $this->_pdo->prepare("DELETE FROM AccessToken WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
@@ -220,54 +251,63 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to delete approval");
-        } 
+        }
+
         return 1 === $stmt->rowCount();
     }
 
-    public function getRefreshToken($refreshToken) {
+    public function getRefreshToken($refreshToken)
+    {
         $stmt = $this->_pdo->prepare("SELECT * FROM Approval WHERE refresh_token = :refresh_token");
         $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to get refresh token");
         }
+
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function updateResourceOwner($resourceOwnerId, $resourceOwnerAttributes) {
+    public function updateResourceOwner($resourceOwnerId, $resourceOwnerAttributes)
+    {
         $result = $this->getResourceOwner($resourceOwnerId);
-        if(FALSE === $result) {
+        if (FALSE === $result) {
             $stmt = $this->_pdo->prepare("INSERT INTO ResourceOwner (id, time, attributes) VALUES(:resource_owner_id, :time, :attributes)");
             $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
             $stmt->bindValue(":time", time(), PDO::PARAM_INT);
             $stmt->bindValue(":attributes", $resourceOwnerAttributes, PDO::PARAM_STR);
-            if(FALSE === $stmt->execute()) {
+            if (FALSE === $stmt->execute()) {
                 throw new StorageException("unable to add resource owner");
             }
+
            return 1 === $stmt->rowCount();
         } else {
             $stmt = $this->_pdo->prepare("UPDATE ResourceOwner SET time = :time, attributes = :attributes WHERE id = :resource_owner_id");
             $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
             $stmt->bindValue(":time", time(), PDO::PARAM_INT);
             $stmt->bindValue(":attributes", $resourceOwnerAttributes, PDO::PARAM_STR);
-            if(FALSE === $stmt->execute()) {
+            if (FALSE === $stmt->execute()) {
                 throw new StorageException("unable to update resource owner");
             }
+
             return 1 === $stmt->rowCount();
         }
     }
 
-    public function getResourceOwner($resourceOwnerId) {
+    public function getResourceOwner($resourceOwnerId)
+    {
         $stmt = $this->_pdo->prepare("SELECT * FROM ResourceOwner WHERE id = :resource_owner_id");
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $result = $stmt->execute();
         if (FALSE === $result) {
             throw new StorageException("unable to get resource owner");
         }
+
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function initDatabase() {
+    public function initDatabase()
+    {
         $this->_pdo->exec("
             CREATE TABLE IF NOT EXISTS `ResourceOwner` (
             `id` VARCHAR(64) NOT NULL,

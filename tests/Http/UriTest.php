@@ -1,51 +1,58 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once 'lib/SplClassLoader.php';
 $c =  new SplClassLoader("Tuxed", "lib");
 $c->register();
 
 use \Tuxed\Http\Uri as Uri;
 use \Tuxed\Http\UriException as UriException;
 
-class UriTest extends PHPUnit_Framework_TestCase {
-
-    function testSetFragment() {
+class UriTest extends PHPUnit_Framework_TestCase
+{
+    public function testSetFragment()
+    {
         $h = new Uri("http://www.example.com/request?action=foo");
         $h->setFragment("bar=foo");
         $this->assertEquals("http://www.example.com/request?action=foo#bar=foo", $h->getUri());
     }
 
-    function testUser() {
+    public function testUser()
+    {
         $h = new Uri("http://user@www.example.com/");
         $h->setFragment("bar=foo");
         $this->assertEquals("http://user@www.example.com/#bar=foo", $h->getUri());
     }
 
-    function testUserPass() {
+    public function testUserPass()
+    {
         $h = new Uri("http://user:pass@www.example.com/");
         $h->setFragment("bar=foo");
         $this->assertEquals("http://user:pass@www.example.com/#bar=foo", $h->getUri());
     }
 
-    function testAppendQuery() {
+    public function testAppendQuery()
+    {
         $h = new Uri("http://www.example.com/request?action=foo");
         $h->appendQuery("bar=foo&do=true");
         $this->assertEquals("http://www.example.com/request?action=foo&bar=foo&do=true", $h->getUri());
     }
 
-    function testAppendNullQuery() {
+    public function testAppendNullQuery()
+    {
         $h = new Uri("http://www.example.com/request");
         $h->appendQuery("bar=foo&do=true");
         $this->assertEquals("http://www.example.com/request?bar=foo&do=true", $h->getUri());
     }
 
-    function testOtherPort() {
+    public function testOtherPort()
+    {
         $h = new Uri("http://www.example.com:443/request");
         $h->setQuery("x");
         $this->assertEquals("http://www.example.com:443/request?x", $h->getUri());
     }
 
-    function testWithGetParameters() {
+    public function testWithGetParameters()
+    {
         $h = new Uri("http://www.example.com/request?action=foo&user=admin&password=secret");
         $this->assertEquals("http", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
@@ -53,7 +60,8 @@ class UriTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("action=foo&user=admin&password=secret", $h->getQuery());
     }
 
-    function testHttpOtherPort() {
+    public function testHttpOtherPort()
+    {
         $h = new Uri("http://www.example.com:8080/request");
         $this->assertEquals("http", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
@@ -61,7 +69,8 @@ class UriTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("/request", $h->getPath());
     }
 
-    function testHttpWithHttpsPort() {
+    public function testHttpWithHttpsPort()
+    {
         $h = new Uri("http://www.example.com:443/request");
         $this->assertEquals("http", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
@@ -69,7 +78,8 @@ class UriTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("/request", $h->getPath());
     }
 
-    function testHttpsWithHttpPort() {
+    public function testHttpsWithHttpPort()
+    {
         $h = new Uri("https://www.example.com:80/request");
         $this->assertEquals("https", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
@@ -77,14 +87,16 @@ class UriTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("/request", $h->getPath());
     }
 
-    function testHttpsWithoutPath() {
+    public function testHttpsWithoutPath()
+    {
         $h = new Uri("https://www.example.com/");
         $this->assertEquals("https", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
         $this->assertEquals("/", $h->getPath());
     }
 
-    function testHttpsWithOtherPortAndQuery() {
+    public function testHttpsWithOtherPortAndQuery()
+    {
         $h = new Uri("https://www.example.com:8081/request?action=foo");
         $this->assertEquals("https", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
@@ -92,7 +104,8 @@ class UriTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("/request", $h->getPath());
     }
 
-    function testHttpsWithOtherPortNoPathAndQuery() {
+    public function testHttpsWithOtherPortNoPathAndQuery()
+    {
         $h = new Uri("https://www.example.com:8081/?action=foo");
         $this->assertEquals("https", $h->getScheme());
         $this->assertEquals("www.example.com", $h->getHost());
@@ -104,10 +117,9 @@ class UriTest extends PHPUnit_Framework_TestCase {
     /**
      * @expectedException \Tuxed\Http\UriException
      */
-    function testMalformedUri() {
+    public function testMalformedUri()
+    {
         $h = new Uri("http://:80");
     }
 
 }
-
-?>

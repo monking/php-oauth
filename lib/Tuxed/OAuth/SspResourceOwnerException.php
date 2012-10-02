@@ -2,6 +2,6 @@
 
 namespace Tuxed\OAuth;
 
-class SspResourceOwnerException extends \Exception {
-
+class SspResourceOwnerException extends \Exception
+{
 }

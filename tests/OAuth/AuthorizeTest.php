@@ -5,9 +5,10 @@ require_once 'OAuthHelper.php';
 use \Tuxed\Http\HttpRequest as HttpRequest;
 use \Tuxed\OAuth\Authorize as Authorize;
 
-class AuthorizeTest extends OAuthHelper {
-
-    public function testGetAuthorize() {
+class AuthorizeTest extends OAuthHelper
+{
+    public function testGetAuthorize()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=testclient&response_type=token&scope=read&state=xyz", "GET");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
@@ -15,7 +16,8 @@ class AuthorizeTest extends OAuthHelper {
         $this->assertEquals("deny", $response->getHeader("X-Frame-Options"));
     }
 
-    public function testPostAuthorize() {
+    public function testPostAuthorize()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=testclient&response_type=token&scope=read&state=xyz", "POST");
         $h->setHeader("HTTP_REFERER", "https://auth.example.org?client_id=testclient&response_type=token&scope=read&state=xyz");
         $h->setPostParameters(array("approval" => "Approve", "scope" => array("read")));
@@ -33,7 +35,8 @@ class AuthorizeTest extends OAuthHelper {
         $this->assertRegexp("|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read&state=abc$|", $response->getHeader("Location"));
     }
 
-    public function testUnsupportedScope() {
+    public function testUnsupportedScope()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=testclient&response_type=token&scope=foo&state=xyz", "GET");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
@@ -41,7 +44,8 @@ class AuthorizeTest extends OAuthHelper {
         $this->assertEquals("http://localhost/php-oauth/unit/test.html#error=invalid_scope&error_description=not+authorized+to+request+this+scope&state=xyz", $response->getHeader("Location"));
     }
 
-    public function testUnregisteredClient() {
+    public function testUnregisteredClient()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=foo&response_type=token&scope=read&state=xyz", "GET");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
@@ -49,14 +53,16 @@ class AuthorizeTest extends OAuthHelper {
         //$this->assertRegexp("|.*client not registered.*$|", $response->getContent());
     }
 
-    public function testInvalidRequestMethod() {
+    public function testInvalidRequestMethod()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=foo&response_type=token&scope=read&state=xyz", "DELETE");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
         $this->assertEquals(405, $response->getStatusCode());
     }
 
-    public function testCSRFAttack() {
+    public function testCSRFAttack()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=testclient&response_type=token&scope=read&state=xyz", "POST");
         $h->setHeader("HTTP_REFERER", "https://evil.site.org/xyz");
         $h->setPostParameters(array("approval" => "Approve", "scope" => array("read")));
@@ -83,7 +89,6 @@ class AuthorizeTest extends OAuthHelper {
 #        $get = array("client_id" => "testclient");
 #        $this->_as->authorize($this->_ro, $get);
 #    }
-
 
 #    public function testWithoutScope() {
 #        $get = array("client_id" => "testclient", "response_type" => "token");

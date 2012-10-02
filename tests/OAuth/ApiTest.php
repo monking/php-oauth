@@ -3,15 +3,14 @@
 require_once 'OAuthHelper.php';
 
 use \Tuxed\OAuth\Api as Api;
-use \Tuxed\OAuth\ApiException as ApiException;
 use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
 
-class ApiTest extends OAuthHelper {
-
+class ApiTest extends OAuthHelper
+{
     protected $_api;
 
-    public function setUp() {
+    public function setUp()
+    {
         parent::setUp();
         // enable Api
         $this->_config->setSectionValue("Api", "enableApi", TRUE);
@@ -25,7 +24,8 @@ class ApiTest extends OAuthHelper {
         $storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
     }
 
-    public function testRetrieveAuthorizations() {
+    public function testRetrieveAuthorizations()
+    {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setPathInfo("/authorizations/");
         $h->setHeader("Authorization", "Bearer 12345abc");
@@ -35,7 +35,8 @@ class ApiTest extends OAuthHelper {
         $this->assertEquals("application/json", $response->getHeader("Content-Type"));
     }
 
-    public function testAddAuthorizations() {
+    public function testAddAuthorizations()
+    {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
@@ -45,7 +46,8 @@ class ApiTest extends OAuthHelper {
         $this->assertEquals(201, $response->getStatusCode());
     }
 
-    public function testAddAuthorizationsUnregisteredClient() {
+    public function testAddAuthorizationsUnregisteredClient()
+    {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
@@ -57,7 +59,8 @@ class ApiTest extends OAuthHelper {
         $this->assertEquals('{"error":"invalid_request","error_description":"client is not registered"}', $response->getContent());
     }
 
-    public function testAddAuthorizationsUnsupportedScope() {
+    public function testAddAuthorizationsUnsupportedScope()
+    {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
@@ -68,7 +71,8 @@ class ApiTest extends OAuthHelper {
         $this->assertEquals('{"error":"invalid_request","error_description":"invalid scope for this client"}', $response->getContent());
     }
 
-    public function testGetAuthorization() {
+    public function testGetAuthorization()
+    {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setPathInfo("/authorizations/testclient");
         $h->setHeader("Authorization", "Bearer 12345abc");
@@ -78,7 +82,8 @@ class ApiTest extends OAuthHelper {
         $this->assertEquals('{"client_id":"testclient","resource_owner_id":"fkooman","scope":"read","refresh_token":null}', $response->getContent());
     }
 
-    public function testDeleteAuthorization() {
+    public function testDeleteAuthorization()
+    {
         $h = new HttpRequest("http://www.example.org/api.php");
         $h->setRequestMethod("DELETE");
         $h->setPathInfo("/authorizations/testclient");

@@ -2,8 +2,8 @@
 
 namespace Tuxed\Http;
 
-class HttpResponse {
-
+class HttpResponse
+{
     private $_headers;
     private $_content;
     private $_statusCode;
@@ -51,51 +51,61 @@ class HttpResponse {
         505 => "HTTP Version Not Supported"
     );
 
-    public function __construct($statusCode = 200) {
+    public function __construct($statusCode = 200)
+    {
         $this->_headers = array();
         $this->setStatusCode($statusCode);
         // if no "Content-Type" header is specified PHP will use "text/html" by default
         $this->setContent(NULL);
     }
 
-    public function getContent() {
+    public function getContent()
+    {
         return $this->_content;
     }
 
-    public function getStatusCode() {
+    public function getStatusCode()
+    {
         return $this->_statusCode;
     }
 
-    public function getStatusReason() {
+    public function getStatusReason()
+    {
         return $this->_statusCodes[$this->_statusCode];
     }
 
-    public function setContentType($contentType) {
+    public function setContentType($contentType)
+    {
         $this->setHeader("Content-Type", $contentType);
     }
 
-    public function getContentType() {
+    public function getContentType()
+    {
         return $this->getHeader("Content-Type");
     }
 
-    public function setContent($content) {
+    public function setContent($content)
+    {
         $this->_content = $content;
     }
 
-    public function setStatusCode($code) {
+    public function setStatusCode($code)
+    {
         if (!is_numeric($code) || !array_key_exists($code, $this->_statusCodes)) {
             throw new HttpResponseException("invalid status code");
         }
         $this->_statusCode = $code;
     }
 
-    public function setHeaders(array $headers) {
+    public function setHeaders(array $headers)
+    {
         foreach ($headers as $k => $v) {
             $this->setHeader($k, $v);
         }
     }
 
-    public function setHeader($headerKey, $headerValue) {
+    public function setHeader($headerKey, $headerValue)
+    {
         $foundHeaderKey = $this->_getHeaderKey($headerKey);
         if ($foundHeaderKey === NULL) {
             $this->_headers[$headerKey] = $headerValue;
@@ -104,27 +114,32 @@ class HttpResponse {
         }
     }
 
-    public function getHeader($headerKey) {
+    public function getHeader($headerKey)
+    {
         $headerKey = $this->_getHeaderKey($headerKey);
+
         return $headerKey !== NULL ? $this->_headers[$headerKey] : NULL;
     }
 
     /**
-     * Look for a header in a case insensitive way. It is possible to have a 
+     * Look for a header in a case insensitive way. It is possible to have a
      * header key "Content-type" or a header key "Content-Type", these should
      * be treated as the same.
-     * 
+     *
      * @param headerName the name of the header to search for
      * @returns The name of the header as it was set (original case)
      *
      */
-    protected function _getHeaderKey($headerKey) {
+    protected function _getHeaderKey($headerKey)
+    {
         $headerKeys = array_keys($this->_headers);
         $keyPositionInArray = array_search(strtolower($headerKey), array_map('strtolower', $headerKeys));
+
         return ($keyPositionInArray === FALSE) ? NULL : $headerKeys[$keyPositionInArray];
     }
 
-    public function getHeaders($formatted = FALSE) {
+    public function getHeaders($formatted = FALSE)
+    {
         if (!$formatted) {
             return $this->_headers;
         }
@@ -132,14 +147,17 @@ class HttpResponse {
         foreach ($this->_headers as $k => $v) {
             array_push($hdrs, $k . ": " . $v);
         }
+
         return $hdrs;
     }
 
-    public function getStatusLine() { 
+    public function getStatusLine()
+    {
         return "HTTP/1.1 " . $this->getStatusCode() . " " . $this->getStatusReason();
     }
 
-    public function sendResponse() {
+    public function sendResponse()
+    {
         header($this->getStatusLine());
         foreach ($this->getHeaders() as $k => $v) {
             header($k . ": " . $v);
@@ -147,7 +165,8 @@ class HttpResponse {
         echo $this->getContent();
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         $s  = PHP_EOL;
         $s .= "*HttpResponse*" . PHP_EOL;
         $s .= "Status:" . PHP_EOL;
@@ -156,7 +175,7 @@ class HttpResponse {
         foreach ($this->getHeaders() as $k => $v) {
             $s .= "\t" . ($k . ": " . $v) . PHP_EOL;
         }
-        if(1 === preg_match("|^application/json|", $this->getContentType())) {
+        if (1 === preg_match("|^application/json|", $this->getContentType())) {
             // format JSON
             $s .= "Content (formatted JSON):" . PHP_EOL;
             $s .= Utils::json_format($this->getContent());
@@ -164,6 +183,7 @@ class HttpResponse {
             $s .= "Content:" . PHP_EOL;
             $s .= $this->getContent();
         }
+
         return $s;
     }
 
