@@ -85,7 +85,7 @@ These clients are written in HTML, CSS and JavaScript only and can be hosted on
 any (static) web server. See the accompanying READMEs for more information. If 
 you followed the client registration in the previous section they should start
 working immediately if you install the applications at the correct URL. Do not
-forget to enable the management API, see below in the section on Entitlements.
+forget to enable the management API, see below in the section on entitlements.
 
 # SELinux
 The install script already takes care of setting the file permissions of the
@@ -145,54 +145,39 @@ In the `[Api]` section the management API can be enabled:
     [Api]
     enableApi = TRUE
 
-In particular, the authenticated user (resouce owner) needs to have the 
-`applications` entitlement in order to be able to modify application 
-registrations.
+In particular, the authenticated user (resource owner) needs to have the 
+`urn:vnd:oauth2:applications` entitlement in order to be able to modify 
+application registrations. The entitlements are part of the resource owner's 
+attributes. This maps perfectly to SAML attributes obtained through the
+simpleSAMLphp integration.
 
-In the authentication modules one can then specify what particular resource 
-owner will get this entitlement. For instance in the `DummyResourceOwner` 
-section:
+## DummyResourceOwner
+For instance in the `DummyResourceOwner` section, the user has this entitlement
+as shown in the snippet below:
 
     ; Dummy Configuration
     [DummyResourceOwner]
-    resourceOwnerId = "fkooman"
-    resourceOwnerEntitlement["applications"] = "fkooman"
+    resourceOwnerId = "1234-5678-9999"
 
-Here you can see that the resource owner `fkooman` will be granted the 
-`applications` entitlement. As there is only one account in the 
-`DummyResourceOwner` configuration it is quite boring.
+    [DummyResourceOwnerAttributes]
+    uid[]         = "fkooman"
+    displayName[] = "François Kooman"
+    entitlement[] = "urn:vnd:oauth2:applications"
+    entitlement[] = "foo"
+    entitlement[] = "bar"
 
-Now, for the `SspResourceOwner` configuration it is a little bit more complex, 
-all non relevant configuration was stripped:
+Here you can see that the resource owner will be granted the 
+`urn:vnd:oauth2:applications`, `foo` and `bar` entitlements. As there is only 
+one account in the `DummyResourceOwner` configuration it is quite boring.
 
-    [SspResourceOwner]
-    entitlementAttributeName = "urn:mace:dir:attribute-def:eduPersonEntitlement"
-    entitlementValueMapping["applications"] = "urn:vnd:oauth2:applications"
+## SspResourceOwner
+Now, for the `SspResourceOwner` configuration it is a little bit more complex.
+Dealing with this is left to the simpleSAMLphp configuration and we just 
+expect a certain configuration.
 
-This means that the entitlement is determined by looking at the SAML attribute 
-`urn:mace:dir:attribute-def:eduPersonEntitlement` provided as part
-of the SAML assertion. If (one of the values) of this attribute contains
-`urn:vnd:oauth2:applications` that particular user will be granted the
-`applications` entitlement. The SAML IdP will have to set this entitlement for
-users that are allowed to perform OAuth client registrations. This is 
-convenient as you no longer need to modify the configuration of `php-oauth` to
-add a new "administrator", but can just add the entitlement to the user in the
-IdP user directory.
-
-See the 
-[eduPersonEntitlementInLDAP](https://github.com/fkooman/php-oauth/blob/master/docs/eduPersonEntitlementInLDAP.md) 
-document for more information about adding this entitlement to some directory
-servers.
-
-See
-[API documentation](https://github.com/fkooman/php-oauth/blob/master/docs/API.md) 
-for more information about the exposed API so you can write your own client 
-interfacing with it.
-
-## simpleSAMLphp
-In the configuration file `config/oauth.ini` various aspects can be configured. 
-To configure the SAML integration, make sure the following settings are
-at least correct. See above for the entitlement configuration.
+In the configuration file `config/oauth.ini` only a few aspects can be 
+configured. To configure the SAML integration, make sure the following settings 
+are at least correct.
 
     authenticationMechanism = "SspResourceOwner"
 
@@ -201,12 +186,38 @@ at least correct. See above for the entitlement configuration.
     sspPath = "/var/simplesamlphp"
     authSource = "default-sp"
 
-    ; by default we use the (persistent) NameID value received from the SAML 
-    ; assertion as the user identifier (RECOMMENDED)
-    useNameID = TRUE
+Now on to the simpleSAMLphp configuration. You configure simpleSAMLphp 
+according to the manual. The snippets below will help you with the 
+configuration to get the entitlements right.
 
-    ; you can also use an attribute as a unique identifier for a user instead 
-    ; of the NameID, but set 'useNameID' to FALSE then!
-    ;resourceOwnerIdAttributeName = "uid"
-    ;resourceOwnerIdAttributeName = "urn:mace:dir:attribute-def:uid"
+First the `metadata/saml20-idp-remote.php` to configure the IdP that is used
+by the simpleSAMLphp as SP:
 
+    $metadata['http://localhost/oauth/ssp/saml2/idp/metadata.php'] = array(
+        'SingleSignOnService' => 'http://localhost/oauth/ssp/saml2/idp/SSOService.php',
+        'SingleLogoutService' => 'http://localhost/oauth/ssp/saml2/idp/SingleLogoutService.php',
+        'certFingerprint' => '4bff319a0fa4903e4f6ed52956fb02e1ebec5166',
+
+        // clean up the attributes received from the IdP and modify them to use
+        // our naming convention
+        'authproc' => array(
+            50 => array(
+                'class' => 'core:AttributeMap',
+                'urn2name',
+            ),
+            51 => array(
+                'class' => 'core:AttributeLimit',
+                'cn', 'eduPersonEntitlement',
+            ),
+            52 => array(
+                'class' => 'core:AttributeMap',
+                'eduPersonEntitlement' => 'entitlement',
+                'cn' => 'displayName',
+            ),
+        ),
+
+    );
+
+You need to modify this (the URLs and the certificate) to work with your IdP. 
+This is basically all that needs to be done specific for `php-oauth`. The rest 
+is simpleSAMLphp generic configuration stuff.
