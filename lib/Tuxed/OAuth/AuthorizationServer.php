@@ -157,6 +157,22 @@ class AuthorizationServer
         }
     }
 
+    public function tokenInfo(array $get)
+    {
+        $token = self::getParameter($get, 'access_token');
+        if (NULL === $token) {
+            throw new TokenInfoException("invalid_token", "the token parameter is missing");
+        }
+        $accessToken = $this->_storage->getAccessToken($token);
+        if (FALSE === $accessToken) {
+            throw new TokenInfoException("invalid_token", "the token was not found");
+        }
+        $resourceOwner = $this->_storage->getResourceOwner($accessToken->resource_owner_id);
+        $accessToken->resource_owner_attributes = json_decode($resourceOwner->attributes, TRUE);
+
+        return $accessToken;
+    }
+
     public function token(array $post, $user = NULL, $pass = NULL)
     {
         // exchange authorization code for access token
@@ -173,22 +189,6 @@ class AuthorizationServer
         $result = NULL;
 
         switch ($grantType) {
-            case "urn:pingidentity.com:oauth2:grant_type:validate_bearer":
-                if (NULL === $token) {
-                    throw new TokenException("invalid_request", "the token parameter is missing");
-                }
-                $accessToken = $this->_storage->getAccessToken($token);
-                if (FALSE === $accessToken) {
-                    throw new TokenException("invalid_grant", "the token was not found");
-                }
-
-                $accessToken->token_type = "urn:pingidentity.com:oauth2:validated_token";
-                // FIXME: update the expires_in field to show the actual amount of seconds it is still valid?
-                $resourceOwner = $this->_storage->getResourceOwner($accessToken->resource_owner_id);
-                $accessToken->resource_owner_attributes = json_decode($resourceOwner->attributes, TRUE);
-
-                return $accessToken;
-
             case "authorization_code":
                 if (NULL === $code) {
                     throw new TokenException("invalid_request", "the code parameter is missing");
