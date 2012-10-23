@@ -236,10 +236,10 @@ service: `displayName` and `entitlement`.
 
 # Resource Servers
 If you are writing a resource server (RS) an API is available to verify the `Bearer`
-token you receive from the client. It is the same API as used by Google, the 
-documentation for it can be found at TODO.
+token you receive from the client. It is the same API as 
+[used by Google](https://developers.google.com/accounts/docs/OAuth2Login#validatingtoken).
 
-An example, the RS gets the following `Authorization` header:
+An example, the RS gets the following `Authorization` header from the client:
 
     Authorization: Bearer eeae9c3366af8cb7acb74dd5635c44e6
 
