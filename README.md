@@ -228,11 +228,9 @@ the `cn` and `eduPersonEntitlement` attributes. If you want to store more
 attributes you can either remove this section, or list the attributes you 
 want to store. Clients can retrieve this information through a proprietary
 API, so make sure you only provide what is strictly necessary for the clients
-connecting to your OAuth service.
-
-Rule `52` maps the attributes to names internally used in the OAuth service. 
-So for this example here, only two attributes are provided to the OAuth 
-service: `displayName` and `entitlement`.
+connecting to your OAuth service. Rule `52` maps the attributes to names 
+internally used in the OAuth service. So for this example here, only two 
+attributes are provided to the OAuth service: `displayName` and `entitlement`.
 
 # Resource Servers
 If you are writing a resource server (RS) an API is available to verify the `Bearer`
@@ -247,14 +245,11 @@ Now in order to verify it, the RS can send a request to the OAuth service:
 
     $ curl http://localhost/php-oauth/tokeninfo.php?access_token=eeae9c3366af8cb7acb74dd5635c44e6
 
-If the token is valid, a response will be given back to the RS:
+If the token is valid, a response (formatted here for display purposes) will be 
+given back to the RS:
 
     {
-        "access_token": "eeae9c3366af8cb7acb74dd5635c44e6", 
-        "client_id": "html-view-grades", 
-        "expires_in": "3600", 
-        "issue_time": "1351007824", 
-        "resource_owner_attributes": {
+        "attributes": {
             "displayName": [
                 "Margie Korn"
             ], 
@@ -265,8 +260,10 @@ If the token is valid, a response will be given back to the RS:
                 "teacher"
             ]
         }, 
-        "resource_owner_id": "880a7ad2054687ce3587d50e769bb8e7601aae82", 
-        "scope": "grades"
+        "audience": "html-view-grades", 
+        "expires_in": 2957, 
+        "scope": "grades", 
+        "user_id": "880a7ad2054687ce3587d50e769bb8e7601aae82"
     }
 
 The RS can now figure out more about the resource owner. If you provide an 
@@ -276,7 +273,7 @@ invalid access token, an error is returned:
 
     {"error":"invalid_token","error_description":"the token was not found"}
 
-If your service needs to provision a user, the `resource_owner_id` is the field
+If your service needs to provision a user, the `user_id` is the field
 that SHOULD to be used for that.
 
 An example RS that uses this protocol written in PHP is available 

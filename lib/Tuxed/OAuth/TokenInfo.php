@@ -39,7 +39,16 @@ class TokenInfo
                 $response->setHeader('Content-Type', 'application/json');
                 $response->setHeader('Cache-Control', 'no-store');
                 $response->setHeader('Pragma', 'no-cache');
-                $response->setContent(json_encode($result));
+
+                $tokenInfo = array (
+                    "audience" => $result->client_id, 
+                    //"client_id" => $result->client_id, 
+                    "user_id" => $result->resource_owner_id, 
+                    //"resource_owner_id" => $result->resource_owner_id, 
+                    "scope" => $result->scope, 
+                    "expires_in" => $result->issue_time + $result->expires_in - time(),
+                    "attributes" => $result->resource_owner_attributes);
+                $response->setContent(json_encode($tokenInfo));
             }
         } catch (TokenInfoException $e) {
             $response->setStatusCode(400);
