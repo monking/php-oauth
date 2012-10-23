@@ -1,5 +1,4 @@
 # Add eduPersonEntitlement to your LDAP
-
 Although this is really out of scope here, I found it useful to keep this 
 information here as documentation about this doesn't seem to be widely 
 available on the Internet, at least not for 389 Directory Server.
@@ -8,7 +7,6 @@ This document is only relevant if you are using the simpleSAMLphp
 authentication backend together with some LDAP server.
 
 ## 389 Directory Server
-
 We assume you are running a recently modern 389 Directory Server instance, for 
 example on Fedora 17.
 
@@ -22,7 +20,6 @@ good thing is that 389 Directory Server already has the `eduPerson` schema
 available by default, at `/etc/dirsrv/schema/60eduperson.ldif`.
 
 ### Adding `eduPerson` `objectClass`
-
 All we have to do is adding the `eduPerson` `objectClass` to an existing entry
 for a user, that can easily be done using the following `LDIF` file:
 
@@ -38,7 +35,6 @@ Now you can add this to the LDAP using `ldapmodify`:
 That is all to add the `objectClass` to the entry for the user `fkooman`.
 
 ### Adding the `eduPersonEntitlement`
-
 To add the entitlements `urn:vnd:oauth2:applications`, `foo`, `bar` and `baz`, 
 the following `LDIF` file can be used:
 
@@ -55,5 +51,4 @@ And added to the LDAP like this:
     $ ldapmodify -W -H ldap://localhost -D 'cn=Directory Manager' < add_eduPersonEntitlement.ldif
 
 The `urn:vnd:oauth2:applications` entitlement will make it possible for this 
-user to manage the OAuth client registrations using the API assuming this is
-configured according to the example in `config/oauth.ini`.
+user to manage the OAuth client registrations using the API.

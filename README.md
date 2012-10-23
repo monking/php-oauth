@@ -1,5 +1,4 @@
 # PHP OAuth Authorization Server
-
 This project aims at providing a stand-alone OAuth v2 Authorization Server that
 is easy to integrate with your existing REST services, written in any language, 
 without requiring extensive changes.
@@ -13,8 +12,8 @@ without requiring extensive changes.
 ([php-browserid](https://github.com/fkooman/php-browserid/))
 
 # Screenshots
-
-Below are some screenshots of the OAuth consent dialog, the first one is the default view, the second is the view when one clicks the "Details" button.
+Below are some screenshots of the OAuth consent dialog, the first one is the 
+default view, the second is the view when one clicks the "Details" button.
 
 ![oauth_consent_simple](https://github.com/fkooman/php-oauth/raw/master/docs/oauth_consent_simple.png)
 
@@ -53,7 +52,7 @@ i.e. to install the tables, run:
     $ php docs/initOAuthDatabase.php
 
 It is also possible to already preregister some clients which makes sense if 
-you want to use the management clients discussed below. The sample registrations
+you want to use the management clients mentioned below. The sample registrations
 are listed in `docs/registration.json`. By default they point to 
 `http://localhost`, but if you run this software on a "real" domain you need to
 modify the `docs/registration.json` file to point to your domain name and 
@@ -69,8 +68,8 @@ then load them in the database:
 
     $ php docs/registerClients.php docs/myregistration.json
 
-This should take care of the initial setup and you can now move to the 
-management clients, see below.
+This should take care of the initial setup and you can now move to installing 
+the management clients, see below.
 
 *NOTE*: On Ubuntu (Debian) you would typically install in `/var/www/php-oauth` and not 
 in `/var/www/html/php-oauth` and you use `sudo` instead of `su -c`.
@@ -85,7 +84,7 @@ These clients are written in HTML, CSS and JavaScript only and can be hosted on
 any (static) web server. See the accompanying READMEs for more information. If 
 you followed the client registration in the previous section they should start
 working immediately if you install the applications at the correct URL. Do not
-forget to enable the management API, see below in the section on entitlements.
+forget to enable the management API in `config/oauth.ini`.
 
 # SELinux
 The install script already takes care of setting the file permissions of the
@@ -121,17 +120,17 @@ your system which replaces the `/PATH/TO/APP` with the actual install directory.
 # Authentication
 There are thee plugins provided to authenticate users:
 
-* DummyResourceOwner - Static account configured in `config/oauth.ini`
-* SspResourceOwner - simpleSAMLphp plugin for SAML authentication
-* BrowserIDResourceOwner - BrowserID / Mozilla Persona plugin
+* `DummyResourceOwner` - one static account configured in `config/oauth.ini`
+* `SspResourceOwner` - simpleSAMLphp plugin for SAML authentication
+* `BrowserIDResourceOwner` - BrowserID / Mozilla Persona plugin
 
 You can configure which plugin to use by modifying the `authenticationMechanism`
-setting.
+setting in `config/oauth.ini`.
 
 ## Entitlements
 A more complex part of the authentication and authorization is the use of 
 entitlements. This is a bit similar to scope in OAuth, only entitlements are 
-for resource owner, while scope is only for OAuth clients.
+for a specific resource owner, while scope is only for an OAuth client.
 
 The entitlements are for example used by the `php-oauth` API. It is possible to 
 write a client application that uses the `php-oauth` API to manage OAuth client 
@@ -193,9 +192,9 @@ configuration to get the entitlements right.
 First the `metadata/saml20-idp-remote.php` to configure the IdP that is used
 by the simpleSAMLphp as SP:
 
-    $metadata['http://localhost/oauth/ssp/saml2/idp/metadata.php'] = array(
-        'SingleSignOnService' => 'http://localhost/oauth/ssp/saml2/idp/SSOService.php',
-        'SingleLogoutService' => 'http://localhost/oauth/ssp/saml2/idp/SingleLogoutService.php',
+    $metadata['http://localhost/simplesaml/saml2/idp/metadata.php'] = array(
+        'SingleSignOnService' => 'http://localhost/simplesaml/saml2/idp/SSOService.php',
+        'SingleLogoutService' => 'http://localhost/simplesaml/saml2/idp/SingleLogoutService.php',
         'certFingerprint' => '4bff319a0fa4903e4f6ed52956fb02e1ebec5166',
 
         // clean up the attributes received from the IdP and modify them to use
@@ -218,6 +217,79 @@ by the simpleSAMLphp as SP:
 
     );
 
-You need to modify this (the URLs and the certificate) to work with your IdP. 
-This is basically all that needs to be done specific for `php-oauth`. The rest 
-is simpleSAMLphp generic configuration stuff.
+You need to modify this (the URLs and the certificate fingerprint) to work with 
+your IdP and possibly the attribute mapping rules. 
+
+Rule `50` changes the attributes to their base name. For example, if your 
+IdP provides the `urn:mace:dir:attribute-def:eduPersonEntitlement` attribute, 
+this is now reduced to just `eduPersonEntitlement`, the same for all the 
+other `urn:mace` prefixed attributes. Rule `51` removes all attributes except
+the `cn` and `eduPersonEntitlement` attributes. If you want to store more 
+attributes you can either remove this section, or list the attributes you 
+want to store. Clients can retrieve this information through a proprietary
+API, so make sure you only provide what is strictly necessary for the clients
+connecting to your OAuth service.
+
+Rule `52` maps the attributes to names internally used in the OAuth service. 
+So for this example here, only two attributes are provided to the OAuth 
+service: `displayName` and `entitlement`.
+
+# Resource Servers
+If you are writing a resource server (RS) an API is available to verify the `Bearer`
+token you receive from the client. It is the same API as used by Google, the 
+documentation for it can be found at TODO.
+
+An example, the RS gets the following `Authorization` header:
+
+    Authorization: Bearer eeae9c3366af8cb7acb74dd5635c44e6
+
+Now in order to verify it, the RS can send a request to the OAuth service:
+
+    $ curl http://localhost/php-oauth/tokeninfo.php?access_token=eeae9c3366af8cb7acb74dd5635c44e6
+
+If the token is valid, a response will be given back to the RS:
+
+    {
+        "access_token": "eeae9c3366af8cb7acb74dd5635c44e6", 
+        "client_id": "html-view-grades", 
+        "expires_in": "3600", 
+        "issue_time": "1351007824", 
+        "resource_owner_attributes": {
+            "displayName": [
+                "Margie Korn"
+            ], 
+            "entitlement": [
+                "urn:vnd:grades:administration"
+            ], 
+            "uid": [
+                "teacher"
+            ]
+        }, 
+        "resource_owner_id": "880a7ad2054687ce3587d50e769bb8e7601aae82", 
+        "scope": "grades"
+    }
+
+The RS can now figure out more about the resource owner. If you provide an 
+invalid access token, an error is returned:
+
+    HTTP/1.1 400 Bad Request
+
+    {"error":"invalid_token","error_description":"the token was not found"}
+
+If your service needs to provision a user, the `resource_owner_id` is the field
+that SHOULD to be used for that.
+
+An example RS that uses this protocol written in PHP is available 
+[https://github.com/fkooman/php-oauth-example-rs](here). As this is so simple, 
+it should be straightforward to implement this token verification in any 
+language.
+
+# Resource Owner Data
+Whenever a resource owner successfully authenicates, the attributes belonging
+to that user are stored in the database. This is done to give the information
+to registered clients and to resource servers that have a valid access token.
+
+Care should be taken in making sure that only the attributes that are needed
+for a correct service operation are provided as attributes. Also, this data, 
+which may be privacy sensitive SHOULD be removed from the database after a 
+certain amount of time expired when the user did not login to the service.
