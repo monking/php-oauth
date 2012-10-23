@@ -1,12 +1,10 @@
 # Introduction
-
 This service provides a REST API to manage "authorizations", i.e.: allow for
 adding and deleting authorized applications. This is helpful for applications
 that are designed to manage the OAuth server in which users are able to revoke
 authorizations.
 
 # User Info API
-
 This API call can be used by the authorized applications to retrieve some 
 information about the resource owner that granted the authorization.
 
@@ -14,8 +12,11 @@ The calls are under the `resource_owner` path and the following attributes can
 be retrieved: 
 
 * `id` - get the persistent, possibly opague, identifier of the resource owner
-* `entitlement` - get the entitlements granted to the resource owner, as an 
-  array.
+* `attributes` - get the attributes belonging to the resource owner. This field
+  can for example contain fields like `displayName` and `entitlement` and can
+  be used by the application to enhance the user experience. *NOTE*: no attribute
+  is required, so do not expect them to be there, unless you enforce this in 
+  some other way, possibly through the SAML configuration.
 
 ### Request `id`
 
@@ -32,20 +33,19 @@ be retrieved:
 This information is meant to improve the user experience. For example, to alter 
 the user interface based on entitlements.
 
-### Request `entitlement`
+### Request `attributes`
 
-    GET /php-oauth/api.php/resource_owner/entitlement
+    GET /php-oauth/api.php/resource_owner/attributes
     Authorization: Bearer xyz
 
-### Response `entitlement`
+### Response `attributes`
 
     HTTP/1.1 200 OK
     Content-Type: application/json
 
-    {"entitlement":["applications","administration"]}
+    {"uid":["admin"],"entitlement":["urn:vnd:oauth2:applications"],"displayName":["Carlos Catalano"]}
 
 # Authorizations API
-
 This section describes the API to add and remove authorizations. However, the 
 application managing this should also be authorized to do this. A scope of 
 "authorizations" can be requested by the client. 
@@ -63,7 +63,6 @@ resource owner was authenticated and authorized the client. All authorization
 registrations through the API are bound to the authenticated resource owner.
 
 ## Adding Authorizations
-
 This adds an authorization for a specific `client_id` with some `scope` for
 the authenticated resource owner. The `client_id` needs to be registered, and
 no existing authorization can exist for the `client_id` and resource owner.
@@ -137,7 +136,6 @@ for the client.
     HTTP/1.1 200 OK
 
 # Error Handling
-
 If a resource does not exist (in `GET` and `DELETE` requests) within a 
 collection the `HTTP/1.1 404 Not Found` error code MUST be returned.
 
@@ -156,7 +154,6 @@ JSON in the body of the response. For example:
     {"error":"invalid_request","error_description":"authorization already exists for this client and resource owner"}
 
 # Applications API
-
 The API also provides functionality to manage applications, i.e.: client 
 registrations. The following functionality is exposed:
 
