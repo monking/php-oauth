@@ -280,7 +280,7 @@ If your service needs to provision a user, the `resource_owner_id` is the field
 that SHOULD to be used for that.
 
 An example RS that uses this protocol written in PHP is available 
-[https://github.com/fkooman/php-oauth-example-rs](here). As this is so simple, 
+[here](https://github.com/fkooman/php-oauth-example-rs). As this is so simple, 
 it should be straightforward to implement this token verification in any 
 language.
 
