@@ -261,9 +261,11 @@ given back to the RS:
             ]
         }, 
         "audience": "html-view-grades", 
-        "expires_in": 2957, 
+        "client_id": "html-view-grades", 
+        "expires_in": 3567, 
+        "resource_owner_id": "6b976124bc1747b3e8b249fe3bd6edff16d546ac", 
         "scope": "grades", 
-        "user_id": "880a7ad2054687ce3587d50e769bb8e7601aae82"
+        "user_id": "6b976124bc1747b3e8b249fe3bd6edff16d546ac"
     }
 
 The RS can now figure out more about the resource owner. If you provide an 
@@ -273,8 +275,8 @@ invalid access token, an error is returned:
 
     {"error":"invalid_token","error_description":"the token was not found"}
 
-If your service needs to provision a user, the `user_id` is the field
-that SHOULD to be used for that.
+If your service needs to provision a user, the field `resource_owner_id` or 
+its alias `user_id` SHOULD to be used for that.
 
 An example RS that uses this protocol written in PHP is available 
 [here](https://github.com/fkooman/php-oauth-example-rs). As this is so simple, 
