@@ -42,9 +42,9 @@ class TokenInfo
 
                 $tokenInfo = array (
                     "audience" => $result->client_id, 
-                    //"client_id" => $result->client_id, 
+                    "client_id" => $result->client_id, 
                     "user_id" => $result->resource_owner_id, 
-                    //"resource_owner_id" => $result->resource_owner_id, 
+                    "resource_owner_id" => $result->resource_owner_id, 
                     "scope" => $result->scope, 
                     "expires_in" => $result->issue_time + $result->expires_in - time(),
                     "attributes" => $result->resource_owner_attributes);
