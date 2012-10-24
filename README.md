@@ -102,9 +102,9 @@ This is only for Red Hat based Linux distributions like RHEL, CentOS and
 Fedora.
 
 If you want the labeling of the `data/` directory to survive file system 
-relabling you have to update the policy as well.
+relabeling you have to update the policy as well.
 
-FIXME: add how to update the policy...
+*FIXME*: add how to update the policy...
 
 # Apache
 There is an example configuration file in `docs/apache.conf`. 
@@ -233,8 +233,8 @@ internally used in the OAuth service. So for this example here, only two
 attributes are provided to the OAuth service: `displayName` and `entitlement`.
 
 # Resource Servers
-If you are writing a resource server (RS) an API is available to verify the `Bearer`
-token you receive from the client. It is the same API as 
+If you are writing a resource server (RS) an API is available to verify the 
+`Bearer` token you receive from the client. It is the same API as 
 [used by Google](https://developers.google.com/accounts/docs/OAuth2Login#validatingtoken).
 
 An example, the RS gets the following `Authorization` header from the client:
@@ -276,15 +276,32 @@ invalid access token, an error is returned:
     {"error":"invalid_token","error_description":"the token was not found"}
 
 If your service needs to provision a user, the field `resource_owner_id` or 
-its alias `user_id` SHOULD to be used for that.
+its alias `user_id` SHOULD to be used for that. The `scope` field can be used
+to determine the scope the client was granted by the resource owner.
 
 An example RS that uses this protocol written in PHP is available 
 [here](https://github.com/fkooman/php-oauth-example-rs). As this is so simple, 
 it should be straightforward to implement this token verification in any 
 language.
 
+# Clients
+Clients can also verify the access token and retrieve more information about
+the resource owner. It is the same API as 
+[used by Google](https://developers.google.com/accounts/docs/OAuth2Login#validatingtoken). 
+However, this endpoint is no replacement for proper 
+authentication at the service. One SHOULD NOT use the OAuth authorization 
+server to authenticate users! The only clients that SHOULD ever use this 
+endpoint are "user-agent-based-applications" as defined in the OAuth 
+specification, i.e.: applications written in HTML, JavaScript and CSS where the 
+endpoint is used to retrieve information from the authenticated user to 
+customize the application view.
+
+If clients use the access token verification endpoint they should make sure 
+that the `client_id` field or its alias `audience` matches the OAuth client ID
+they registered at the service.
+
 # Resource Owner Data
-Whenever a resource owner successfully authenicates, the attributes belonging
+Whenever a resource owner successfully authenticates, the attributes belonging
 to that user are stored in the database. This is done to give the information
 to registered clients and to resource servers that have a valid access token.
 

@@ -1,49 +1,11 @@
 # Introduction
-This service provides a REST API to manage "authorizations", i.e.: allow for
-adding and deleting authorized applications. This is helpful for applications
-that are designed to manage the OAuth server in which users are able to revoke
-authorizations.
+The OAuth Authorization Server provides a REST API to manage the service.
 
-# User Info API
-This API call can be used by the authorized applications to retrieve some 
-information about the resource owner that granted the authorization.
+It provides an API to:
 
-The calls are under the `resource_owner` path and the following attributes can
-be retrieved: 
-
-* `id` - get the persistent, possibly opague, identifier of the resource owner
-* `attributes` - get the attributes belonging to the resource owner. This field
-  can for example contain fields like `displayName` and `entitlement` and can
-  be used by the application to enhance the user experience. *NOTE*: no attribute
-  is required, so do not expect them to be there, unless you enforce this in 
-  some other way, possibly through the SAML configuration.
-
-### Request `id`
-
-    GET /php-oauth/api.php/resource_owner/id
-    Authorization: Bearer xyz
-
-### Response `id`
-
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-
-    {"id":"fkooman"}
-
-This information is meant to improve the user experience. For example, to alter 
-the user interface based on entitlements.
-
-### Request `attributes`
-
-    GET /php-oauth/api.php/resource_owner/attributes
-    Authorization: Bearer xyz
-
-### Response `attributes`
-
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-
-    {"uid":["admin"],"entitlement":["urn:vnd:oauth2:applications"],"displayName":["Carlos Catalano"]}
+* Manage "authorizations", i.e.: which resource owner granted which application 
+  what permissions
+* Manage "applications", i.e.: manage OAuth client registrations
 
 # Authorizations API
 This section describes the API to add and remove authorizations. However, the 
@@ -166,14 +128,18 @@ registrations. The following functionality is exposed:
 The API works the same as for the authorizations. For adding a new application
 the following JSON parameters are required in the POST body:
 
-* `id`
-* `name`
-* `description`
+* `id` (a unique client identifier)
+* `name` (a one line short name for the service)
+* `description` (a multi-line description of the service)
 * `secret` (only for `web_application` type)
-* `type` (`web_application`, `user_agent_based_application` or `native_application`)
-* `redirect_uri`
+* `type` (`web_application`, `user_agent_based_application` or 
+  `native_application`)
+* `redirect_uri` (a URL to redirect the browser to after the resource owner 
+   grants the access)
 * `icon` (full absolute URL to icon)
 * `allowed_scope` (scopes the client is allowed to request, space separated)
+* `contact_email` (contact email address to report issues with the application 
+  to)
 
 For updating an application the same parameters are required, except `id` as 
 that is specified in the URL directly.

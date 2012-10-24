@@ -41,14 +41,6 @@ class Api
             $storage = $this->_storage; // FIXME: can this be avoided??
             $rs = $this->_rs; // FIXME: can this be avoided??
 
-            $request->matchRest("GET", "/resource_owner/id", function() use ($response, $rs) {
-                $response->setContent(json_encode(array("id" => $rs->getResourceOwnerId())));
-            });
-
-            $request->matchRest("GET", "/resource_owner/attributes", function() use ($response, $rs) {
-                $response->setContent(json_encode($rs->getAttributes()));
-            });
-
             $request->matchRest("POST", "/authorizations/", function() use ($request, $response, $storage, $rs) {
                 $rs->requireScope("authorizations");
                 $data = json_decode($request->getContent(), TRUE);
