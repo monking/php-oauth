@@ -10,6 +10,7 @@ interface IOAuthStorage
     public function getAuthorizationCode     ($authorizationCode, $redirectUri);
     public function deleteAuthorizationCode  ($authorizationCode, $redirectUri);
     public function deleteExpiredAccessTokens();
+    public function deleteExpiredAuthorizationCodes();
 
     public function getRefreshToken          ($refreshToken);
 

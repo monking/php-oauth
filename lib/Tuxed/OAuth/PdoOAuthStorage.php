@@ -162,11 +162,21 @@ class PdoOAuthStorage implements IOAuthStorage
 
     public function deleteExpiredAccessTokens()
     {
-        // delete access tokens that expired
-        $stmt = $this->_pdo->prepare("DELETE FROM AccessToken WHERE issue_time + expires_in < :now");
-        $stmt->bindValue(":now", time(), PDO::PARAM_INT);
+        // delete access tokens that expired 8 hours or longer ago
+        $stmt = $this->_pdo->prepare("DELETE FROM AccessToken WHERE issue_time + expires_in < :time");
+        $stmt->bindValue(":time", time() - 28800, PDO::PARAM_INT);
         if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to delete access tokens");
+        }
+    }
+
+    public function deleteExpiredAuthorizationCodes()
+    {
+        // delete authorization codes that expired 8 hours or longer ago
+        $stmt = $this->_pdo->prepare("DELETE FROM AuthorizationCode WHERE issue_time + 600 < :time");
+        $stmt->bindValue(":time", time() - 28800, PDO::PARAM_INT);
+        if (FALSE === $stmt->execute()) {
+            throw new StorageException("unable to delete authorization code");
         }
     }
 

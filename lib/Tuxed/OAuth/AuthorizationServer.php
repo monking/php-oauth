@@ -14,6 +14,12 @@ class AuthorizationServer
     {
         $this->_storage = $storage;
         $this->_c = $c;
+
+        // occasionally delete expired access tokens and authorization codes
+        if (3 === rand(0,5)) {
+            $storage->deleteExpiredAccessTokens();
+            $storage->deleteExpiredAuthorizationCodes();
+        }
     }
 
     public function authorize(IResourceOwner $resourceOwner, array $get)
@@ -168,7 +174,7 @@ class AuthorizationServer
             throw new TokenInfoException("invalid_token", "the token was not found");
         }
 
-        if(time() > $accessToken->issue_time + $accessToken->expires_in) {
+        if (time() > $accessToken->issue_time + $accessToken->expires_in) {
             throw new TokenInfoException("invalid_token", "the token expired");
         }
 
