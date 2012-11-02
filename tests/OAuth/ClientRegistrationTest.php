@@ -1,11 +1,11 @@
 <?php
 
-require_once 'lib/SplClassLoader.php';
-$c =  new SplClassLoader("Tuxed", "lib");
-$c->register();
+require_once "lib/SplClassLoader.php";
+$c1 =  new SplClassLoader("OAuth", "lib");
+$c1->register();
 
-use \Tuxed\OAuth\ClientRegistration as ClientRegistration;
-use \Tuxed\OAuth\ClientRegistrationException as ClientRegistrationException;
+use \OAuth\ClientRegistration as ClientRegistration;
+use \OAuth\ClientRegistrationException as ClientRegistrationException;
 
 class ClientRegistrationTest extends PHPUnit_Framework_TestCase
 {

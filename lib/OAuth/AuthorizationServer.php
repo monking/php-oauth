@@ -1,9 +1,9 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Config as Config;
-use \Tuxed\Http\Uri as Uri;
+use \RestService\Utils\Config as Config;
+use \RestService\Http\Uri as Uri;
 
 class AuthorizationServer
 {

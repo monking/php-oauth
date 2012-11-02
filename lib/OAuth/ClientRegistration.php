@@ -1,6 +1,6 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
 // FIXME: enforce maximum length of fields, match with database!
 class ClientRegistration

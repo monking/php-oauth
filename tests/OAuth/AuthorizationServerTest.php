@@ -2,10 +2,10 @@
 
 require_once 'OAuthHelper.php';
 
-use \Tuxed\OAuth\ResourceServerException as ResourceServerException;
-use \Tuxed\OAuth\AuthorizeResult as AuthorizeResult;
-use \Tuxed\OAuth\AuthorizationServer as AuthorizationServer;
-use \Tuxed\OAuth\ResourceServer as ResourceServer;
+use \OAuth\ResourceServerException as ResourceServerException;
+use \OAuth\AuthorizeResult as AuthorizeResult;
+use \OAuth\AuthorizationServer as AuthorizationServer;
+use \OAuth\ResourceServer as ResourceServer;
 
 class ImplicitGrantTest extends OAuthHelper
 {
@@ -17,10 +17,10 @@ class ImplicitGrantTest extends OAuthHelper
     {
         parent::setUp();
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
-        $authMech = '\\Tuxed\OAuth\\' . $this->_config->getValue('authenticationMechanism');
+        $authMech = '\\OAuth\\' . $this->_config->getValue('authenticationMechanism');
         $this->_ro = new $authMech($this->_config);
 
         $this->_rs = new ResourceServer($storage);

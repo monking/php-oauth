@@ -1,20 +1,17 @@
 <?php
 
-require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "SplClassLoader.php";
-$c =  new SplClassLoader("Tuxed", dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib");
-$c->register();
+require_once "../lib/SplClassLoader.php";
+$c1 = new SplClassLoader("RestService", "../extlib/php-rest-service/lib");
+$c1->register();
+$c2 =  new SplClassLoader("OAuth", "../lib");
+$c2->register();
 
-#function exception_error_handler($errno, $errstr, $errfile, $errline ) {
-#    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-#}
-#set_error_handler("exception_error_handler");
-
-use \Tuxed\Http\HttpResponse as HttpResponse;
-use \Tuxed\Config as Config;
-use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\Logger as Logger;
-use \Tuxed\OAuth\Api as Api;
+use \RestService\Http\HttpResponse as HttpResponse;
+use \RestService\Utils\Config as Config;
+use \RestService\Http\IncomingHttpRequest as IncomingHttpRequest;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \RestService\Utils\Logger as Logger;
+use \OAuth\Api as Api;
 
 $logger = NULL;
 $request = NULL;

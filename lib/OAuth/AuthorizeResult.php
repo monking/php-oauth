@@ -1,8 +1,8 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Http\Uri as Uri;
+use \RestService\Http\Uri as Uri;
 
 class AuthorizeResult
 {

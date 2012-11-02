@@ -2,8 +2,8 @@
 
 require_once 'OAuthHelper.php';
 
-use \Tuxed\OAuth\Api as Api;
-use \Tuxed\Http\HttpRequest as HttpRequest;
+use \OAuth\Api as Api;
+use \RestService\Http\HttpRequest as HttpRequest;
 
 class ApiTest extends OAuthHelper
 {
@@ -16,7 +16,7 @@ class ApiTest extends OAuthHelper
         $this->_config->setSectionValue("Api", "enableApi", TRUE);
         $this->_api = new Api($this->_config, NULL);
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $storage->updateResourceOwner('fkooman', NULL, NULL);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
 /**
  * Thrown when interaction with the token endpoint fails

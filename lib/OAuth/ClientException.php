@@ -1,6 +1,6 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
 /**
  * Thrown when the client needs to be informed of an error

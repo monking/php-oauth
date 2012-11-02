@@ -1,8 +1,8 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Config as Config;
+use \RestService\Utils\Config as Config;
 use \SimpleSAML_Auth_Simple as SimpleSAML_Auth_Simple;
 
 class SspResourceOwner implements IResourceOwner

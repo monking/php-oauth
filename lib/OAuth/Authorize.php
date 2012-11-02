@@ -1,11 +1,11 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Config as Config;
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\Http\HttpResponse as HttpResponse;
-use \Tuxed\Logger as Logger;
+use \RestService\Utils\Config as Config;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \RestService\Http\HttpResponse as HttpResponse;
+use \RestService\Utils\Logger as Logger;
 
 class Authorize
 {
@@ -20,11 +20,11 @@ class Authorize
         $this->_config = $c;
         $this->_logger = $l;
 
-        $authMech = '\\Tuxed\OAuth\\' . $this->_config->getValue('authenticationMechanism');
+        $authMech = '\\OAuth\\' . $this->_config->getValue('authenticationMechanism');
         $this->_resourceOwner = new $authMech($this->_config);
 #        $this->_resourceOwner->setHint($request->getQueryParameter("user_address"));
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $this->_as = new AuthorizationServer($storage, $this->_config);
@@ -47,7 +47,7 @@ class Authorize
                             );
                             extract($tplData);
                             ob_start();
-                            require dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "askAuthorization.php";
+                            require dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "askAuthorization.php";
                             $response->setContent(ob_get_clean());
                         } elseif (AuthorizeResult::REDIRECT === $result->getAction()) {
                             $response->setStatusCode(302);
@@ -99,7 +99,7 @@ class Authorize
             // tell resource owner about the error (through browser)
             $response->setStatusCode(400);
             ob_start();
-            require dirname(dirname(dirname(__DIR__))) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "errorPage.php";
+            require dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . "errorPage.php";
             $response->setContent(ob_get_clean());
             if (NULL !== $this->_logger) {
                 $this->_logger->logFatal($e->getMessage() . PHP_EOL . $request . PHP_EOL . $response);

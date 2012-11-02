@@ -2,8 +2,8 @@
 
 require_once 'OAuthHelper.php';
 
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\OAuth\Token as Token;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \OAuth\Token as Token;
 
 class TokenTest extends OAuthHelper
 {
@@ -11,7 +11,7 @@ class TokenTest extends OAuthHelper
     {
         parent::setUp();
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $storage->updateResourceOwner('fkooman', NULL, NULL);

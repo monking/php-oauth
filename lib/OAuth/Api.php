@@ -1,11 +1,11 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\Http\HttpResponse as HttpResponse;
-use \Tuxed\Logger as Logger;
-use \Tuxed\Config as Config;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \RestService\Http\HttpResponse as HttpResponse;
+use \RestService\Utils\Logger as Logger;
+use \RestService\Utils\Config as Config;
 
 class Api
 {
@@ -20,7 +20,7 @@ class Api
         $this->_config = $c;
         $this->_logger = $l;
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $this->_storage = new $oauthStorageBackend($this->_config);
 
         $this->_rs = new ResourceServer($this->_storage);

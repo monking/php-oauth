@@ -1,11 +1,11 @@
 <?php
 
-require_once 'lib/SplClassLoader.php';
-$c =  new SplClassLoader("Tuxed", "lib");
-$c->register();
+require_once "lib/SplClassLoader.php";
+$c1 =  new SplClassLoader("OAuth", "lib");
+$c1->register();
 
-use \Tuxed\OAuth\Scope as Scope;
-use \Tuxed\OAuth\ScopeException as ScopeException;
+use \OAuth\Scope as Scope;
+use \OAuth\ScopeException as ScopeException;
 
 class ScopeTest extends PHPUnit_Framework_TestCase
 {
@@ -47,7 +47,7 @@ class ScopeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Tuxed\OAuth\ScopeException
+     * @expectedException \OAuth\ScopeException
      */
     public function testMalformedScope()
     {

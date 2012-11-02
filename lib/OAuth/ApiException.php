@@ -1,6 +1,6 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
 class ApiException extends \Exception
 {

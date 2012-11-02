@@ -1,11 +1,11 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Config as Config;
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\Http\HttpResponse as HttpResponse;
-use \Tuxed\Logger as Logger;
+use \RestService\Utils\Config as Config;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \RestService\Http\HttpResponse as HttpResponse;
+use \RestService\Utils\Logger as Logger;
 
 class TokenInfo
 {
@@ -19,7 +19,7 @@ class TokenInfo
         $this->_config = $c;
         $this->_logger = $l;
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $this->_as = new AuthorizationServer($storage, $this->_config);
@@ -41,11 +41,11 @@ class TokenInfo
                 $response->setHeader('Pragma', 'no-cache');
 
                 $tokenInfo = array (
-                    "audience" => $result->client_id, 
-                    "client_id" => $result->client_id, 
-                    "user_id" => $result->resource_owner_id, 
-                    "resource_owner_id" => $result->resource_owner_id, 
-                    "scope" => $result->scope, 
+                    "audience" => $result->client_id,
+                    "client_id" => $result->client_id,
+                    "user_id" => $result->resource_owner_id,
+                    "resource_owner_id" => $result->resource_owner_id,
+                    "scope" => $result->scope,
                     "expires_in" => $result->issue_time + $result->expires_in - time(),
                     "attributes" => $result->resource_owner_attributes);
                 $response->setContent(json_encode($tokenInfo));

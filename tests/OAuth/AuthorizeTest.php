@@ -2,8 +2,8 @@
 
 require_once 'OAuthHelper.php';
 
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\OAuth\Authorize as Authorize;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \OAuth\Authorize as Authorize;
 
 class AuthorizeTest extends OAuthHelper
 {
@@ -73,7 +73,7 @@ class AuthorizeTest extends OAuthHelper
     }
 
 #    /**
-#     * @expectedException \Tuxed\OAuth\ResourceOwnerException
+#     * @expectedException \OAuth\ResourceOwnerException
 #     * @expectedExceptionMessage client_id missing
 #     */
 #    public function testMissingClientId() {
@@ -82,7 +82,7 @@ class AuthorizeTest extends OAuthHelper
 #    }
 
 #    /**
-#     * @expectedException \Tuxed\OAuth\ResourceOwnerException
+#     * @expectedException \OAuth\ResourceOwnerException
 #     * @expectedExceptionMessage response_type missing
 #     */
 #    public function testMissingResponseType() {
@@ -96,7 +96,7 @@ class AuthorizeTest extends OAuthHelper
 #    }
 
 #    /**
-#     * @expectedException \Tuxed\OAuth\ResourceOwnerException
+#     * @expectedException \OAuth\ResourceOwnerException
 #     * @expectedExceptionMessage client not registered
 #     */
 #    public function testUnregisteredClient() {
@@ -105,7 +105,7 @@ class AuthorizeTest extends OAuthHelper
 #    }
 
 #    /**
-#     * @expectedException \Tuxed\OAuth\ResourceOwnerException
+#     * @expectedException \OAuth\ResourceOwnerException
 #     * @expectedExceptionMessage specified redirect_uri not the same as registered redirect_uri
 #     */
 #    public function testWrongRedirectUri() {
@@ -114,7 +114,7 @@ class AuthorizeTest extends OAuthHelper
 #    }
 
 #    /**
-#     * @expectedException \Tuxed\OAuth\ClientException
+#     * @expectedException \OAuth\ClientException
 #     * @expectedExceptionMessage unsupported_response_type
 #     */
 #    public function testWrongClientType() {
@@ -123,7 +123,7 @@ class AuthorizeTest extends OAuthHelper
 #    }
 
 #    /**
-#     * @expectedException \Tuxed\OAuth\ClientException
+#     * @expectedException \OAuth\ClientException
 #     * @expectedExceptionMessage invalid_scope
 #     */
 #    public function testUnsupportedScope() {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
 /**
  * When something went wrong with storing or retrieving

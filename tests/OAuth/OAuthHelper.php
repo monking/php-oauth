@@ -1,11 +1,13 @@
 <?php
 
-require_once 'lib/SplClassLoader.php';
-$c =  new SplClassLoader("Tuxed", "lib");
-$c->register();
+require_once "lib/SplClassLoader.php";
+$c1 = new SplClassLoader("RestService", "extlib/php-rest-service/lib");
+$c1->register();
+$c2 =  new SplClassLoader("OAuth", "lib");
+$c2->register();
 
-use \Tuxed\Config as Config;
-use \Tuxed\OAuth\PdoOAuthStorage as PdoOAuthStorage;
+use \RestService\Utils\Config as Config;
+use \OAuth\PdoOAuthStorage as PdoOAuthStorage;
 
 class OAuthHelper extends PHPUnit_Framework_TestCase
 {

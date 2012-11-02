@@ -1,11 +1,11 @@
 <?php
 
-namespace Tuxed\OAuth;
+namespace OAuth;
 
-use \Tuxed\Config as Config;
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\Http\HttpResponse as HttpResponse;
-use \Tuxed\Logger as Logger;
+use \RestService\Utils\Config as Config;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \RestService\Http\HttpResponse as HttpResponse;
+use \RestService\Utils\Logger as Logger;
 
 class Token
 {
@@ -19,7 +19,7 @@ class Token
         $this->_config = $c;
         $this->_logger = $l;
 
-        $oauthStorageBackend = '\\Tuxed\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $this->_as = new AuthorizationServer($storage, $this->_config);

@@ -1,15 +1,17 @@
 <?php
 
-require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "SplClassLoader.php";
-$c =  new SplClassLoader("Tuxed", dirname(__DIR__) . DIRECTORY_SEPARATOR . "lib");
-$c->register();
+require_once "../lib/SplClassLoader.php";
+$c1 = new SplClassLoader("RestService", "../extlib/php-rest-service/lib");
+$c1->register();
+$c2 =  new SplClassLoader("OAuth", "../lib");
+$c2->register();
 
-use \Tuxed\Config as Config;
-use \Tuxed\Logger as Logger;
-use \Tuxed\Http\HttpRequest as HttpRequest;
-use \Tuxed\Http\IncomingHttpRequest as IncomingHttpRequest;
-use \Tuxed\OAuth\Authorize as Authorize;
-use \Tuxed\Http\HttpResponse as HttpResponse;
+use \RestService\Utils\Config as Config;
+use \RestService\Utils\Logger as Logger;
+use \RestService\Http\HttpRequest as HttpRequest;
+use \RestService\Http\IncomingHttpRequest as IncomingHttpRequest;
+use \OAuth\Authorize as Authorize;
+use \RestService\Http\HttpResponse as HttpResponse;
 
 $logger = NULL;
 $request = NULL;
