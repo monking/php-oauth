@@ -37,6 +37,10 @@ On Debian/Ubuntu:
     $ git clone git://github.com/fkooman/php-oauth.git
     $ cd php-oauth
 
+Install the external dependencies:
+
+    $ sh docs/install_dependencies.sh
+
 Now you can create the default configuration files, the paths will be 
 automatically set, permissions set and a sample Apache configuration file will 
 be generated and shown on the screen (see below for more information on
