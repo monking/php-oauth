@@ -60,7 +60,7 @@ class SspResourceOwner implements IResourceOwner
     /* FIXME: DEPRECATED */
     public function getEntitlement()
     {
-        return $this->getAttribute("entitlement");
+        return $this->getAttribute("eduPersonEntitlement");
     }
 
 }

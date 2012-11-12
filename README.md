@@ -165,9 +165,9 @@ as shown in the snippet below:
     [DummyResourceOwnerAttributes]
     uid[]         = "fkooman"
     displayName[] = "François Kooman"
-    entitlement[] = "urn:vnd:oauth2:applications"
-    entitlement[] = "foo"
-    entitlement[] = "bar"
+    eduPersonEntitlement[] = "urn:vnd:oauth2:applications"
+    eduPersonEntitlement[] = "foo"
+    eduPersonEntitlement[] = "bar"
 
 Here you can see that the resource owner will be granted the 
 `urn:vnd:oauth2:applications`, `foo` and `bar` entitlements. As there is only 
@@ -208,15 +208,6 @@ by the simpleSAMLphp as SP:
                 'class' => 'core:AttributeMap',
                 'urn2name',
             ),
-            51 => array(
-                'class' => 'core:AttributeLimit',
-                'cn', 'eduPersonEntitlement',
-            ),
-            52 => array(
-                'class' => 'core:AttributeMap',
-                'eduPersonEntitlement' => 'entitlement',
-                'cn' => 'displayName',
-            ),
         ),
 
     );
@@ -227,14 +218,7 @@ your IdP and possibly the attribute mapping rules.
 Rule `50` changes the attributes to their base name. For example, if your 
 IdP provides the `urn:mace:dir:attribute-def:eduPersonEntitlement` attribute, 
 this is now reduced to just `eduPersonEntitlement`, the same for all the 
-other `urn:mace` prefixed attributes. Rule `51` removes all attributes except
-the `cn` and `eduPersonEntitlement` attributes. If you want to store more 
-attributes you can either remove this section, or list the attributes you 
-want to store. Clients can retrieve this information through a proprietary
-API, so make sure you only provide what is strictly necessary for the clients
-connecting to your OAuth service. Rule `52` maps the attributes to names 
-internally used in the OAuth service. So for this example here, only two 
-attributes are provided to the OAuth service: `displayName` and `entitlement`.
+other `urn:mace` prefixed attributes. 
 
 # Resource Servers
 If you are writing a resource server (RS) an API is available to verify the 
@@ -257,7 +241,7 @@ given back to the RS:
             "displayName": [
                 "Margie Korn"
             ], 
-            "entitlement": [
+            "eduPersonEntitlement": [
                 "urn:vnd:grades:administration"
             ], 
             "uid": [

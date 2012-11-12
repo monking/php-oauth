@@ -57,11 +57,11 @@ class ResourceServer
 
     public function getEntitlement()
     {
-        if (!array_key_exists("entitlement", $this->_resourceOwnerAttributes)) {
+        if (!array_key_exists('eduPersonEntitlement', $this->_resourceOwnerAttributes)) {
             return array();
         }
 
-        return $this->_resourceOwnerAttributes['entitlement'];
+        return $this->_resourceOwnerAttributes['eduPersonEntitlement'];
     }
 
     public function hasScope($scope)
@@ -81,11 +81,11 @@ class ResourceServer
 
     public function hasEntitlement($entitlement)
     {
-        if (!array_key_exists("entitlement", $this->_resourceOwnerAttributes)) {
+        if (!array_key_exists('eduPersonEntitlement', $this->_resourceOwnerAttributes)) {
             return FALSE;
         }
 
-        return in_array($entitlement, $this->_resourceOwnerAttributes['entitlement']);
+        return in_array($entitlement, $this->_resourceOwnerAttributes['eduPersonEntitlement']);
     }
 
     public function requireEntitlement($entitlement)

@@ -61,9 +61,9 @@ resourceOwnerId = "1234-5678-9999"
 [DummyResourceOwnerAttributes]
 uid[]         = "fkooman"
 displayName[] = "François Kooman"
-entitlement[] = "urn:vnd:oauth2:applications"
-entitlement[] = "foo"
-entitlement[] = "bar"
+eduPersonEntitlement[] = "urn:vnd:oauth2:applications"
+eduPersonEntitlement[] = "foo"
+eduPersonEntitlement[] = "bar"
 
 ; BrowserID configuration
 [BrowserIDResourceOwner]
