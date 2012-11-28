@@ -85,7 +85,12 @@ class Authorize
         } catch (ClientException $e) {
             // tell the client about the error
             $client = $e->getClient();
-            $separator = ($client->type === "user_agent_based_application") ? "#" : "?";
+
+            if($client->type === "user_agent_based_application") {
+                $separator = "#";
+            } else {
+                $separator = (FALSE === strpos($client->redirect_uri, "?")) ? "?" : "&";
+            }
             $parameters = array("error" => $e->getMessage(), "error_description" => $e->getDescription());
             if (NULL !== $e->getState()) {
                 $parameters['state'] = $e->getState();
