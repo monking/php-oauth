@@ -14,7 +14,7 @@
       <div id="container">
         <div class="httpCode"><?php echo $response->getStatusCode(); ?> - <?php echo $response->getStatusReason(); ?></div>
         <h3>Error</h3>
-        <p>A fatal error occurred!</p>
+        <p>An error occurred!</p>
         <div class="errorBox">
           <strong>ERROR</strong>: <?php echo $e->getMessage(); ?>
         </div>
