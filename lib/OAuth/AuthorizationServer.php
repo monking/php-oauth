@@ -102,7 +102,8 @@ class AuthorizationServer
                         $token += array ("state" => $state);
                     }
                     $ar = new AuthorizeResult(AuthorizeResult::REDIRECT);
-                    $ar->setRedirectUri(new Uri($client->redirect_uri . "?" . http_build_query($token)));
+                    $separator = (FALSE === strpos($client->redirect_uri, "?")) ? "?" : "&";
+                    $ar->setRedirectUri(new Uri($client->redirect_uri . $separator . http_build_query($token)));
 
                     return $ar;
                 }
