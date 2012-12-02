@@ -149,7 +149,7 @@ In the `[Api]` section the management API can be enabled:
     enableApi = TRUE
 
 In particular, the authenticated user (resource owner) needs to have the 
-`urn:vnd:oauth2:applications` entitlement in order to be able to modify 
+`urn:x-oauth:entitlement:applications` entitlement in order to be able to modify 
 application registrations. The entitlements are part of the resource owner's 
 attributes. This maps perfectly to SAML attributes obtained through the
 simpleSAMLphp integration.
@@ -165,12 +165,12 @@ as shown in the snippet below:
     [DummyResourceOwnerAttributes]
     uid[]         = "fkooman"
     displayName[] = "François Kooman"
-    eduPersonEntitlement[] = "urn:vnd:oauth2:applications"
+    eduPersonEntitlement[] = "urn:x-oauth:entitlement:applications"
     eduPersonEntitlement[] = "foo"
     eduPersonEntitlement[] = "bar"
 
 Here you can see that the resource owner will be granted the 
-`urn:vnd:oauth2:applications`, `foo` and `bar` entitlements. As there is only 
+`urn:x-oauth:entitlement:applications`, `foo` and `bar` entitlements. As there is only 
 one account in the `DummyResourceOwner` configuration it is quite boring.
 
 ## SspResourceOwner
@@ -242,7 +242,7 @@ given back to the RS:
                 "Margie Korn"
             ], 
             "eduPersonEntitlement": [
-                "urn:vnd:grades:administration"
+                "urn:x-oauth:entitlement:administration"
             ], 
             "uid": [
                 "teacher"

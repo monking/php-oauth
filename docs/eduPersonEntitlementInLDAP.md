@@ -35,13 +35,13 @@ Now you can add this to the LDAP using `ldapmodify`:
 That is all to add the `objectClass` to the entry for the user `fkooman`.
 
 ### Adding the `eduPersonEntitlement`
-To add the entitlements `urn:vnd:oauth2:applications`, `foo`, `bar` and `baz`, 
+To add the entitlements `urn:x-oauth:entitlement:applications`, `foo`, `bar` and `baz`, 
 the following `LDIF` file can be used:
 
     dn: uid=fkooman,ou=People,dc=wind,dc=surfnet,dc=nl
     changetype: modify
     add: eduPersonEntitlement
-    eduPersonEntitlement: urn:vnd:oauth2:applications
+    eduPersonEntitlement: urn:x-oauth:entitlement:applications
     eduPersonEntitlement: foo
     eduPersonEntitlement: bar
     eduPersonEntitlement: baz
@@ -50,5 +50,5 @@ And added to the LDAP like this:
 
     $ ldapmodify -W -H ldap://localhost -D 'cn=Directory Manager' < add_eduPersonEntitlement.ldif
 
-The `urn:vnd:oauth2:applications` entitlement will make it possible for this 
+The `urn:x-oauth:entitlement:applications` entitlement will make it possible for this 
 user to manage the OAuth client registrations using the API.

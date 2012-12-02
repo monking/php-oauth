@@ -61,7 +61,7 @@ resourceOwnerId = "1234-5678-9999"
 [DummyResourceOwnerAttributes]
 uid[]         = "fkooman"
 displayName[] = "François Kooman"
-eduPersonEntitlement[] = "urn:vnd:oauth2:applications"
+eduPersonEntitlement[] = "urn:x-oauth:entitlement:applications"
 eduPersonEntitlement[] = "foo"
 eduPersonEntitlement[] = "bar"
 

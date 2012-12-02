@@ -93,7 +93,7 @@ class ImplicitGrantTest extends OAuthHelper
         // verify token
         $this->_rs->verifyAuthorizationHeader("Bearer " . $response->access_token);
         $this->assertEquals("1234-5678-9999", $this->_rs->getResourceOwnerId());
-        $this->assertTrue($this->_rs->hasEntitlement("urn:vnd:oauth2:applications"));
+        $this->assertTrue($this->_rs->hasEntitlement("urn:x-oauth:entitlement:applications"));
         $this->assertFalse($this->_rs->hasEntitlement("foobar"));
         $this->assertTrue($this->_rs->hasScope("read"));
         $this->assertFalse($this->_rs->hasScope("foo"));
