@@ -1,7 +1,7 @@
 ; This is the OAuth Authorization Server configuration
 
 ; name of service
-serviceName = "OAuth Authorization Server"
+serviceName = "Authorization"
 ; type of resources you get access too
 serviceResources = "protected resource"
 
@@ -59,8 +59,8 @@ persistentConnection = FALSE
 resourceOwnerId = "1234-5678-9999"
 
 [DummyResourceOwnerAttributes]
-uid[]         = "fkooman"
-displayName[] = "François Kooman"
+uid[]                  = "fkooman"
+cn[]                   = "François Kooman"
 eduPersonEntitlement[] = "urn:x-oauth:entitlement:applications"
 eduPersonEntitlement[] = "foo"
 eduPersonEntitlement[] = "bar"

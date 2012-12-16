@@ -21,6 +21,11 @@ div#container {
     box-shadow:         0 0 3px 0 #8c8c8c;
 }
 
+div#userInfo {
+    float: right;
+    font-size: 75%;
+}
+
 table#detailsTable {
     width: 100%;
     font-size: 85%;

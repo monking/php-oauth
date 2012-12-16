@@ -22,7 +22,6 @@ class Authorize
 
         $authMech = '\\OAuth\\' . $this->_config->getValue('authenticationMechanism');
         $this->_resourceOwner = new $authMech($this->_config);
-#        $this->_resourceOwner->setHint($request->getQueryParameter("user_address"));
 
         $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
@@ -38,8 +37,12 @@ class Authorize
                 case "GET":
                         $result = $this->_as->authorize($this->_resourceOwner, $request->getQueryParameters());
                         if (AuthorizeResult::ASK_APPROVAL === $result->getAction()) {
+                            // FIXME: should this be true also for the POST?
                             $response->setHeader("X-Frame-Options", "deny");
+                            $resourceOwnerCnArray = $this->_resourceOwner->getAttribute("cn");
                             $tplData = array(
+                                "resourceOwnerId" => $this->_resourceOwner->getResourceOwnerId(),
+                                "resourceOwnerCn" => $resourceOwnerCnArray[0],
                                 "config" => $this->_config,
                                 "client" => $result->getClient(),
                                 "scope" => $result->getScope(),

@@ -13,12 +13,15 @@
 <body>
   <div id="wrapper">
       <div id="container">
+        
+        <div id="userInfo">
+            You are <strong title="<?php echo $resourceOwnerId; ?>"><?php echo $resourceOwnerCn; ?></strong>
+        </div>
+        
         <form method="post" action="">
-          <h3><?php echo $config->getValue('serviceName'); ?></h3>
+          <h2>Approval Required</h2>
 
-          <p><strong><?php echo $client->getName(); ?></strong> wants to
-          access your
-          <strong><?php echo $config->getValue('serviceResources'); ?></strong>.</p>
+          <p>The application <strong><?php echo $client->getName(); ?></strong> wants to access your <strong><?php echo $config->getValue('serviceResources'); ?></strong>.</p>
 
         <?php if(!$sslEnabled) { ?>
 
