@@ -89,7 +89,7 @@ class Authorize
             // tell the client about the error
             $client = $e->getClient();
 
-            if($client->type === "user_agent_based_application") {
+            if ($client->type === "user_agent_based_application") {
                 $separator = "#";
             } else {
                 $separator = (FALSE === strpos($client->redirect_uri, "?")) ? "?" : "&";

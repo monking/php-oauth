@@ -13,21 +13,21 @@
 <body>
   <div id="wrapper">
       <div id="container">
-        
+
         <div id="userInfo">
             You are <strong title="<?php echo $resourceOwnerId; ?>"><?php echo $resourceOwnerCn; ?></strong>
         </div>
-        
+
         <form method="post" action="">
           <h2>Approval Required</h2>
 
           <p>The application <strong><?php echo $client->getName(); ?></strong> wants to access your <strong><?php echo $config->getValue('serviceResources'); ?></strong>.</p>
 
-        <?php if(!$sslEnabled) { ?>
+        <?php if (!$sslEnabled) { ?>
 
             <div class="warnBox">
             <strong>WARNING</strong>: your application is not using HTTPS!
-            <?php if(NULL !== $client->getContactEmail()) { ?>
+            <?php if (NULL !== $client->getContactEmail()) { ?>
             Please <a href="mailto:<?php echo $client->getContactEmail(); ?>">inform</a> the application provider.
             <?php } ?>
             </div>
@@ -50,14 +50,14 @@
             <tr>
               <th>Requested Permission(s)</th>
 
-              <?php if(0 === count($scope->getScopeAsArray())) { ?>
+              <?php if (0 === count($scope->getScopeAsArray())) { ?>
               <td><em>None</em></td>
               <?php } else { ?>
               <td>
-                <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?><?php foreach($scope->getScopeAsArray() as $s) { ?><label><input type="checkbox"
+                <?php if ($config->getValue('allowResourceOwnerScopeFiltering')) { ?><?php foreach($scope->getScopeAsArray() as $s) { ?><label><input type="checkbox"
                 checked="checked" name="scope[]" value=
                 "<?php echo $s; ?>"> <?php echo $s; ?></label>
-                <?php } ?> <?php if($config->getValue('allowResourceOwnerScopeFiltering')) { ?>
+                <?php } ?> <?php if ($config->getValue('allowResourceOwnerScopeFiltering')) { ?>
 
                 <div class="warnBox">
                   <strong>WARNING</strong>: by removing permissions, the application may not work
@@ -65,7 +65,7 @@
                 </div><?php } ?><?php } else { ?>
 
                 <ul class="permissionList">
-                  <?php foreach($scope->getScopeAsArray() as $s) { ?>
+                  <?php foreach ($scope->getScopeAsArray() as $s) { ?>
 
                   <li><?php echo $s; ?></li>
 

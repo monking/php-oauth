@@ -1,6 +1,6 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once 'lib/SplClassLoader.php';
 $c1 = new SplClassLoader("RestService", "extlib/php-rest-service/lib");
 $c1->register();
 $c2 =  new SplClassLoader("OAuth", "lib");
@@ -15,7 +15,7 @@ $config = new Config(dirname(__DIR__) . DIRECTORY_SEPARATOR . "config" . DIRECTO
 $storage = new PdoOAuthStorage($config);
 $storage->initDatabase();
 
-if($argc !== 2) {
+if ($argc !== 2) {
         echo "ERROR: specify manifest file or URL to parse" . PHP_EOL;
         die();
 }
@@ -23,14 +23,14 @@ if($argc !== 2) {
 $manifestFile = $argv[1];
 $fileContents = file_get_contents($manifestFile);
 $data = json_decode($fileContents, TRUE);
-if(NULL === $data || !is_array($data)) {
+if (NULL === $data || !is_array($data)) {
         echo "ERROR: manifest seems to be in wrong format" . PHP_EOL;
         die();
 }
 
-foreach($data as $d) {
+foreach ($data as $d) {
         // go over all app entries
-        if(FALSE === $storage->getClient($d['key'])) {
+        if (FALSE === $storage->getClient($d['key'])) {
                 echo "Adding '" . $d['name'] . "'..." . PHP_EOL;
                 $x = array (
                         "id" => $d['key'],
@@ -39,12 +39,10 @@ foreach($data as $d) {
                         "secret" => NULL,
                         "type" => "user_agent_based_application",
                         "icon" => $d['icons']['128'],
-			            "allowed_scope" => implode(" ", $d['permissions']),
+                        "allowed_scope" => implode(" ", $d['permissions']),
                         "redirect_uri" => $d['app']['launch']['web_url'],
                 );
                 $y = ClientRegistration::fromArray($x);
                 $storage->addClient($y->getClientAsArray());
         }
 }
-
-?>

@@ -1,6 +1,6 @@
 <?php
 
-require_once "lib/SplClassLoader.php";
+require_once 'lib/SplClassLoader.php';
 $c1 =  new SplClassLoader("OAuth", "lib");
 $c1->register();
 
