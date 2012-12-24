@@ -20,7 +20,7 @@ class Api
         $this->_config = $c;
         $this->_logger = $l;
 
-        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = 'OAuth\\' . $this->_config->getValue('storageBackend');
         $this->_storage = new $oauthStorageBackend($this->_config);
 
         $this->_rs = new ResourceServer($this->_storage);

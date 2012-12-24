@@ -19,7 +19,7 @@ class Token
         $this->_config = $c;
         $this->_logger = $l;
 
-        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = 'OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $this->_as = new AuthorizationServer($storage, $this->_config);

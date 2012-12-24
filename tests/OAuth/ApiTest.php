@@ -16,7 +16,7 @@ class ApiTest extends OAuthHelper
         $this->_config->setSectionValue("Api", "enableApi", TRUE);
         $this->_api = new Api($this->_config, NULL);
 
-        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = 'OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $storage->updateResourceOwner('fkooman', NULL, NULL);

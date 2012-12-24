@@ -20,10 +20,10 @@ class Authorize
         $this->_config = $c;
         $this->_logger = $l;
 
-        $authMech = '\\OAuth\\' . $this->_config->getValue('authenticationMechanism');
+        $authMech = 'OAuth\\' . $this->_config->getValue('authenticationMechanism');
         $this->_resourceOwner = new $authMech($this->_config);
 
-        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = 'OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
         $this->_as = new AuthorizationServer($storage, $this->_config);

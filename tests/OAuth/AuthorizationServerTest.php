@@ -17,10 +17,10 @@ class ImplicitGrantTest extends OAuthHelper
     {
         parent::setUp();
 
-        $oauthStorageBackend = '\\OAuth\\' . $this->_config->getValue('storageBackend');
+        $oauthStorageBackend = 'OAuth\\' . $this->_config->getValue('storageBackend');
         $storage = new $oauthStorageBackend($this->_config);
 
-        $authMech = '\\OAuth\\' . $this->_config->getValue('authenticationMechanism');
+        $authMech = 'OAuth\\' . $this->_config->getValue('authenticationMechanism');
         $this->_ro = new $authMech($this->_config);
 
         $this->_rs = new ResourceServer($storage);
