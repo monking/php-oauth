@@ -64,7 +64,7 @@ class Api
                 $refreshToken = (array_key_exists("refresh_token", $data) && $data['refresh_token']) ? AuthorizationServer::randomHex(16) : NULL;
 
                 // check to see if an authorization for this client/resource_owner already exists
-                if (FALSE === $storage->getApproval($clientId, $rs->getResourceOwnerId())) {
+                if (FALSE === $storage->getApprovalByResourceOwnerId($clientId, $rs->getResourceOwnerId())) {
                     if (FALSE === $storage->addApproval($clientId, $rs->getResourceOwnerId(), $data['scope'], $refreshToken)) {
                         throw new ApiException("invalid_request", "unable to add authorization");
                     }
@@ -76,7 +76,7 @@ class Api
 
             $request->matchRest("GET", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
                 $rs->requireScope("authorizations");
-                $data = $storage->getApproval($id, $rs->getResourceOwnerId());
+                $data = $storage->getApprovalByResourceOwnerId($id, $rs->getResourceOwnerId());
                 if (FALSE === $data) {
                     throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
                 }
@@ -85,7 +85,7 @@ class Api
 
             $request->matchRest("GET", "/authorizations/:id", function($id) use ($request, $response, $storage, $rs) {
                 $rs->requireScope("authorizations");
-                $data = $storage->getApproval($id, $rs->getResourceOwnerId());
+                $data = $storage->getApprovalByResourceOwnerId($id, $rs->getResourceOwnerId());
                 if (FALSE === $data) {
                     throw new ApiException("not_found", "the resource you are trying to retrieve does not exist");
                 }

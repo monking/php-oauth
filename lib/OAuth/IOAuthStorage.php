@@ -12,7 +12,8 @@ interface IOAuthStorage
     public function deleteExpiredAccessTokens();
     public function deleteExpiredAuthorizationCodes();
 
-    public function getRefreshToken          ($refreshToken);
+    public function getApprovalByRefreshToken ($clientId, $refreshToken);
+    public function getApprovalByResourceOwnerId ($clientId, $resourceOwnerId);
 
     public function getClients               ();
     public function getClient                ($clientId);
@@ -22,7 +23,6 @@ interface IOAuthStorage
     public function deleteClient             ($clientId);
 
     public function getApprovals             ($resourceOwnerId);
-    public function getApproval              ($clientId, $resourceOwnerId);
     public function addApproval              ($clientId, $resourceOwnerId, $scope, $refreshToken);
 
     // FIXME: should we also update the refresh_token on token update?

@@ -66,7 +66,7 @@ class AuthorizationServer
 
             $this->_storage->updateResourceOwner($resourceOwner->getResourceOwnerId(), json_encode($resourceOwner->getAttributes()));
 
-            $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId(), $scope->getScope());
+            $approvedScope = $this->_storage->getApprovalByResourceOwnerId($clientId, $resourceOwner->getResourceOwnerId());
             if (FALSE === $approvedScope || FALSE === $scope->isSubsetOf(new Scope($approvedScope->scope))) {
                 $ar = new AuthorizeResult(AuthorizeResult::ASK_APPROVAL);
                 $ar->setClient(ClientRegistration::fromArray((array) $client));
@@ -139,7 +139,7 @@ class AuthorizationServer
                     throw new ClientException("invalid_scope", "approved scope is not a subset of requested scope", $client, $state);
                 }
 
-                $approvedScope = $this->_storage->getApproval($clientId, $resourceOwner->getResourceOwnerId());
+                $approvedScope = $this->_storage->getApprovalByResourceOwnerId($clientId, $resourceOwner->getResourceOwnerId());
                 if (FALSE === $approvedScope) {
                     // no approved scope stored yet, new entry
                     $refreshToken = ("code" === $responseType) ? self::randomHex(16) : NULL;
@@ -221,7 +221,7 @@ class AuthorizationServer
                 if (NULL === $refreshToken) {
                     throw new TokenException("invalid_request", "the refresh_token parameter is missing");
                 }
-                $result = $this->_storage->getRefreshToken($refreshToken);
+                $result = $this->_storage->getApprovalByRefreshToken($clientId, $refreshToken);
                 if (FALSE === $result) {
                     throw new TokenException("invalid_grant", "the refresh_token was not found");
                 }
@@ -269,7 +269,7 @@ class AuthorizationServer
             if (FALSE === $this->_storage->deleteAuthorizationCode($code, $redirectUri)) {
                 throw new TokenException("invalid_grant", "this grant was already used");
             }
-            $approval = $this->_storage->getApproval($result->client_id, $result->resource_owner_id);
+            $approval = $this->_storage->getApprovalByResourceOwnerId($result->client_id, $result->resource_owner_id);
             $token->refresh_token = $approval->refresh_token;
         } else {
             // refresh_token

@@ -131,7 +131,7 @@ class PdoOAuthStorage implements IOAuthStorage
         return 1 === $stmt->rowCount();
     }
 
-    public function getApproval($clientId, $resourceOwnerId)
+    public function getApprovalByResourceOwnerId($clientId, $resourceOwnerId)
     {
         $stmt = $this->_pdo->prepare("SELECT * FROM Approval WHERE client_id = :client_id AND resource_owner_id = :resource_owner_id");
         $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
@@ -143,6 +143,20 @@ class PdoOAuthStorage implements IOAuthStorage
 
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
+
+    public function getApprovalByRefreshToken($clientId, $refreshToken)
+    {
+        $stmt = $this->_pdo->prepare("SELECT * FROM Approval WHERE client_id = :client_id AND refresh_token = :refresh_token");
+        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
+        $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
+        $result = $stmt->execute();
+        if (FALSE === $result) {
+            throw new StorageException("unable to get approval");
+        }
+
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
 
     public function storeAccessToken($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry)
     {
@@ -264,18 +278,6 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         }
 
         return 1 === $stmt->rowCount();
-    }
-
-    public function getRefreshToken($refreshToken)
-    {
-        $stmt = $this->_pdo->prepare("SELECT * FROM Approval WHERE refresh_token = :refresh_token");
-        $stmt->bindValue(":refresh_token", $refreshToken, PDO::PARAM_STR);
-        $result = $stmt->execute();
-        if (FALSE === $result) {
-            throw new StorageException("unable to get refresh token");
-        }
-
-        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
     public function updateResourceOwner($resourceOwnerId, $resourceOwnerAttributes)
