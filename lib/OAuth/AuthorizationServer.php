@@ -214,7 +214,7 @@ class AuthorizationServer
         } else {
             // client provided no authentication, client_id must be in POST body
             if (NULL === $clientId || empty($clientId)) {
-                throw new TokenException("invalid_request", "the client_id parameter is missing, required for public clients");
+                throw new TokenException("invalid_request", "the client_id parameter is missing and also no client authentication used, unable to determine client identity");
             }
             $client = $this->_storage->getClient($clientId);
 
