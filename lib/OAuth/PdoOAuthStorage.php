@@ -157,7 +157,6 @@ class PdoOAuthStorage implements IOAuthStorage
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-
     public function storeAccessToken($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry)
     {
         $stmt = $this->_pdo->prepare("INSERT INTO AccessToken (client_id, resource_owner_id, issue_time, expires_in, scope, access_token) VALUES(:client_id, :resource_owner_id, :issue_time, :expires_in, :scope, :access_token)");
@@ -210,9 +209,10 @@ class PdoOAuthStorage implements IOAuthStorage
         return 1 === $stmt->rowCount();
     }
 
-    public function getAuthorizationCode($authorizationCode, $redirectUri)
+    public function getAuthorizationCode($clientId, $authorizationCode, $redirectUri)
     {
-$stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorization_code IS :authorization_code AND redirect_uri IS :redirect_uri");
+$stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE client_id IS :client_id AND authorization_code IS :authorization_code AND redirect_uri IS :redirect_uri");
+        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":authorization_code", $authorizationCode, PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $redirectUri, PDO::PARAM_STR | PDO::PARAM_NULL);
         $result = $stmt->execute();
@@ -223,9 +223,10 @@ $stmt = $this->_pdo->prepare("SELECT * FROM AuthorizationCode WHERE authorizatio
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function deleteAuthorizationCode($authorizationCode, $redirectUri)
+    public function deleteAuthorizationCode($clientId, $authorizationCode, $redirectUri)
     {
-        $stmt = $this->_pdo->prepare("DELETE FROM AuthorizationCode WHERE authorization_code IS :authorization_code AND redirect_uri IS :redirect_uri");
+        $stmt = $this->_pdo->prepare("DELETE FROM AuthorizationCode WHERE client_id IS :client_id AND authorization_code IS :authorization_code AND redirect_uri IS :redirect_uri");
+        $stmt->bindValue(":client_id", $clientId, PDO::PARAM_STR);
         $stmt->bindValue(":authorization_code", $authorizationCode, PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $redirectUri, PDO::PARAM_STR | PDO::PARAM_NULL);
         $result = $stmt->execute();

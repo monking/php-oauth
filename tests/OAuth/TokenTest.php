@@ -64,7 +64,7 @@ class TokenTest extends OAuthHelper
     public function testWithoutCredentials()
     {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
-        $h->setPostParameters(array("code" => "4uth0r1z4t10n", "grant_type" => "authorization_code"));
+        $h->setPostParameters(array("client_id" => "testcodeclient", "code" => "4uth0r1z4t10n", "grant_type" => "authorization_code"));
         $t = new Token($this->_config, NULL);
         $response = $t->handleRequest($h);
         $this->assertEquals(401, $response->getStatusCode());

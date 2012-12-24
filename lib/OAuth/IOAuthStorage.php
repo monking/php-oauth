@@ -7,8 +7,8 @@ interface IOAuthStorage
     public function storeAccessToken         ($accessToken, $issueTime, $clientId, $resourceOwnerId, $scope, $expiry);
     public function getAccessToken           ($accessToken);
     public function storeAuthorizationCode   ($authorizationCode, $resourceOwnerId, $issueTime, $clientId, $redirectUri, $scope);
-    public function getAuthorizationCode     ($authorizationCode, $redirectUri);
-    public function deleteAuthorizationCode  ($authorizationCode, $redirectUri);
+    public function getAuthorizationCode     ($clientId, $authorizationCode, $redirectUri);
+    public function deleteAuthorizationCode  ($clientId, $authorizationCode, $redirectUri);
     public function deleteExpiredAccessTokens();
     public function deleteExpiredAuthorizationCodes();
 

@@ -193,12 +193,48 @@ class AuthorizationServer
         $redirectUri  = self::getParameter($post, 'redirect_uri');
         $refreshToken = self::getParameter($post, 'refresh_token');
         $token        = self::getParameter($post, 'token');
+        $clientId     = self::getParameter($post, 'client_id');
+
+        if (NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
+            // client provided authentication, it MUST be valid now...
+            $client = $this->_storage->getClient($user);
+
+            // FIXME what if the client does not exist?
+
+            // check pass
+            if ($pass !== $client->secret) {
+                throw new TokenException("invalid_client", "client authentication failed");
+            }
+
+            // if client_id in POST is set, it must match the user id
+            if (NULL !== $clientId && $clientId !== $user) {
+                throw new TokenException("invalid_grant", "client_id inconsistency: authenticating user must match POST body client_id");
+            }
+            $hasAuthenticated = TRUE;
+        } else {
+            // client provided no authentication, client_id must be in POST body
+            if (NULL === $clientId || empty($clientId)) {
+                throw new TokenException("invalid_request", "the client_id parameter is missing, required for public clients");
+            }
+            $client = $this->_storage->getClient($clientId);
+
+            // FIXME what if the client does not exist?
+
+            $hasAuthenticated = FALSE;
+        }
+
+        if ("user_agent_based_application" === $client->type) {
+            throw new TokenException("unauthorized_client", "this client type is not allowed to use the token endpoint");
+        }
+
+        if ("web_application" === $client->type && !$hasAuthenticated) {
+            // web_application type MUST have authenticated
+            throw new TokenException("invalid_client", "this client requires authentication");
+        }
 
         if (NULL === $grantType) {
             throw new TokenException("invalid_request", "the grant_type parameter is missing");
         }
-
-        $result = NULL;
 
         switch ($grantType) {
             case "authorization_code":
@@ -207,87 +243,56 @@ class AuthorizationServer
                 }
                 // FIXME: if all of a sudden a redirect_uri is present, it should be allowed?
                 // spec is vague about this... but then again, it doesn't make sense to not specify it
-                // in the authorize request, and now all of a sudden you specify it
-                $result = $this->_storage->getAuthorizationCode($code, $redirectUri);
+                // in the authorize request, and now all of a sudden it is specified... ignore it?
+                $result = $this->_storage->getAuthorizationCode($client->id, $code, $redirectUri);
                 if (FALSE === $result) {
                     throw new TokenException("invalid_grant", "the authorization code was not found");
                 }
                 if (time() > $result->issue_time + 600) {
                     throw new TokenException("invalid_grant", "the authorization code expired");
                 }
+
+                // we MUST be able to delete the authorization code, otherwise it was used before
+                if (FALSE === $this->_storage->deleteAuthorizationCode($client->id, $code, $redirectUri)) {
+                    throw new TokenException("invalid_grant", "this authorization code grant was already used");
+                }
+
+                $approval = $this->_storage->getApprovalByResourceOwnerId($client->id, $result->resource_owner_id);
+
+                $token = array();
+                $token['access_token'] = self::randomHex(16);
+                $token['expires_in'] = $this->_c->getValue('accessTokenExpiry');
+                // FIXME: requested scope could be less than what was authorized, we should honor that!
+                $token['scope'] = $result->scope;
+                $token['refresh_token'] = $approval->refresh_token;
+                $token['token_type'] = "bearer";
+                $this->_storage->storeAccessToken($token['access_token'], time(), $client->id, $result->resource_owner_id, $token['scope'], $token['expires_in']);
                 break;
 
             case "refresh_token":
                 if (NULL === $refreshToken) {
                     throw new TokenException("invalid_request", "the refresh_token parameter is missing");
                 }
-                $result = $this->_storage->getApprovalByRefreshToken($clientId, $refreshToken);
+                $result = $this->_storage->getApprovalByRefreshToken($client->id, $refreshToken);
                 if (FALSE === $result) {
                     throw new TokenException("invalid_grant", "the refresh_token was not found");
                 }
+
+                $token = array();
+                $token['access_token'] = self::randomHex(16);
+                $token['expires_in'] = $this->_c->getValue('accessTokenExpiry');
+                // FIXME: requested scope could be less than what was authorized, we should honor that!
+                $token['scope'] = $result->scope;
+                $token['token_type'] = "bearer";
+
+                $this->_storage->storeAccessToken($token['access_token'], time(), $client->id, $result->resource_owner_id, $token['scope'], $token['expires_in']);
                 break;
 
             default:
                 throw new TokenException("unsupported_grant_type", "the requested grant type is not supported");
         }
 
-        $client = $this->_storage->getClient($result->client_id);
-        if ("user_agent_based_application" === $client->type) {
-            throw new TokenException("unauthorized_client", "this client type is not allowed to use the token endpoint");
-        }
-        if ("web_application" === $client->type) {
-            // REQUIRE basic auth
-            if (NULL === $user || empty($user) || NULL === $pass || empty($pass)) {
-                throw new TokenException("invalid_client", "this client requires authentication");
-            }
-
-            if ($user !== $client->id || $pass !== $client->secret) {
-                throw new TokenException("invalid_client", "client authentication failed");
-            }
-        }
-        if ("native_application" === $client->type) {
-            // MAY use basic auth, so only check when Authorization header is provided
-            if (NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
-                if ($user !== $client->id || $pass !== $client->secret) {
-                    throw new TokenException("invalid_client", "client authentication failed");
-                }
-            }
-        }
-
-        if ($client->id !== $result->client_id) {
-            throw new TokenException("invalid_grant", "grant was not issued to this client");
-        }
-
-        // create a new access token
-        // FIXME: return existing access token if it exists for this exact client, resource owner and scope?
-        $accessToken = self::randomHex(16);
-        $this->_storage->storeAccessToken($accessToken, time(), $result->client_id, $result->resource_owner_id, $result->scope, $this->_c->getValue('accessTokenExpiry'));
-        $token = $this->_storage->getAccessToken($accessToken);
-
-        if ("authorization_code" === $grantType) {
-            // we need to be able to delete, otherwise someone else was first!
-            if (FALSE === $this->_storage->deleteAuthorizationCode($code, $redirectUri)) {
-                throw new TokenException("invalid_grant", "this grant was already used");
-            }
-            $approval = $this->_storage->getApprovalByResourceOwnerId($result->client_id, $result->resource_owner_id);
-            $token->refresh_token = $approval->refresh_token;
-        } else {
-            // refresh_token
-            // just return the generated access_token
-        }
-
-        $token->expires_in = $token->issue_time + $token->expires_in - time();
-        $token->token_type = 'bearer';
-        // filter unwanted response parameters
-        // FIXME: the scope should be from the scope bound to the refresh_token, and not to the approval!
-        $responseParameters = array("access_token", "token_type", "expires_in", "refresh_token", "scope");
-        foreach ($token as $k => $v) {
-            if (!in_array($k, $responseParameters)) {
-                unset($token->$k);
-            }
-        }
-
-        return $token;
+        return (object) $token;
     }
 
     private static function getParameter(array $parameters, $key)
