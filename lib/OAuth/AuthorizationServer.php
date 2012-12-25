@@ -209,6 +209,7 @@ class AuthorizationServer
         $refreshToken = self::getParameter($post, 'refresh_token');
         $token        = self::getParameter($post, 'token');
         $clientId     = self::getParameter($post, 'client_id');
+        $scope        = self::getParameter($post, 'scope');
 
         if (NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
             // client provided authentication, it MUST be valid now...
@@ -280,7 +281,9 @@ class AuthorizationServer
                 $token = array();
                 $token['access_token'] = self::randomHex(16);
                 $token['expires_in'] = $this->_c->getValue('accessTokenExpiry');
-                // FIXME: requested scope could be less than what was authorized, we should honor that!
+                // we always grant the scope the user authorized, no further restrictions here...
+                // FIXME: the merging of authorized scopes in the authorize function is a bit of a mess!
+                // we should deal with that there and come up with a good solution...
                 $token['scope'] = $result->scope;
                 $token['refresh_token'] = $approval->refresh_token;
                 $token['token_type'] = "bearer";
@@ -299,10 +302,22 @@ class AuthorizationServer
                 $token = array();
                 $token['access_token'] = self::randomHex(16);
                 $token['expires_in'] = $this->_c->getValue('accessTokenExpiry');
-                // FIXME: requested scope could be less than what was authorized, we should honor that!
-                $token['scope'] = $result->scope;
-                $token['token_type'] = "bearer";
+                if (NULL !== $scope) {
+                    // the client wants to obtain a specific scope
+                    $requestedScope = new Scope($scope);
+                    $authorizedScope = new Scope($result->scope);
+                    if ($requestedScope->isSubsetOf($authorizedScope)) {
+                        // if it is a subset of the authorized scope we honor that
+                        $token['scope'] = $requestedScope->getScope();
+                    } else {
+                        // if not the client gets the authorized scope
+                        $token['scope'] = $result->scope;
+                    }
+                } else {
+                    $token['scope'] = $result->scope;
+                }
 
+                $token['token_type'] = "bearer";
                 $this->_storage->storeAccessToken($token['access_token'], time(), $client->id, $result->resource_owner_id, $token['scope'], $token['expires_in']);
                 break;
 

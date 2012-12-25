@@ -30,7 +30,7 @@ class TokenTest extends OAuthHelper
         $storage = new $oauthStorageBackend($this->_config);
 
         $storage->updateResourceOwner('fkooman', NULL, NULL);
-        $storage->addApproval('testcodeclient', 'fkooman', 'read', 'r3fr3sh');
+        $storage->addApproval('testcodeclient', 'fkooman', 'read write foo', 'r3fr3sh');
         $storage->addApproval('testnativeclient', 'fkooman', 'read', 'n4t1v3r3fr3sh');
         $storage->storeAuthorizationCode("4uth0r1z4t10n", "fkooman", time(), "testcodeclient", NULL, "read");
         $storage->storeAuthorizationCode("3xp1r3d4uth0r1z4t10n", "fkooman", time() - 1000, "testcodeclient", NULL, "read");
@@ -56,7 +56,7 @@ class TokenTest extends OAuthHelper
         $t = new Token($this->_config, NULL);
         $response = $t->handleRequest($h);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read","token_type":"bearer"}$|', $response->getContent());
+        $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read write foo","token_type":"bearer"}$|', $response->getContent());
     }
 
     public function testInvalidRequestMethod()
@@ -182,5 +182,26 @@ class TokenTest extends OAuthHelper
         $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code was not found"}', $response->getContent());
     }
 
+    public function testRefreshTokenSubScope()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("refresh_token" => "r3fr3sh", "scope" => "foo", "grant_type" => "refresh_token"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"foo","token_type":"bearer"}$|', $response->getContent());
+    }
+
+    public function testRefreshTokenNoSubScope()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("refresh_token" => "r3fr3sh", "scope" => "we want no sub scope", "grant_type" => "refresh_token"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read write foo","token_type":"bearer"}$|', $response->getContent());
+    }
 
 }

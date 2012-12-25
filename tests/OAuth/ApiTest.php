@@ -80,7 +80,7 @@ class ApiTest extends OAuthHelper
         $h->setRequestMethod("POST");
         $h->setPathInfo("/authorizations/");
         $h->setHeader("Authorization", "Bearer 12345abc");
-        $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "foo")));
+        $h->setContent(json_encode(array("client_id" => "testcodeclient", "scope" => "UNSUPPORTED SCOPE")));
         $response = $this->_api->handleRequest($h);
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertEquals('{"error":"invalid_request","error_description":"invalid scope for this client"}', $response->getContent());

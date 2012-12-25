@@ -68,7 +68,7 @@ class OAuthHelper extends PHPUnit_Framework_TestCase
                   "description" => "Client for unit testing",
                   "secret" => "abcdef",
                   "icon" => NULL,
-                  "allowed_scope" => "read",
+                  "allowed_scope" => "read write foo bar foobar",
                   "contact_email" => NULL,
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "web_application");
