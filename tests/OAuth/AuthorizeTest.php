@@ -71,7 +71,8 @@ class AuthorizeTest extends OAuthHelper
         $this->assertRegexp("|.*csrf protection triggered, referrer does not match request uri.*|", $response->getContent());
     }
 
-    public function testMissingClientId() {
+    public function testMissingClientId()
+    {
         $h = new HttpRequest("https://auth.example.org", "GET");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
@@ -79,7 +80,8 @@ class AuthorizeTest extends OAuthHelper
         $this->assertRegexp("|.*client_id missing.*|", $response->getContent());
     }
 
-    public function testMissingResponseType() {
+    public function testMissingResponseType()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=testclient", "GET");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
@@ -87,7 +89,8 @@ class AuthorizeTest extends OAuthHelper
         $this->assertRegexp("|.*response_type missing.*|", $response->getContent());
     }
 
-    public function testWrongRedirectUri() {
+    public function testWrongRedirectUri()
+    {
         $u = urlencode("http://wrong.example.org/foo");
         $h = new HttpRequest("https://auth.example.org?client_id=testclient&response_type=token&scope=read&redirect_uri=$u", "GET");
         $o = new Authorize($this->_config);
@@ -96,7 +99,8 @@ class AuthorizeTest extends OAuthHelper
         $this->assertRegexp("|.*specified redirect_uri not the same as registered redirect_uri.*|", $response->getContent());
     }
 
-    public function testWrongClientType() {
+    public function testWrongClientType()
+    {
         $h = new HttpRequest("https://auth.example.org?client_id=testclient&scope=read&response_type=code", "GET");
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
