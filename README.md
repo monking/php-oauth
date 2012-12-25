@@ -1,7 +1,18 @@
-# PHP OAuth Authorization Server
+# Introduction
 This project aims at providing a stand-alone OAuth v2 Authorization Server that
 is easy to integrate with your existing REST services, written in any language, 
 without requiring extensive changes.
+
+# License
+Licensed under the GNU Affero General Public License as published by the Free 
+Software Foundation, either version 3 of the License, or (at your option) any 
+later version.
+
+    https://www.gnu.org/licenses/agpl.html
+
+This rougly means that if you use this software in your service you need to 
+make the source code available to the users of your service (if you modify
+it). Refer to the license for the exact details.
 
 # Features
 * PDO (database abstraction layer for various databases) storage backend for
