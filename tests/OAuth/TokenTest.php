@@ -135,7 +135,6 @@ class TokenTest extends OAuthHelper
         $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code expired"}', $response->getContent());
     }
 
-
     public function testNativeClientRequest()
     {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
@@ -157,7 +156,7 @@ class TokenTest extends OAuthHelper
         $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code was not found"}', $response->getContent());
     }
 
-    public function testCodeNotBoundToUsedClient() 
+    public function testCodeNotBoundToUsedClient()
     {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
         $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
