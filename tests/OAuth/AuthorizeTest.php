@@ -24,7 +24,6 @@ class AuthorizeTest extends OAuthHelper
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
         $this->assertEquals(302, $response->getStatusCode());
-        //$this->assertEquals("", $response->getContent());
         $this->assertRegexp("|^http://localhost/php-oauth/unit/test.html#access_token=[a-zA-Z0-9]+&expires_in=5&token_type=bearer&scope=read&state=xyz$|", $response->getHeader("Location"));
 
         // now a get should immediately return the access token redirect...
@@ -50,7 +49,7 @@ class AuthorizeTest extends OAuthHelper
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
         $this->assertEquals(400, $response->getStatusCode());
-        //$this->assertRegexp("|.*client not registered.*$|", $response->getContent());
+        $this->assertRegexp("|.*client not registered.*|", $response->getContent());
     }
 
     public function testInvalidRequestMethod()
@@ -69,71 +68,40 @@ class AuthorizeTest extends OAuthHelper
         $o = new Authorize($this->_config);
         $response = $o->handleRequest($h);
         $this->assertEquals(400, $response->getStatusCode());
-        //$this->assertRegexp("|.*csrf protection triggered, referrer does not match request uri.*|$|", $response->getContent());
+        $this->assertRegexp("|.*csrf protection triggered, referrer does not match request uri.*|", $response->getContent());
     }
 
-#    /**
-#     * @expectedException \OAuth\ResourceOwnerException
-#     * @expectedExceptionMessage client_id missing
-#     */
-#    public function testMissingClientId() {
-#        $get = array();
-#        $this->_as->authorize($this->_ro, $get);
-#    }
+    public function testMissingClientId() {
+        $h = new HttpRequest("https://auth.example.org", "GET");
+        $o = new Authorize($this->_config);
+        $response = $o->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertRegexp("|.*client_id missing.*|", $response->getContent());
+    }
 
-#    /**
-#     * @expectedException \OAuth\ResourceOwnerException
-#     * @expectedExceptionMessage response_type missing
-#     */
-#    public function testMissingResponseType() {
-#        $get = array("client_id" => "testclient");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
+    public function testMissingResponseType() {
+        $h = new HttpRequest("https://auth.example.org?client_id=testclient", "GET");
+        $o = new Authorize($this->_config);
+        $response = $o->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertRegexp("|.*response_type missing.*|", $response->getContent());
+    }
 
-#    public function testWithoutScope() {
-#        $get = array("client_id" => "testclient", "response_type" => "token");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
+    public function testWrongRedirectUri() {
+        $u = urlencode("http://wrong.example.org/foo");
+        $h = new HttpRequest("https://auth.example.org?client_id=testclient&response_type=token&scope=read&redirect_uri=$u", "GET");
+        $o = new Authorize($this->_config);
+        $response = $o->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertRegexp("|.*specified redirect_uri not the same as registered redirect_uri.*|", $response->getContent());
+    }
 
-#    /**
-#     * @expectedException \OAuth\ResourceOwnerException
-#     * @expectedExceptionMessage client not registered
-#     */
-#    public function testUnregisteredClient() {
-#        $get = array("client_id" => "unregistered", "response_type" => "token", "scope" => "read");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
-
-#    /**
-#     * @expectedException \OAuth\ResourceOwnerException
-#     * @expectedExceptionMessage specified redirect_uri not the same as registered redirect_uri
-#     */
-#    public function testWrongRedirectUri() {
-#        $get = array("client_id" => "testclient", "response_type" => "token", "scope" => "read", "redirect_uri" => "http://wrong.example.org/foo");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
-
-#    /**
-#     * @expectedException \OAuth\ClientException
-#     * @expectedExceptionMessage unsupported_response_type
-#     */
-#    public function testWrongClientType() {
-#        $get = array("client_id" => "testclient", "response_type" => "code", "scope" => "read");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
-
-#    /**
-#     * @expectedException \OAuth\ClientException
-#     * @expectedExceptionMessage invalid_scope
-#     */
-#    public function testUnsupportedScope() {
-#        $get = array("client_id" => "testclient", "response_type" => "token", "scope" => "foo");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
-
-#    public function testCorrectCall() {
-#        $get = array("client_id" => "testclient", "response_type" => "token", "scope" => "read");
-#        $this->_as->authorize($this->_ro, $get);
-#    }
+    public function testWrongClientType() {
+        $h = new HttpRequest("https://auth.example.org?client_id=testclient&scope=read&response_type=code", "GET");
+        $o = new Authorize($this->_config);
+        $response = $o->handleRequest($h);
+        $this->assertEquals(302, $response->getStatusCode());
+        $this->assertEquals("http://localhost/php-oauth/unit/test.html#error=unsupported_response_type&error_description=response_type+not+supported+by+client+profile", $response->getHeader("Location"));
+    }
 
 }
