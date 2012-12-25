@@ -57,8 +57,19 @@ class OAuthHelper extends PHPUnit_Framework_TestCase
                   "contact_email" => NULL,
                   "redirect_uri" => "http://localhost/php-oauth/unit/test.html",
                   "type" => "web_application");
+        $na = array ("id" => "testnativeclient",
+                  "name" => "Simple Test Client for Authorization Code Native Profile",
+                  "description" => "Client for unit testing",
+                  "secret" => NULL,
+                  "icon" => NULL,
+                  "allowed_scope" => "read",
+                  "contact_email" => NULL,
+                  "redirect_uri" => "oauth://callback",
+                  "type" => "native_application");
+
         $storage->addClient($uaba);
         $storage->addClient($wa);
+        $storage->addClient($na);
     }
 
     public function tearDown()

@@ -200,7 +200,7 @@ class PdoOAuthStorage implements IOAuthStorage
         $stmt->bindValue(":resource_owner_id", $resourceOwnerId, PDO::PARAM_STR);
         $stmt->bindValue(":authorization_code", $authorizationCode, PDO::PARAM_STR);
         $stmt->bindValue(":redirect_uri", $redirectUri, PDO::PARAM_STR);
-        $stmt->bindValue(":issue_time", time(), PDO::PARAM_INT);
+        $stmt->bindValue(":issue_time", $issueTime, PDO::PARAM_INT);
         $stmt->bindValue(":scope", $scope, PDO::PARAM_STR);
         if (FALSE === $stmt->execute()) {
             throw new StorageException("unable to store authorization code");

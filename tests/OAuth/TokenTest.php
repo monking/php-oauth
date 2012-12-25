@@ -16,10 +16,12 @@ class TokenTest extends OAuthHelper
 
         $storage->updateResourceOwner('fkooman', NULL, NULL);
         $storage->addApproval('testcodeclient', 'fkooman', 'read', 'r3fr3sh');
-        //$storage->storeAccessToken('12345abc', time(), 'testcodeclient', 'fkooman', 'authorizations', 3600);
+        $storage->addApproval('testnativeclient', 'fkooman', 'read', 'n4t1v3r3fr3sh');
         $storage->storeAuthorizationCode("4uth0r1z4t10n", "fkooman", time(), "testcodeclient", NULL, "read");
-
+        $storage->storeAuthorizationCode("3xp1r3d4uth0r1z4t10n", "fkooman", time() - 1000, "testcodeclient", NULL, "read");
+        $storage->storeAuthorizationCode("n4t1v34uth0r1z4t10n", "fkooman", time(), "testnativeclient", NULL, "read");
     }
+
     public function testAuthorizationCode()
     {
         $h = new HttpRequest("https://auth.example.org/token", "POST");
@@ -68,8 +70,102 @@ class TokenTest extends OAuthHelper
         $t = new Token($this->_config, NULL);
         $response = $t->handleRequest($h);
         $this->assertEquals(401, $response->getStatusCode());
-        $this->assertEquals('{"error":"invalid_client","error_description":"this client requires authentication"}', $response->getContent());
-
+        $this->assertEquals('Basic realm="OAuth Server"', $response->getHeader("WWW-Authenticate"));
+        $this->assertEquals('{"error":"invalid_client","error_description":"client authentication failed"}', $response->getContent());
     }
+
+    public function testWithInvalidClient()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("NONEXISTINGCLIENT:abcdef"));
+        $h->setPostParameters(array("code" => "4uth0r1z4t10n"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals('Basic realm="OAuth Server"', $response->getHeader("WWW-Authenticate"));
+        $this->assertEquals('{"error":"invalid_client","error_description":"client authentication failed"}', $response->getContent());
+    }
+
+    public function testWithInvalidPassword()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:WRONGPASSWORD"));
+        $h->setPostParameters(array("code" => "4uth0r1z4t10n"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals('Basic realm="OAuth Server"', $response->getHeader("WWW-Authenticate"));
+        $this->assertEquals('{"error":"invalid_client","error_description":"client authentication failed"}', $response->getContent());
+    }
+
+    public function testClientIdUserMismatch()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("code" => "4uth0r1z4t10n", "grant_type" => "authorization_code", "client_id" => "MISMATCH_CLIENT_ID"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_grant","error_description":"client_id inconsistency: authenticating user must match POST body client_id"}', $response->getContent());
+    }
+
+    public function testExpiredAuthorization()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("code" => "3xp1r3d4uth0r1z4t10n", "grant_type" => "authorization_code"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code expired"}', $response->getContent());
+    }
+
+
+    public function testNativeClientRequest()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setPostParameters(array("client_id" => "testnativeclient", "code" => "n4t1v34uth0r1z4t10n", "grant_type" => "authorization_code"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read","refresh_token":"n4t1v3r3fr3sh","token_type":"bearer"}$|', $response->getContent());
+    }
+
+    public function testInvalidCode()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("code" => "1nv4l1d4uth0r1z4t10n", "grant_type" => "authorization_code"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code was not found"}', $response->getContent());
+    }
+
+    public function testCodeNotBoundToUsedClient() 
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("code" => "n4t1v34uth0r1z4t10n", "grant_type" => "authorization_code"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code was not found"}', $response->getContent());
+    }
+
+    public function checkReuseAuthorizationCode()
+    {
+        $h = new HttpRequest("https://auth.example.org/token", "POST");
+        $h->setHeader("Authorization", "Basic " . base64_encode("testcodeclient:abcdef"));
+        $h->setPostParameters(array("code" => "4uth0r1z4t10n", "grant_type" => "authorization_code"));
+        $t = new Token($this->_config, NULL);
+        $response = $t->handleRequest($h);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertRegexp('|^{"access_token":"[a-zA-Z0-9]+","expires_in":5,"scope":"read","refresh_token":"r3fr3sh","token_type":"bearer"}$|', $response->getContent());
+        $response = $t->handleRequest($h);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('{"error":"invalid_grant","error_description":"the authorization code was not found"}', $response->getContent());
+    }
+
 
 }

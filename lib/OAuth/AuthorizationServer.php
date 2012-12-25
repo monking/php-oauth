@@ -198,15 +198,16 @@ class AuthorizationServer
         if (NULL !== $user && !empty($user) && NULL !== $pass && !empty($pass)) {
             // client provided authentication, it MUST be valid now...
             $client = $this->_storage->getClient($user);
-
-            // FIXME what if the client does not exist?
+            if (FALSE === $client) {
+                throw new TokenException("invalid_client", "client authentication failed");
+            }
 
             // check pass
             if ($pass !== $client->secret) {
                 throw new TokenException("invalid_client", "client authentication failed");
             }
 
-            // if client_id in POST is set, it must match the user id
+            // if client_id in POST is set, it must match the user
             if (NULL !== $clientId && $clientId !== $user) {
                 throw new TokenException("invalid_grant", "client_id inconsistency: authenticating user must match POST body client_id");
             }
@@ -214,11 +215,12 @@ class AuthorizationServer
         } else {
             // client provided no authentication, client_id must be in POST body
             if (NULL === $clientId || empty($clientId)) {
-                throw new TokenException("invalid_request", "the client_id parameter is missing and also no client authentication used, unable to determine client identity");
+                throw new TokenException("invalid_request", "no client authentication used nor client_id POST parameter");
             }
             $client = $this->_storage->getClient($clientId);
-
-            // FIXME what if the client does not exist?
+            if (FALSE === $client) {
+                throw new TokenException("invalid_client", "client identity could not be established");
+            }
 
             $hasAuthenticated = FALSE;
         }
@@ -229,7 +231,7 @@ class AuthorizationServer
 
         if ("web_application" === $client->type && !$hasAuthenticated) {
             // web_application type MUST have authenticated
-            throw new TokenException("invalid_client", "this client requires authentication");
+            throw new TokenException("invalid_client", "client authentication failed");
         }
 
         if (NULL === $grantType) {
@@ -254,6 +256,7 @@ class AuthorizationServer
 
                 // we MUST be able to delete the authorization code, otherwise it was used before
                 if (FALSE === $this->_storage->deleteAuthorizationCode($client->id, $code, $redirectUri)) {
+                    // check to prevent deletion race condition
                     throw new TokenException("invalid_grant", "this authorization code grant was already used");
                 }
 
