@@ -70,6 +70,11 @@ eduPersonEntitlement[] = "bar"
 browserIDPath   = "/var/www/html/php-browserid"
 verifierAddress = "https://browserid.org/verify"
 
+; file contains the statically configured attributes for BrowserID users
+; see included config/attributes.json.example for an example. Copy this file
+; to config/attributes.json and modify it for your setup
+attributesFile = "/PATH/TO/APP/config/attributes.json"
+
 ; simpleSAMLphp configuration
 [SspResourceOwner]
 sspPath    = "/var/simplesamlphp"

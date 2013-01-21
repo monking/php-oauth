@@ -21,6 +21,9 @@ interface IResourceOwner
 {
     public function setHint                    ($resourceOwnerIdHint = NULL);
     public function getAttributes              ();
+    public function getAttribute               ($key);
     public function getResourceOwnerId         ();
+
+    /* FIXME: DEPRECATED */
     public function getEntitlement             ();
 }

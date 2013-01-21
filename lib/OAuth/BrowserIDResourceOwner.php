@@ -46,7 +46,34 @@ class BrowserIDResourceOwner implements IResourceOwner
 
     public function getAttributes()
     {
-        return json_encode(array());
+        $attributesFile = $this->_c->getSectionValue('BrowserIDResourceOwner', 'attributesFile');
+        $fileContents = @file_get_contents($attributesFile);
+        if (FALSE === $fileContents) {
+            throw new BrowserIDResourceOwnerException("unable to read BrowserID attributes file");
+        }
+        $attributes = json_decode($fileContents, TRUE);
+        if (is_array($attributes) && array_key_exists($this->getResourceOwnerId(), $attributes)) {
+            return $attributes[$this->getResourceOwnerId()];
+        }
+
+        return array();
+    }
+
+    public function getAttribute($key)
+    {
+        $attributes = $this->getAttributes();
+        if (array_key_exists($key, $attributes)) {
+            return $attributes[$key];
+        }
+
+        // "cn" is a special attribute which is used in the OAuth consent
+        // dialog, if it is not available from the file just use the BrowserID
+        // email address
+        if ("cn" === $key) {
+            return array($this->getResourceOwnerId());
+        }
+
+        return NULL;
     }
 
     public function getResourceOwnerId()
@@ -54,21 +81,10 @@ class BrowserIDResourceOwner implements IResourceOwner
         return $this->_verifier->authenticate($this->_resourceOwnerIdHint);
     }
 
+    /* FIXME: DEPRECATED */
     public function getEntitlement()
     {
-        $resourceOwnerEntitlement = $this->_c->getSectionValue("BrowserIDResourceOwner", "resourceOwnerEntitlement", FALSE);
-        if (!is_array($resourceOwnerEntitlement)) {
-            return NULL;
-        }
-
-        $entitlements = array();
-        foreach ($resourceOwnerEntitlement as $k => $v) {
-            if ($v === $this->getResourceOwnerId()) {
-                array_push($entitlements, $k);
-            }
-        }
-
-            return empty($entitlements) ? NULL : implode(" ", $entitlements);
+        return $this->getAttribute("eduPersonEntitlement");
     }
 
 }
